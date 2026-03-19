@@ -1,0 +1,158 @@
+@inherits LayoutComponentBase
+@inject AuthStateService Auth
+@inject NavigationManager Nav
+@implements IDisposable
+
+@if (!Auth.EsAutenticado)
+{
+    <RedirectToLogin />
+    return;
+}
+
+<div class="sf-layout">
+
+    <!-- SIDEBAR -->
+    <nav class="sf-sidebar @(sidebarColapsado ? "sf-sidebar-collapsed" : "")">
+
+        <div class="sf-sidebar-brand">
+            <span class="sf-brand-text"><strong style="font-weight:800">SGI</strong><span style="font-weight:300">-FORM</span></span>
+        </div>
+
+        <ul class="sf-nav-list">
+            <li class="sf-nav-section">Principal</li>
+            <li>
+                <NavLink href="/" Match="NavLinkMatch.All" class="sf-nav-item" ActiveClass="active">
+                    <span class="sf-nav-icon">📊</span>
+                    <span class="sf-nav-label">Dashboard</span>
+                </NavLink>
+            </li>
+
+            <li class="sf-nav-section">Configuración</li>
+            <li>
+                <NavLink href="/tipos-inspeccion" class="sf-nav-item" ActiveClass="active">
+                    <span class="sf-nav-icon">📋</span>
+                    <span class="sf-nav-label">Tipos de Inspección</span>
+                </NavLink>
+            </li>
+            <li>
+                <NavLink href="/flujos" class="sf-nav-item" ActiveClass="active">
+                    <span class="sf-nav-icon">🔧</span>
+                    <span class="sf-nav-label">Constructor de Flujos</span>
+                </NavLink>
+            </li>
+
+            <li class="sf-nav-section">Operaciones</li>
+            <li>
+                <NavLink href="/importaciones" class="sf-nav-item" ActiveClass="active">
+                    <span class="sf-nav-icon">💾</span>
+                    <span class="sf-nav-label">Importar Excel</span>
+                </NavLink>
+            </li>
+            <li>
+                <NavLink href="/servicios" class="sf-nav-item" ActiveClass="active">
+                    <span class="sf-nav-icon">📍</span>
+                    <span class="sf-nav-label">Servicios</span>
+                </NavLink>
+            </li>
+            <li>
+                <NavLink href="/asignaciones" class="sf-nav-item" ActiveClass="active">
+                    <span class="sf-nav-icon">📌</span>
+                    <span class="sf-nav-label">Asignaciones</span>
+                </NavLink>
+            </li>
+
+            <li class="sf-nav-section">Resultados</li>
+            <li>
+                <NavLink href="/inspecciones" class="sf-nav-item" ActiveClass="active">
+                    <span class="sf-nav-icon">✅</span>
+                    <span class="sf-nav-label">Inspecciones</span>
+                </NavLink>
+            </li>
+            <li>
+                <NavLink href="/control-calidad" class="sf-nav-item" ActiveClass="active">
+                    <span class="sf-nav-icon">🔍</span>
+                    <span class="sf-nav-label">Control de Calidad</span>
+                </NavLink>
+            </li>
+            <li>
+                <NavLink href="/reportes" class="sf-nav-item" ActiveClass="active">
+                    <span class="sf-nav-icon">📈</span>
+                    <span class="sf-nav-label">Reportes</span>
+                </NavLink>
+            </li>
+
+            <li class="sf-nav-section">Administración</li>
+            <li>
+                <NavLink href="/operadores" class="sf-nav-item" ActiveClass="active">
+                    <span class="sf-nav-icon">👷</span>
+                    <span class="sf-nav-label">Operadores</span>
+                </NavLink>
+            </li>
+            <li>
+                <NavLink href="/usuarios" class="sf-nav-item" ActiveClass="active">
+                    <span class="sf-nav-icon">👤</span>
+                    <span class="sf-nav-label">Usuarios</span>
+                </NavLink>
+            </li>
+        </ul>
+
+        <div class="sf-sidebar-footer">
+            <div class="sf-user-info">
+                <strong>@Auth.Nombre</strong>
+                <span class="sf-user-role">@Auth.Rol</span>
+            </div>
+            <button class="sf-btn-logout" @onclick="Logout">Cerrar sesión</button>
+        </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="sf-main">
+        <header class="sf-topbar">
+            <button class="sf-menu-toggle" @onclick="ToggleSidebar" title="Menú">
+                ☰
+            </button>
+            <div class="sf-topbar-right">
+                <span class="sf-topbar-empresa">Sanitaria Demo</span>
+            </div>
+        </header>
+
+        <div class="sf-page-content">
+            <ErrorBoundary>
+                <ChildContent>
+                    @Body
+                </ChildContent>
+                <ErrorContent Context="ex">
+                    <div class="sf-alert sf-alert-danger">
+                        <strong>Error inesperado:</strong> @ex.Message
+                    </div>
+                </ErrorContent>
+            </ErrorBoundary>
+        </div>
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    Se produjo un error. <a href="." class="reload">Recargar</a>
+</div>
+
+@code {
+    private bool sidebarColapsado = false;
+
+    protected override void OnInitialized()
+    {
+        Auth.OnChange += StateHasChanged;
+    }
+
+    private void ToggleSidebar() => sidebarColapsado = !sidebarColapsado;
+
+    private void Logout()
+    {
+        Auth.ClearSession();
+        Nav.NavigateTo("/login", forceLoad: true);
+    }
+
+    public void Dispose()
+    {
+        Auth.OnChange -= StateHasChanged;
+    }
+}

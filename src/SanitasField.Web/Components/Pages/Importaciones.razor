@@ -1,0 +1,363 @@
+@page "/importaciones"
+@layout SanitasField.Web.Components.Layout.MainLayout
+@inject ApiClient Api
+@using System.Net.Http.Headers
+
+<PageTitle>Importar Excel — SGI-FORM</PageTitle>
+
+<div class="sf-page-header">
+    <div>
+        <h2>Importar desde Excel</h2>
+        <span class="sf-text-muted">Carga masiva de servicios a inspeccionar</span>
+    </div>
+</div>
+
+<!-- PASO 1: SUBIR ARCHIVO -->
+<div class="sf-wizard">
+    <div class="sf-wizard-steps">
+        <div class="sf-wizard-step @(paso >= 1 ? "active" : "")">
+            <span class="sf-step-num">1</span>
+            <span class="sf-step-label">Subir archivo</span>
+        </div>
+        <div class="sf-wizard-step @(paso >= 2 ? "active" : "")">
+            <span class="sf-step-num">2</span>
+            <span class="sf-step-label">Vista previa</span>
+        </div>
+        <div class="sf-wizard-step @(paso >= 3 ? "active" : "")">
+            <span class="sf-step-num">3</span>
+            <span class="sf-step-label">Confirmar</span>
+        </div>
+        <div class="sf-wizard-step @(paso >= 4 ? "active" : "")">
+            <span class="sf-step-num">4</span>
+            <span class="sf-step-label">Resultado</span>
+        </div>
+    </div>
+
+    <!-- PASO 1 -->
+    @if (paso == 1)
+    {
+        <div class="sf-card sf-wizard-card">
+            <h3>Seleccionar archivo Excel</h3>
+            <p class="sf-text-muted">
+                El archivo debe contener como mínimo la columna <code>id_servicio</code>.
+                Se soportan formatos .xlsx y .xls (máximo 50 MB).
+            </p>
+
+            <div class="sf-upload-zone" @onclick="TriggerFileInput">
+                <div class="sf-upload-icon">&#128190;</div>
+                <p>Haz clic para seleccionar o arrastra el archivo aquí</p>
+                <InputFile id="fileInput" OnChange="OnFileSelected" accept=".xlsx,.xls"
+                           style="display:none" />
+                @if (archivoSeleccionado != null)
+                {
+                    <div class="sf-upload-file-info">
+                        <span class="sf-file-name">@archivoSeleccionado.Name</span>
+                        <span class="sf-file-size">@FormatBytes(archivoSeleccionado.Size)</span>
+                    </div>
+                }
+            </div>
+
+            @if (!string.IsNullOrEmpty(uploadError))
+            {
+                <div class="sf-alert sf-alert-danger">@uploadError</div>
+            }
+
+            <div class="sf-wizard-nav">
+                <div></div>
+                <button class="sf-btn sf-btn-primary" @onclick="SubirArchivo"
+                        disabled="@(archivoSeleccionado == null || subiendo)">
+                    @(subiendo ? "Subiendo..." : "Siguiente →")
+                </button>
+            </div>
+        </div>
+    }
+
+    <!-- PASO 2: PREVIEW -->
+    @if (paso == 2 && loteId != null)
+    {
+        <div class="sf-card sf-wizard-card">
+            <h3>Vista previa de datos</h3>
+            <div class="sf-preview-info">
+                <span>Total filas detectadas: <strong>@totalFilas</strong></span>
+            </div>
+
+            @if (preview?.Filas?.Any() == true)
+            {
+                <div class="sf-table-scroll">
+                    <table class="sf-table sf-table-xs">
+                        <thead>
+                            <tr>
+                                @foreach (var h in preview.Headers ?? Enumerable.Empty<string>())
+                                {
+                                    <th>@h</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var fila in preview.Filas)
+                            {
+                                <tr>
+                                    @foreach (var val in fila.Values)
+                                    {
+                                        <td>@val</td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            <div class="sf-wizard-nav">
+                <button class="sf-btn sf-btn-secondary" @onclick="() => paso = 1">
+                    ← Atrás
+                </button>
+                <button class="sf-btn sf-btn-primary" @onclick="() => paso = 3">
+                    Confirmar importación →
+                </button>
+            </div>
+        </div>
+    }
+
+    <!-- PASO 3: CONFIRMAR -->
+    @if (paso == 3)
+    {
+        <div class="sf-card sf-wizard-card">
+            <h3>Confirmar importación</h3>
+            <div class="sf-confirm-summary">
+                <p>Vas a importar <strong>@totalFilas</strong> registros de servicios.</p>
+                <p class="sf-text-muted">Esta acción cargará los registros en el sistema.</p>
+            </div>
+
+            @if (!string.IsNullOrEmpty(confirmError))
+            {
+                <div class="sf-alert sf-alert-danger">@confirmError</div>
+            }
+
+            <div class="sf-wizard-nav">
+                <button class="sf-btn sf-btn-secondary" @onclick="() => paso = 2">
+                    ← Atrás
+                </button>
+                <button class="sf-btn sf-btn-primary sf-btn-success" @onclick="ConfirmarImportacion"
+                        disabled="@confirmando">
+                    @(confirmando ? "Procesando..." : "Confirmar e importar")
+                </button>
+            </div>
+        </div>
+    }
+
+    <!-- PASO 4: RESULTADO -->
+    @if (paso == 4 && resultadoLote != null)
+    {
+        <div class="sf-card sf-wizard-card">
+            <div class="sf-result-header @(resultadoLote.FilasError > 0 ? "sf-result-warning" : "sf-result-success")">
+                <div class="sf-result-icon">
+                    @(resultadoLote.FilasError > 0 ? "⚠️" : "✅")
+                </div>
+                <h3>Importación @(resultadoLote.FilasError > 0 ? "completada con errores" : "exitosa")</h3>
+            </div>
+
+            <div class="sf-result-stats">
+                <div class="sf-stat-item sf-stat-success">
+                    <span class="sf-stat-num">@resultadoLote.FilasValidas</span>
+                    <span class="sf-stat-label">Importados correctamente</span>
+                </div>
+                @if (resultadoLote.FilasError > 0)
+                {
+                    <div class="sf-stat-item sf-stat-danger">
+                        <span class="sf-stat-num">@resultadoLote.FilasError</span>
+                        <span class="sf-stat-label">Filas con errores</span>
+                    </div>
+                }
+            </div>
+
+            <div class="sf-wizard-nav">
+                <button class="sf-btn sf-btn-secondary" @onclick="NuevaImportacion">
+                    Importar otro archivo
+                </button>
+                <a href="/servicios" class="sf-btn sf-btn-primary">
+                    Ver servicios importados →
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- HISTORIAL DE IMPORTACIONES -->
+<div class="sf-card sf-mt-4">
+    <div class="sf-card-header">
+        <h3>Historial de importaciones</h3>
+    </div>
+
+    @if (historial?.Items?.Any() == true)
+    {
+        <table class="sf-table">
+            <thead>
+                <tr>
+                    <th>Archivo</th>
+                    <th>Total filas</th>
+                    <th>Válidas</th>
+                    <th>Errores</th>
+                    <th>Estado</th>
+                    <th>Usuario</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var lote in historial.Items)
+                {
+                    <tr>
+                        <td><span class="sf-file-name-sm">@lote.NombreOriginal</span></td>
+                        <td>@(lote.TotalFilas?.ToString() ?? "—")</td>
+                        <td class="sf-text-success">@lote.FilasValidas</td>
+                        <td class="@(lote.FilasError > 0 ? "sf-text-danger" : "")">@lote.FilasError</td>
+                        <td>
+                            <span class="sf-badge @GetEstadoBadge(lote.Estado)">
+                                @lote.Estado
+                            </span>
+                        </td>
+                        <td>@lote.Usuario</td>
+                        <td class="sf-text-xs">@lote.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p class="sf-text-muted sf-p-4">No hay importaciones previas</p>
+    }
+</div>
+
+@code {
+    private int paso = 1;
+    private IBrowserFile? archivoSeleccionado;
+    private bool subiendo = false;
+    private bool confirmando = false;
+    private string? uploadError;
+    private string? confirmError;
+    private Guid? loteId;
+    private int totalFilas = 0;
+    private PreviewData? preview;
+    private LoteResultado? resultadoLote;
+    private LoteHistorial? historial;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarHistorial();
+    }
+
+    private async Task CargarHistorial()
+    {
+        historial = await Api.GetAsync<LoteHistorial>("api/v1/importaciones?pagina=1&porPagina=10");
+    }
+
+    private void TriggerFileInput()
+    {
+        // El InputFile se activa con el click en la zona de upload
+    }
+
+    private void OnFileSelected(InputFileChangeEventArgs e)
+    {
+        archivoSeleccionado = e.File;
+        uploadError = null;
+    }
+
+    private async Task SubirArchivo()
+    {
+        if (archivoSeleccionado == null) return;
+
+        subiendo = true;
+        uploadError = null;
+
+        try
+        {
+            using var content = new MultipartFormDataContent();
+            var fileContent = new StreamContent(archivoSeleccionado.OpenReadStream(maxAllowedSize: 50_000_000));
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            content.Add(fileContent, "archivo", archivoSeleccionado.Name);
+
+            var result = await Api.PostAsync<UploadResponse>("api/v1/importaciones/upload", content);
+
+            if (result.Success && result.Data != null)
+            {
+                loteId = result.Data.LoteId;
+                totalFilas = result.Data.TotalFilas ?? 0;
+
+                // Cargar preview
+                preview = await Api.GetAsync<PreviewData>($"api/v1/importaciones/{loteId}/preview");
+                paso = 2;
+            }
+            else
+            {
+                uploadError = result.Error ?? "Error al subir el archivo";
+            }
+        }
+        catch (Exception ex)
+        {
+            uploadError = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            subiendo = false;
+        }
+    }
+
+    private async Task ConfirmarImportacion()
+    {
+        if (loteId == null) return;
+
+        confirmando = true;
+        confirmError = null;
+
+        var result = await Api.PostAsync<LoteResultado>(
+            $"api/v1/importaciones/{loteId}/confirmar", new { });
+
+        if (result.Success && result.Data != null)
+        {
+            resultadoLote = result.Data;
+            paso = 4;
+            await CargarHistorial();
+        }
+        else
+        {
+            confirmError = result.Error ?? "Error al confirmar";
+        }
+
+        confirmando = false;
+    }
+
+    private void NuevaImportacion()
+    {
+        paso = 1;
+        archivoSeleccionado = null;
+        loteId = null;
+        preview = null;
+        resultadoLote = null;
+        uploadError = null;
+        confirmError = null;
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024:F1} KB";
+        return $"{bytes / (1024 * 1024):F1} MB";
+    }
+
+    private static string GetEstadoBadge(string? estado) => estado?.ToLower() switch
+    {
+        "completado" => "sf-badge-success",
+        "completado_con_errores" => "sf-badge-warning",
+        "fallido" => "sf-badge-danger",
+        "procesando" => "sf-badge-info",
+        _ => "sf-badge-secondary"
+    };
+
+    // DTOs
+    private record UploadResponse(Guid LoteId, string? NombreOriginal, int? TotalFilas, string? Estado);
+    private record PreviewData(int Total, List<string>? Headers, List<Dictionary<string, string>>? Filas);
+    private record LoteResultado(Guid LoteId, string? Estado, int? TotalFilas, int FilasValidas, int FilasError);
+    private record LoteItem(Guid Id, string? NombreOriginal, int? TotalFilas, int FilasValidas, int FilasError, string? Estado, string? Usuario, DateTimeOffset CreatedAt);
+    private record LoteHistorial(int Total, List<LoteItem>? Items);
+}

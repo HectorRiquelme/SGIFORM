@@ -1,0 +1,24 @@
+graph TB
+    subgraph "Navegador Web"
+        BW[Blazor Server<br/>Puerto 5054]
+    end
+
+    subgraph "Dispositivo Android"
+        MA[App MAUI<br/>SQLite local]
+    end
+
+    subgraph "Servidor"
+        API[ASP.NET Core API<br/>Puerto 5043]
+        BW -->|HTTP/SignalR| API
+        MA -->|HTTPS + JWT| API
+    end
+
+    subgraph "Docker"
+        PG[(PostgreSQL 17<br/>Puerto 5434)]
+        API -->|EF Core| PG
+    end
+
+    subgraph "Storage"
+        FS[File System<br/>uploads/fotos/]
+        API -->|Fotos + Excel| FS
+    end

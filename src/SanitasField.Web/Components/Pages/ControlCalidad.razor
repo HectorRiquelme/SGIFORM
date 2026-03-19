@@ -1,0 +1,244 @@
+@page "/control-calidad"
+@layout SanitasField.Web.Components.Layout.MainLayout
+@inject ApiClient Api
+
+<PageTitle>Control de Calidad — SGI-FORM</PageTitle>
+
+<div class="sf-page-header">
+    <div>
+        <h2>Control de Calidad</h2>
+        <span class="sf-text-muted">Revisar, aprobar u observar inspecciones completadas</span>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="sf-filter-bar">
+    <select class="sf-select sf-select-sm" @bind="filtroEstado" @bind:after="Cargar">
+        <option value="completada">Completadas (por revisar)</option>
+        <option value="enviada">Enviadas</option>
+        <option value="aprobada">Aprobadas</option>
+        <option value="observada">Observadas</option>
+        <option value="rechazada">Rechazadas</option>
+        <option value="">Todas</option>
+    </select>
+    <button class="sf-btn sf-btn-secondary sf-btn-sm" @onclick="Cargar">Actualizar</button>
+    <span class="sf-text-muted sf-text-xs" style="margin-left:auto">@total inspecciones</span>
+</div>
+
+@if (loading)
+{
+    <div class="sf-loading-center"><div class="sf-spinner"></div></div>
+}
+else
+{
+    @foreach (var i in items)
+    {
+        var pct = i.TotalPreguntas > 0 ? (int)((double)i.TotalRespondidas / i.TotalPreguntas * 100) : 0;
+
+        <div class="sf-card" style="margin-bottom:12px">
+            <div style="display:flex;gap:16px;padding:16px;align-items:start">
+
+                <!-- Columna izquierda: datos del servicio -->
+                <div style="flex:1">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                        <code style="font-size:14px;font-weight:700">@i.ServicioIdServicio</code>
+                        <span class="sf-badge @GetBadge(i.Estado)">@i.Estado</span>
+                    </div>
+                    <div class="sf-text-muted" style="font-size:13px;margin-bottom:4px">
+                        @i.ServicioDireccion
+                    </div>
+                    <div style="display:flex;gap:16px;font-size:12px;color:#6b7280">
+                        <span>👷 @i.OperadorNombre</span>
+                        @if (i.SincronizadoEn.HasValue)
+                        {
+                            <span>🔄 @i.SincronizadoEn.Value.ToLocalTime().ToString("dd/MM HH:mm")</span>
+                        }
+                        @if (i.CoordXFin.HasValue)
+                        {
+                            <span>📍 GPS OK</span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Columna central: avance y fotos -->
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:100px">
+                    <div style="font-size:24px;font-weight:700;color:#1a56db">@pct%</div>
+                    <div class="sf-progress" style="width:80px">
+                        <div class="sf-progress-bar" style="width:@pct%"></div>
+                    </div>
+                    <div class="sf-text-xs sf-text-muted">
+                        @i.TotalRespondidas / @i.TotalPreguntas preguntas
+                    </div>
+                    @if (i.TotalFotografias > 0)
+                    {
+                        <span class="sf-badge sf-badge-info" style="font-size:11px">
+                            📷 @i.TotalFotografias fotos
+                        </span>
+                    }
+                </div>
+
+                <!-- Columna derecha: acciones -->
+                <div style="display:flex;flex-direction:column;gap:6px;min-width:130px">
+                    @if (i.Estado == "completada" || i.Estado == "enviada")
+                    {
+                        <button class="sf-btn sf-btn-success sf-btn-sm" style="width:100%"
+                                @onclick="() => Aprobar(i.Id)">
+                            ✅ Aprobar
+                        </button>
+                        <button class="sf-btn sf-btn-secondary sf-btn-sm" style="width:100%;border-color:#f59e0b;color:#92400e"
+                                @onclick="() => AbrirObservacion(i)">
+                            ⚠️ Observar
+                        </button>
+                        <button class="sf-btn sf-btn-danger sf-btn-sm" style="width:100%"
+                                @onclick="() => AbrirRechazo(i)">
+                            ❌ Rechazar
+                        </button>
+                    }
+                    @if (i.Estado == "observada")
+                    {
+                        <div style="padding:6px;background:#fef3c7;border-radius:4px;font-size:11px">
+                            Observada — pendiente corrección
+                        </div>
+                    }
+                    @if (i.Estado == "aprobada")
+                    {
+                        <div style="padding:6px;background:#d1fae5;border-radius:4px;font-size:11px">
+                            ✅ Aprobada
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (!items.Any())
+    {
+        <div class="sf-card" style="padding:48px;text-align:center">
+            <div style="font-size:40px;margin-bottom:8px">📋</div>
+            <p class="sf-text-muted">No hay inspecciones con el estado seleccionado</p>
+        </div>
+    }
+}
+
+<!-- Modal observación/rechazo -->
+@if (mostrarModal && inspeccionActual != null)
+{
+    <div class="sf-modal-overlay">
+        <div class="sf-modal">
+            <div class="sf-modal-header">
+                <h3>@(accionModal == "observar" ? "⚠️ Observar inspección" : "❌ Rechazar inspección")</h3>
+                <button class="sf-btn-close" @onclick="() => mostrarModal = false">✕</button>
+            </div>
+            <div class="sf-modal-body">
+                <p class="sf-text-muted" style="margin-bottom:12px">
+                    Servicio: <strong>@inspeccionActual.ServicioIdServicio</strong> —
+                    Operador: @inspeccionActual.OperadorNombre
+                </p>
+                <div class="sf-form-group">
+                    <label>Motivo *</label>
+                    <textarea class="sf-input" rows="3" @bind="motivo"
+                              placeholder="Describe el motivo de la @(accionModal == "observar" ? "observación" : "rechazo")...">
+                    </textarea>
+                </div>
+            </div>
+            <div class="sf-modal-footer">
+                <button class="sf-btn sf-btn-secondary" @onclick="() => mostrarModal = false">Cancelar</button>
+                <button class="sf-btn @(accionModal == "observar" ? "sf-btn-primary" : "sf-btn-danger")"
+                        @onclick="EjecutarAccion" disabled="@procesando">
+                    @(procesando ? "Procesando..." : (accionModal == "observar" ? "⚠️ Confirmar observación" : "❌ Confirmar rechazo"))
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(mensaje))
+{
+    <div class="sf-alert sf-alert-success" style="position:fixed;bottom:20px;right:20px;z-index:300;max-width:400px;box-shadow:0 4px 12px rgba(0,0,0,.2)">
+        @mensaje
+    </div>
+}
+
+@code {
+    private bool loading = true, mostrarModal = false, procesando = false;
+    private string filtroEstado = "completada";
+    private string accionModal = "observar";
+    private string? motivo, mensaje;
+    private int total = 0;
+    private List<InspItem> items = new();
+    private InspItem? inspeccionActual;
+
+    protected override async Task OnInitializedAsync() => await Cargar();
+
+    private async Task Cargar()
+    {
+        loading = true;
+        var q = "api/v1/inspecciones?porPagina=50";
+        if (!string.IsNullOrEmpty(filtroEstado)) q += $"&estado={filtroEstado}";
+
+        var r = await Api.GetAsync<InspResp>(q);
+        items = r?.Items ?? new();
+        total = r?.Total ?? 0;
+        loading = false;
+    }
+
+    private async Task Aprobar(Guid id)
+    {
+        await Api.PostAsync<object>($"api/v1/inspecciones/{id}/aprobar", new { });
+        mensaje = "Inspección aprobada correctamente";
+        await Cargar();
+        _ = LimpiarMensaje();
+    }
+
+    private void AbrirObservacion(InspItem i)
+    {
+        inspeccionActual = i; accionModal = "observar"; motivo = null; mostrarModal = true;
+    }
+
+    private void AbrirRechazo(InspItem i)
+    {
+        inspeccionActual = i; accionModal = "rechazar"; motivo = null; mostrarModal = true;
+    }
+
+    private async Task EjecutarAccion()
+    {
+        if (string.IsNullOrWhiteSpace(motivo) || inspeccionActual == null) return;
+        procesando = true;
+
+        var endpoint = accionModal == "observar"
+            ? $"api/v1/inspecciones/{inspeccionActual.Id}/observar"
+            : $"api/v1/inspecciones/{inspeccionActual.Id}/rechazar";
+
+        await Api.PostAsync<object>(endpoint, new { observacion = motivo });
+        mostrarModal = false;
+        mensaje = accionModal == "observar"
+            ? "Inspección observada correctamente"
+            : "Inspección rechazada";
+        procesando = false;
+        await Cargar();
+        _ = LimpiarMensaje();
+    }
+
+    private async Task LimpiarMensaje()
+    {
+        await Task.Delay(4000);
+        mensaje = null;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private static string GetBadge(string? e) => e switch
+    {
+        "completada" => "sf-badge-info",
+        "enviada" => "sf-badge-info",
+        "aprobada" => "sf-badge-success",
+        "observada" => "sf-badge-warning",
+        "rechazada" => "sf-badge-danger",
+        _ => "sf-badge-secondary"
+    };
+
+    private record InspResp(int Total, List<InspItem>? Items);
+    private record InspItem(Guid Id, string? Estado,
+        int TotalPreguntas, int TotalRespondidas, int TotalFotografias,
+        decimal? CoordXFin, DateTimeOffset? SincronizadoEn,
+        string? ServicioIdServicio, string? ServicioDireccion, string? OperadorNombre);
+}

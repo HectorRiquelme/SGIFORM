@@ -1,0 +1,27 @@
+sequenceDiagram
+    participant App as App Android
+    participant Queue as SyncQueue<br/>(SQLite)
+    participant API as API REST
+    participant DB as PostgreSQL
+
+    Note over App,API: DESCARGA (online)
+    App->>API: GET /sync/download?desde=last_sync
+    API->>DB: SELECT asignaciones + flujos
+    API-->>App: JSON comprimido
+    App->>App: Guardar en SQLite<br/>Upsert por ID
+
+    Note over App,Queue: TRABAJO (offline)
+    App->>App: Ejecutar inspeccion
+    App->>App: Guardar en SQLite
+    App->>Queue: Encolar: {entity:inspeccion, op:UPDATE}
+    App->>App: Capturar foto
+    App->>Queue: Encolar: {entity:fotografia, op:INSERT}
+
+    Note over Queue,API: SUBIDA (cuando hay conexion)
+    Queue->>API: POST /sync/upload<br/>(inspecciones pendientes)
+    API->>DB: INSERT/UPDATE inspecciones
+    API-->>Queue: ACK
+    Queue->>API: POST /sync/photos<br/>(batch de 5 fotos)
+    API->>DB: INSERT fotografias
+    API-->>Queue: ACK
+    Queue->>Queue: Marcar como "sent"

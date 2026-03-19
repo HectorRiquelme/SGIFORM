@@ -1,0 +1,8 @@
+flowchart TD
+    A[Usuario responde pregunta P] --> B[FlowEngine.ActualizarRespuesta]
+    B --> C[Buscar reglas donde<br/>pregunta_origen = P]
+    C --> D{Evaluar condicion<br/>operador + valor}
+    D -->|Cumple| E[Aplicar accion<br/>sobre destino]
+    D -->|No cumple| F[Revertir a<br/>estado base]
+    E --> G[Re-renderizar UI]
+    F --> G

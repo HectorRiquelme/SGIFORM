@@ -1,0 +1,250 @@
+@page "/inspecciones"
+@layout SanitasField.Web.Components.Layout.MainLayout
+@inject ApiClient Api
+
+<PageTitle>Inspecciones — SGI-FORM</PageTitle>
+
+<div class="sf-page-header">
+    <div>
+        <h2>Inspecciones</h2>
+        <span class="sf-text-muted">Resultado de las inspecciones ejecutadas en terreno</span>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="sf-filter-bar">
+    <select class="sf-select sf-select-sm" @bind="filtros.Estado" @bind:after="Cargar">
+        <option value="">Todos los estados</option>
+        <option value="borrador">Borrador</option>
+        <option value="en_progreso">En progreso</option>
+        <option value="completada">Completada</option>
+        <option value="enviada">Enviada</option>
+        <option value="aprobada">Aprobada</option>
+        <option value="observada">Observada</option>
+        <option value="rechazada">Rechazada</option>
+    </select>
+    <select class="sf-select sf-select-sm" @bind="filtros.OperadorId" @bind:after="Cargar">
+        <option value="">Todos los operadores</option>
+        @foreach (var op in operadores)
+        {
+            <option value="@op.Id">@op.NombreCompleto</option>
+        }
+    </select>
+    <button class="sf-btn sf-btn-secondary sf-btn-sm" @onclick="Cargar">Buscar</button>
+</div>
+
+@if (loading)
+{
+    <div class="sf-loading-center"><div class="sf-spinner"></div></div>
+}
+else
+{
+    <div class="sf-card">
+        <div class="sf-card-header">
+            <span class="sf-text-muted" style="font-size:13px">@total inspecciones</span>
+        </div>
+        <table class="sf-table">
+            <thead>
+                <tr>
+                    <th>ID Servicio</th>
+                    <th>Operador</th>
+                    <th>Estado</th>
+                    <th>Avance</th>
+                    <th>Fotos</th>
+                    <th>GPS</th>
+                    <th>Sincronizado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (items.Any())
+                {
+                    @foreach (var i in items)
+                    {
+                        var pct = i.TotalPreguntas > 0
+                            ? (int)((double)i.TotalRespondidas / i.TotalPreguntas * 100)
+                            : 0;
+                        <tr>
+                            <td>
+                                <code style="font-size:12px">@i.ServicioIdServicio</code>
+                                <div class="sf-text-muted sf-text-xs">@i.ServicioDireccion</div>
+                            </td>
+                            <td class="sf-text-xs">@i.OperadorNombre</td>
+                            <td><span class="sf-badge @GetEstadoBadge(i.Estado)">@i.Estado</span></td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:4px">
+                                    <div class="sf-progress" style="width:60px">
+                                        <div class="sf-progress-bar" style="width:@pct%"></div>
+                                    </div>
+                                    <span class="sf-text-xs">@pct%</span>
+                                </div>
+                            </td>
+                            <td class="sf-text-center">
+                                @if (i.TotalFotografias > 0)
+                                {
+                                    <span class="sf-badge sf-badge-info">📷 @i.TotalFotografias</span>
+                                }
+                                else
+                                {
+                                    <span class="sf-text-muted sf-text-xs">—</span>
+                                }
+                            </td>
+                            <td class="sf-text-center">
+                                @if (i.CoordXFin.HasValue)
+                                {
+                                    <span class="sf-badge sf-badge-success">📍</span>
+                                }
+                                else
+                                {
+                                    <span class="sf-text-muted sf-text-xs">—</span>
+                                }
+                            </td>
+                            <td class="sf-text-xs sf-text-muted">
+                                @(i.SincronizadoEn.HasValue
+                                    ? i.SincronizadoEn.Value.ToLocalTime().ToString("dd/MM HH:mm")
+                                    : "Pendiente")
+                            </td>
+                            <td>
+                                <div class="sf-action-btns">
+                                    @if (i.Estado == "completada" || i.Estado == "enviada")
+                                    {
+                                        <button class="sf-btn sf-btn-success sf-btn-sm"
+                                                @onclick="() => Aprobar(i.Id)">✅ Aprobar</button>
+                                        <button class="sf-btn sf-btn-danger sf-btn-sm"
+                                                @onclick="() => AbrirObservacion(i)">⚠️ Observar</button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="sf-text-center sf-text-muted" style="padding:32px">
+                            No hay inspecciones con estos filtros
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (total > filtros.PorPagina)
+    {
+        <div class="sf-pagination">
+            <button class="sf-btn sf-btn-secondary sf-btn-sm"
+                    disabled="@(filtros.Pagina <= 1)"
+                    @onclick="() => CambiarPagina(filtros.Pagina - 1)">← Anterior</button>
+            <span>Página @filtros.Pagina</span>
+            <button class="sf-btn sf-btn-secondary sf-btn-sm"
+                    disabled="@(filtros.Pagina * filtros.PorPagina >= total)"
+                    @onclick="() => CambiarPagina(filtros.Pagina + 1)">Siguiente →</button>
+        </div>
+    }
+}
+
+<!-- Modal observación -->
+@if (mostrarObservacion && inspeccionObservar != null)
+{
+    <div class="sf-modal-overlay">
+        <div class="sf-modal">
+            <div class="sf-modal-header">
+                <h3>Observar inspección</h3>
+                <button class="sf-btn-close" @onclick="() => mostrarObservacion = false">✕</button>
+            </div>
+            <div class="sf-modal-body">
+                <div class="sf-form-group">
+                    <label>Motivo de observación *</label>
+                    <textarea class="sf-input" rows="3" @bind="motivoObservacion"
+                              placeholder="Describe el motivo..."></textarea>
+                </div>
+            </div>
+            <div class="sf-modal-footer">
+                <button class="sf-btn sf-btn-secondary" @onclick="() => mostrarObservacion = false">Cancelar</button>
+                <button class="sf-btn sf-btn-danger" @onclick="Observar">⚠️ Enviar observación</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool loading = true;
+    private bool mostrarObservacion = false;
+    private int total = 0;
+    private string? motivoObservacion;
+    private InspeccionItem? inspeccionObservar;
+    private List<InspeccionItem> items = new();
+    private List<OperadorRef> operadores = new();
+    private FiltrosModel filtros = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var ops = await Api.GetAsync<OperadoresResponse>("api/v1/operadores?porPagina=100");
+        operadores = ops?.Items ?? new();
+        await Cargar();
+    }
+
+    private async Task Cargar()
+    {
+        loading = true;
+        var q = $"api/v1/inspecciones?pagina={filtros.Pagina}&porPagina={filtros.PorPagina}";
+        if (!string.IsNullOrEmpty(filtros.Estado)) q += $"&estado={filtros.Estado}";
+        if (!string.IsNullOrEmpty(filtros.OperadorId)) q += $"&operadorId={filtros.OperadorId}";
+
+        var result = await Api.GetAsync<InspeccionesResponse>(q);
+        items = result?.Items ?? new();
+        total = result?.Total ?? 0;
+        loading = false;
+    }
+
+    private async Task CambiarPagina(int p) { filtros.Pagina = p; await Cargar(); }
+
+    private async Task Aprobar(Guid id)
+    {
+        await Api.PostAsync<object>($"api/v1/inspecciones/{id}/aprobar", new { });
+        await Cargar();
+    }
+
+    private void AbrirObservacion(InspeccionItem i)
+    {
+        inspeccionObservar = i;
+        motivoObservacion = null;
+        mostrarObservacion = true;
+    }
+
+    private async Task Observar()
+    {
+        if (inspeccionObservar == null || string.IsNullOrWhiteSpace(motivoObservacion)) return;
+        await Api.PostAsync<object>($"api/v1/inspecciones/{inspeccionObservar.Id}/observar",
+            new { observacion = motivoObservacion });
+        mostrarObservacion = false;
+        await Cargar();
+    }
+
+    private static string GetEstadoBadge(string? e) => e switch
+    {
+        "aprobada"   => "sf-badge-success",
+        "completada" => "sf-badge-info",
+        "enviada"    => "sf-badge-info",
+        "observada"  => "sf-badge-warning",
+        "rechazada"  => "sf-badge-danger",
+        _ => "sf-badge-secondary"
+    };
+
+    private record InspeccionesResponse(int Total, List<InspeccionItem>? Items);
+    private record InspeccionItem(Guid Id, string? Estado,
+        int TotalPreguntas, int TotalRespondidas, int TotalFotografias,
+        decimal? CoordXFin, DateTimeOffset? SincronizadoEn,
+        string? ServicioIdServicio, string? ServicioDireccion, string? OperadorNombre);
+    private record OperadorRef(Guid Id, string? NombreCompleto);
+    private record OperadoresResponse(int Total, List<OperadorRef>? Items);
+
+    private class FiltrosModel
+    {
+        public string? Estado { get; set; }
+        public string? OperadorId { get; set; }
+        public int Pagina { get; set; } = 1;
+        public int PorPagina { get; set; } = 25;
+    }
+}

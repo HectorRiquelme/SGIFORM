@@ -1,0 +1,12 @@
+flowchart TD
+    A[Operador<br/>abre app] --> B[Login]
+    B --> C[Descarga<br/>asignaciones]
+    C --> D[Selecciona<br/>inspeccion]
+    D --> E[Navega<br/>secciones]
+    E --> F[Responde<br/>preguntas]
+    F --> G{Motor evalua<br/>reglas}
+    G -->|Muestra/oculta| F
+    F --> H[Captura<br/>fotos + GPS]
+    H --> I[Valida<br/>campos obligatorios]
+    I --> J[Cierra<br/>inspeccion]
+    J --> K[Sincroniza<br/>cuando hay red]

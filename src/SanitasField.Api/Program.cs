@@ -1,0 +1,187 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Serilog;
+using SanitasField.Infrastructure.Persistence;
+using SanitasField.Infrastructure.Services;
+
+try
+{
+    var builder = WebApplication.CreateBuilder(args);
+
+    // ─── Logging ──────────────────────────────────────────────────────────────
+    if (builder.Environment.EnvironmentName != "Testing")
+    {
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .CreateBootstrapLogger();
+
+        builder.Host.UseSerilog((ctx, lc) =>
+            lc.ReadFrom.Configuration(ctx.Configuration));
+    }
+
+    // ─── Base de datos PostgreSQL + EF Core ───────────────────────────────────
+    builder.Services.AddDbContext<AppDbContext>(opt =>
+        opt.UseNpgsql(
+            builder.Configuration.GetConnectionString("Default"),
+            npgsql => npgsql.MigrationsAssembly("SanitasField.Infrastructure")
+        )
+        // Columnas mapeadas explícitamente en AppDbContext.OnModelCreating
+    );
+
+    // ─── JWT Authentication ───────────────────────────────────────────────────
+    var jwtKey = builder.Configuration["Jwt:Key"]
+        ?? throw new InvalidOperationException("Jwt:Key no configurado");
+
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(opt =>
+        {
+            opt.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                ValidAudience = builder.Configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                ClockSkew = TimeSpan.FromSeconds(30)
+            };
+        });
+
+    builder.Services.AddAuthorization();
+
+    // ─── CORS ─────────────────────────────────────────────────────────────────
+    var allowedOrigins = builder.Configuration
+        .GetSection("Cors:AllowedOrigins")
+        .Get<string[]>() ?? [];
+
+    builder.Services.AddCors(opt => opt.AddDefaultPolicy(policy =>
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials()));
+
+    // ─── Servicios de aplicación ──────────────────────────────────────────────
+    builder.Services.AddScoped<IAuthService, AuthService>();
+    builder.Services.AddScoped<IExcelImportService, ExcelImportService>();
+
+    // ─── Controllers + JSON ───────────────────────────────────────────────────
+    builder.Services.AddControllers()
+        .AddJsonOptions(opt =>
+        {
+            opt.JsonSerializerOptions.PropertyNamingPolicy =
+                System.Text.Json.JsonNamingPolicy.SnakeCaseLower;
+            opt.JsonSerializerOptions.DefaultIgnoreCondition =
+                System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+        });
+
+    // ─── Swagger / OpenAPI ────────────────────────────────────────────────────
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v1", new OpenApiInfo
+        {
+            Title = "SanitasField API",
+            Version = "v1",
+            Description = "API REST para el sistema de inspecciones técnicas en terreno SanitasField"
+        });
+
+        // Habilitar JWT en Swagger UI
+        c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+        {
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            Description = "Ingrese el token JWT: Bearer {token}"
+        });
+
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                Array.Empty<string>()
+            }
+        });
+    });
+
+    // ─── Health checks ────────────────────────────────────────────────────────
+    var healthBuilder = builder.Services.AddHealthChecks();
+    var connStr = builder.Configuration.GetConnectionString("Default");
+    if (!string.IsNullOrEmpty(connStr) && builder.Environment.EnvironmentName != "Testing")
+        healthBuilder.AddNpgSql(connStr);
+
+    var app = builder.Build();
+
+    // ─── Middleware pipeline ──────────────────────────────────────────────────
+    if (app.Environment.EnvironmentName != "Testing")
+        app.UseSerilogRequestLogging();
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "SanitasField API v1");
+            c.RoutePrefix = string.Empty; // Swagger en raíz
+        });
+    }
+
+    app.UseHttpsRedirection();
+    app.UseCors();
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    // Middleware de errores global
+    app.UseExceptionHandler(errApp =>
+    {
+        errApp.Run(async ctx =>
+        {
+            ctx.Response.StatusCode = 500;
+            ctx.Response.ContentType = "application/json";
+            var err = ctx.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
+            if (err != null)
+            {
+                Log.Error(err.Error, "Unhandled exception");
+                await ctx.Response.WriteAsJsonAsync(new
+                {
+                    error = "Error interno del servidor",
+                    detail = app.Environment.IsDevelopment() ? err.Error.Message : null,
+                    inner = app.Environment.IsDevelopment() ? err.Error.InnerException?.Message : null,
+                    inner2 = app.Environment.IsDevelopment() ? err.Error.InnerException?.InnerException?.Message : null
+                });
+            }
+        });
+    });
+
+    app.MapControllers();
+    app.MapHealthChecks("/health");
+
+    // ─── Auto-run migrations en desarrollo ────────────────────────────────────
+    if (app.Environment.IsDevelopment())
+    {
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        // Comentar en producción - usar migraciones manuales
+        // await db.Database.MigrateAsync();
+    }
+
+    Log.Information("SanitasField API iniciando en {Env}", app.Environment.EnvironmentName);
+    await app.RunAsync();
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"API fatal error: {ex.Message}");
+}
+
+// Necesario para WebApplicationFactory<Program> en tests de integración
+public partial class Program { }

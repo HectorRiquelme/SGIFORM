@@ -1,0 +1,69 @@
+@inject ApiClient Api
+
+@if (items == null)
+{
+    <div class="sf-loading-inline" style="padding:16px">
+        <div class="sf-spinner-sm"></div>
+        <span>Cargando...</span>
+    </div>
+}
+else if (!items.Any())
+{
+    <p class="sf-text-muted" style="padding:16px">Sin operadores activos</p>
+}
+else
+{
+    <table class="sf-table sf-table-sm">
+        <thead>
+            <tr>
+                <th>Operador</th>
+                <th class="sf-text-center">Pend.</th>
+                <th class="sf-text-center">Ejec.</th>
+                <th class="sf-text-center">Final.</th>
+                <th>Última sync</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var op in items.Take(Limite))
+            {
+                <tr>
+                    <td>
+                        <div style="font-weight:500">@op.Nombre</div>
+                        <div class="sf-text-muted sf-text-xs">@op.CodigoOperador · @(op.Zona ?? "—")</div>
+                    </td>
+                    <td class="sf-text-center">
+                        <span class="sf-badge sf-badge-warning">@op.Pendientes</span>
+                    </td>
+                    <td class="sf-text-center">
+                        <span class="sf-badge sf-badge-info">@op.EnEjecucion</span>
+                    </td>
+                    <td class="sf-text-center">
+                        <span class="sf-badge sf-badge-success">@op.Finalizadas</span>
+                    </td>
+                    <td class="sf-text-xs sf-text-muted">
+                        @(op.UltimaSync.HasValue
+                            ? op.UltimaSync.Value.ToLocalTime().ToString("dd/MM HH:mm")
+                            : "Sin sync")
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter] public int Limite { get; set; } = 10;
+
+    private List<OperadorResumen>? items;
+
+    protected override async Task OnInitializedAsync()
+    {
+        items = await Api.GetAsync<List<OperadorResumen>>("api/v1/dashboard/por-operador");
+        items ??= new();
+    }
+
+    private record OperadorResumen(
+        Guid OperadorId, string? Nombre, string? CodigoOperador,
+        string? Zona, int Pendientes, int EnEjecucion, int Finalizadas,
+        int Total, DateTimeOffset? UltimaSync);
+}

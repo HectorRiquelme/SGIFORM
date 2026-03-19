@@ -1,0 +1,59 @@
+@inject ApiClient Api
+
+@if (items == null)
+{
+    <div class="sf-loading-inline" style="padding:16px">
+        <div class="sf-spinner-sm"></div>
+        <span>Cargando...</span>
+    </div>
+}
+else if (!items.Any())
+{
+    <p class="sf-text-muted" style="padding:16px">Sin datos disponibles</p>
+}
+else
+{
+    <table class="sf-table sf-table-sm">
+        <thead>
+            <tr>
+                <th>Localidad</th>
+                <th class="sf-text-right">Total</th>
+                <th class="sf-text-right">Asignados</th>
+                <th>Avance</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in items)
+            {
+                var pct = item.TotalServicios > 0
+                    ? (int)((double)item.ConAsignacion / item.TotalServicios * 100)
+                    : 0;
+                <tr>
+                    <td>@(item.Localidad ?? "Sin localidad")</td>
+                    <td class="sf-text-right">@item.TotalServicios</td>
+                    <td class="sf-text-right">@item.ConAsignacion</td>
+                    <td style="min-width:120px">
+                        <div style="display:flex;align-items:center;gap:6px">
+                            <div class="sf-progress" style="flex:1">
+                                <div class="sf-progress-bar" style="width:@(pct)%"></div>
+                            </div>
+                            <span class="sf-text-xs sf-text-muted">@pct%</span>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<LocalidadItem>? items;
+
+    protected override async Task OnInitializedAsync()
+    {
+        items = await Api.GetAsync<List<LocalidadItem>>("api/v1/dashboard/por-localidad");
+        items ??= new();
+    }
+
+    private record LocalidadItem(string? Localidad, int TotalServicios, int ConAsignacion);
+}

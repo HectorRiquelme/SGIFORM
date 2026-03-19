@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:views="clr-namespace:SanitasField.Mobile.Views"
+       x:Class="SanitasField.Mobile.AppShell"
+       BackgroundColor="#1a56db"
+       ForegroundColor="White"
+       TitleColor="White"
+       UnselectedColor="#93c5fd">
+
+    <Shell.Resources>
+        <Style TargetType="TabBar">
+            <Setter Property="Shell.TabBarBackgroundColor" Value="White" />
+            <Setter Property="Shell.TabBarForegroundColor" Value="#1a56db" />
+            <Setter Property="Shell.TabBarUnselectedColor" Value="#9ca3af" />
+            <Setter Property="Shell.TabBarTitleColor" Value="#1a56db" />
+        </Style>
+    </Shell.Resources>
+
+    <!-- Login (sin Tab Bar) -->
+    <ShellContent Route="login"
+                  Shell.NavBarIsVisible="False"
+                  ContentTemplate="{DataTemplate views:LoginPage}" />
+
+    <!-- App principal con Tab Bar -->
+    <TabBar>
+        <ShellContent Route="inspecciones"
+                      Title="Inspecciones"
+                      Icon="list.png"
+                      ContentTemplate="{DataTemplate views:InspeccionesListPage}" />
+
+        <ShellContent Route="sincronizacion"
+                      Title="Sincronizar"
+                      Icon="sync.png"
+                      ContentTemplate="{DataTemplate views:SincronizacionPage}" />
+    </TabBar>
+
+</Shell>

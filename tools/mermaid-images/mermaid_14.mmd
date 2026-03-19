@@ -1,0 +1,9 @@
+flowchart LR
+    A[Supervisor abre<br/>Control de Calidad] --> B[Ve inspecciones<br/>completadas]
+    B --> C{Decision}
+    C -->|OK| D[Aprobar]
+    C -->|Faltan datos| E[Observar<br/>con motivo]
+    C -->|Rechazar| F[Rechazar<br/>con motivo]
+    D --> G[Estado: Aprobada]
+    E --> H[Estado: Observada]
+    F --> I[Estado: Rechazada]

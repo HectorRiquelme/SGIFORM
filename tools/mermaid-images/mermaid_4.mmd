@@ -1,0 +1,32 @@
+graph LR
+    subgraph "Views (XAML)"
+        LP[LoginPage]
+        ILP[InspeccionesListPage]
+        IP[InspeccionPage]
+        SP[SincronizacionPage]
+    end
+
+    subgraph "ViewModels"
+        LVM[LoginViewModel]
+        ILVM[InspeccionesListViewModel]
+        IVM[InspeccionViewModel]
+    end
+
+    subgraph "Services"
+        AS[AuthService]
+        SS[SyncService]
+        FE[FlowEngine]
+    end
+
+    subgraph "Data"
+        ADB[AppDatabase<br/>SQLite]
+        LM[LocalModels]
+    end
+
+    LP --> LVM --> AS
+    ILP --> ILVM --> SS
+    IP --> IVM --> FE
+    IVM --> ADB
+    SS --> ADB
+    FE --> ADB
+    ADB --> LM

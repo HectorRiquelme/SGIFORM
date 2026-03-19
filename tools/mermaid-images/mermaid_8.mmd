@@ -1,0 +1,18 @@
+graph TD
+    F[Flujo] --> FV1[Version 1<br/>Estado: publicado]
+    F --> FV2[Version 2<br/>Estado: borrador]
+
+    FV1 --> S1[Seccion 1: Acceso]
+    FV1 --> S2[Seccion 2: Medidor]
+    FV1 --> S3[Seccion 3: Evidencia]
+
+    S1 --> P1[Pregunta: Acceso?<br/>Tipo: si_no]
+    S1 --> P2[Pregunta: Motivo<br/>Tipo: seleccion_unica<br/>Visible: false]
+    S2 --> P3[Pregunta: Estado<br/>Tipo: seleccion_unica]
+    S3 --> P4[Pregunta: Fotos<br/>Tipo: fotos_multiples]
+
+    FV1 --> R1{Regla: Si P1=No<br/>Accion: Mostrar P2}
+    FV1 --> R2{Regla: Si P1=No<br/>Accion: Obligatorio P2}
+
+    R1 -.-> P2
+    R2 -.-> P2

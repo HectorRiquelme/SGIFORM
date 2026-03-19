@@ -1,0 +1,34 @@
+sequenceDiagram
+    participant Excel
+    participant Web as Web Blazor
+    participant API as API REST
+    participant DB as PostgreSQL
+    participant App as App Android
+    participant SQLite as SQLite Local
+
+    Note over Excel,Web: 1. Carga de datos
+    Excel->>Web: Upload .xlsx
+    Web->>API: POST /importaciones/upload
+    API->>DB: INSERT servicios
+
+    Note over Web,DB: 2. Configuracion
+    Web->>API: Crear flujos, asignar operadores
+    API->>DB: INSERT asignaciones
+
+    Note over App,DB: 3. Trabajo en terreno
+    App->>API: GET /sync/download
+    API->>DB: SELECT asignaciones + flujos
+    API-->>App: Paquete JSON
+    App->>SQLite: Guardar local
+    App->>App: Trabajar offline
+    App->>SQLite: Guardar respuestas + fotos
+
+    Note over App,DB: 4. Sincronizacion
+    App->>API: POST /sync/upload
+    API->>DB: INSERT inspecciones
+    App->>API: POST /sync/photos
+    API->>FS: Guardar fotos
+
+    Note over Web,DB: 5. Control de calidad
+    Web->>API: GET /inspecciones
+    Web->>API: POST /inspecciones/{id}/aprobar

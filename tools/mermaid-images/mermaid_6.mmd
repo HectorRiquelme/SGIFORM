@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant DB
+
+    Note over Client,API: Login Web
+    Client->>API: POST /auth/login {email, password}
+    API->>DB: SELECT usuario WHERE email
+    API->>API: BCrypt.Verify(password, hash)
+    API->>DB: INSERT refresh_token
+    API-->>Client: {access_token, refresh_token, nombre, rol}
+
+    Note over Client,API: Login Movil
+    Client->>API: POST /auth/login-movil {codigo_operador, empresa_slug, password}
+    API->>DB: SELECT empresa WHERE slug
+    API->>DB: SELECT operador WHERE codigo + empresa
+    API->>API: BCrypt.Verify
+    API-->>Client: {access_token, operador_id, empresa_id}
+
+    Note over Client,API: Requests autenticados
+    Client->>API: GET /operadores [Authorization: Bearer token]
+    API->>API: Validar JWT (issuer, audience, expiry, signature)
+    API->>API: Extraer claims (empresa_id, rol, tipo_usuario)
+    API-->>Client: Datos filtrados por empresa_id

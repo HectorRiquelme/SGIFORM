@@ -1,0 +1,27 @@
+graph TD
+    subgraph "Blazor Server"
+        Routes[Routes.razor]
+        ML[MainLayout.razor<br/>Sidebar + Topbar]
+        EL[EmptyLayout.razor<br/>Sin sidebar]
+
+        Routes --> ML
+        Routes --> EL
+
+        Login[Login.razor] --> EL
+        Home[Home.razor] --> ML
+        Ops[Operadores.razor] --> ML
+        Flujos[Flujos.razor] --> ML
+        Import[Importaciones.razor] --> ML
+    end
+
+    subgraph "Services"
+        ASS[AuthStateService<br/>Scoped por circuito]
+        AC[ApiClient<br/>HttpClient + JWT]
+
+        Login --> ASS
+        Login --> AC
+        Home --> AC
+        ML --> ASS
+    end
+
+    AC -->|HTTP| API[API REST :5043]

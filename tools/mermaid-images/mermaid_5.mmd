@@ -1,0 +1,26 @@
+erDiagram
+    EMPRESA ||--o{ USUARIO : tiene
+    EMPRESA ||--o{ OPERADOR : tiene
+    EMPRESA ||--o{ TIPO_INSPECCION : tiene
+    EMPRESA ||--o{ FLUJO : tiene
+    EMPRESA ||--o{ SERVICIO_INSPECCION : tiene
+
+    USUARIO }o--|| ROL : tiene
+    ROL ||--o{ ROL_PERMISO : tiene
+    ROL_PERMISO }o--|| PERMISO : de
+
+    FLUJO ||--o{ FLUJO_VERSION : tiene
+    FLUJO_VERSION ||--o{ FLUJO_SECCION : contiene
+    FLUJO_SECCION ||--o{ FLUJO_PREGUNTA : contiene
+    FLUJO_PREGUNTA ||--o{ FLUJO_OPCION : tiene
+    FLUJO_VERSION ||--o{ FLUJO_REGLA : tiene
+
+    IMPORTACION_LOTE ||--o{ SERVICIO_INSPECCION : genera
+
+    SERVICIO_INSPECCION ||--o{ ASIGNACION_INSPECCION : asignado_a
+    ASIGNACION_INSPECCION }o--|| OPERADOR : ejecuta
+    ASIGNACION_INSPECCION ||--o| INSPECCION : produce
+
+    INSPECCION ||--o{ INSPECCION_RESPUESTA : contiene
+    INSPECCION ||--o{ INSPECCION_FOTOGRAFIA : contiene
+    INSPECCION ||--o{ INSPECCION_HISTORIAL : registra
