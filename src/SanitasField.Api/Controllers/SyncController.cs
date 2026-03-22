@@ -143,8 +143,13 @@ public class SyncController : ControllerBase
                     _db.Inspecciones.Add(inspeccion);
                 }
 
-                // Actualizar datos
-                inspeccion.Estado = Enum.Parse<EstadoInspeccion>(inspReq.Estado, true);
+                // Actualizar datos — TryParse para evitar excepción con valores inválidos
+                if (!Enum.TryParse<EstadoInspeccion>(inspReq.Estado, ignoreCase: true, out var estadoParsed))
+                {
+                    errores.Add(new { asignacion_id = inspReq.AsignacionId, error = $"Estado inválido: '{inspReq.Estado}'" });
+                    continue;
+                }
+                inspeccion.Estado = estadoParsed;
                 inspeccion.FechaInicio = inspReq.FechaInicio;
                 inspeccion.FechaFin = inspReq.FechaFin;
                 inspeccion.CoordXInicio = inspReq.CoordXInicio;
@@ -166,11 +171,16 @@ public class SyncController : ControllerBase
                     }
                     else
                     {
+                        if (!Enum.TryParse<TipoControl>(respReq.TipoControl, ignoreCase: true, out var tipoControlParsed))
+                        {
+                            _logger.LogWarning("TipoControl inválido '{Tipo}' en pregunta {PreguntaId}", respReq.TipoControl, respReq.PreguntaId);
+                            continue;
+                        }
                         var nuevaResp = new InspeccionRespuesta
                         {
                             InspeccionId = inspeccion.Id,
                             PreguntaId = respReq.PreguntaId,
-                            TipoControl = Enum.Parse<TipoControl>(respReq.TipoControl, true)
+                            TipoControl = tipoControlParsed
                         };
                         ActualizarRespuesta(nuevaResp, respReq);
                         _db.InspeccionRespuestas.Add(nuevaResp);

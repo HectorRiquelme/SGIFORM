@@ -248,7 +248,7 @@ else
         operadorEditar = op;
         formModel = new OperadorFormModel
         {
-            CodigoOperador = op.CodigoOperador,
+            CodigoOperador = op.CodigoOperador ?? "",
             Nombre = op.Nombre ?? "",
             Apellido = op.Apellido ?? "",
             Email = op.Email,

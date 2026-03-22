@@ -108,6 +108,10 @@ public class OperadoresController : ControllerBase
     [Authorize(Roles = "admin,supervisor")]
     public async Task<IActionResult> Create([FromBody] CreateOperadorRequest req)
     {
+        // Validar longitud mínima de contraseña
+        if (string.IsNullOrWhiteSpace(req.Password) || req.Password.Length < 6)
+            return BadRequest(new { error = "La contraseña debe tener al menos 6 caracteres" });
+
         // Validar código único
         var existe = await _db.Operadores.AnyAsync(o =>
             o.EmpresaId == EmpresaId &&

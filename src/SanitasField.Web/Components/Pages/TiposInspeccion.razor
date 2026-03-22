@@ -177,7 +177,7 @@ else
         editando = t;
         form = new FormModel
         {
-            Codigo = t.Codigo, Nombre = t.Nombre,
+            Codigo = t.Codigo ?? "", Nombre = t.Nombre ?? "",
             Descripcion = t.Descripcion, Activo = t.Activo,
             Icono = t.Icono, Color = t.Color
         };
