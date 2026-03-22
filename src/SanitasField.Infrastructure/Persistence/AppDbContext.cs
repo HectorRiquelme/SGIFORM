@@ -152,7 +152,9 @@ public class AppDbContext : DbContext
             e.ToTable("refresh_token");
             e.HasKey(x => x.Id);
             e.Property(x => x.Id).HasColumnName("id");
-            e.Property(x => x.UsuarioId).HasColumnName("usuario_id");
+            // usuario_id y operador_id son mutuamente excluyentes (uno de los dos es no nulo)
+            e.Property(x => x.UsuarioId).HasColumnName("usuario_id").IsRequired(false);
+            e.Property(x => x.OperadorId).HasColumnName("operador_id").IsRequired(false);
             e.Property(x => x.Token).HasColumnName("token");
             e.Property(x => x.ExpiraEn).HasColumnName("expira_en");
             e.Property(x => x.Revocado).HasColumnName("revocado");
@@ -162,6 +164,18 @@ public class AppDbContext : DbContext
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             // La tabla refresh_token no tiene updated_at — ignorar esta propiedad heredada
             e.Ignore(x => x.UpdatedAt);
+            // Relación con Usuario (nullable — tokens de usuarios web)
+            e.HasOne(x => x.Usuario)
+                .WithMany(u => u.RefreshTokens)
+                .HasForeignKey(x => x.UsuarioId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
+            // Relación con Operador (nullable — tokens de operadores móviles)
+            e.HasOne(x => x.Operador)
+                .WithMany(o => o.RefreshTokens)
+                .HasForeignKey(x => x.OperadorId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // operador

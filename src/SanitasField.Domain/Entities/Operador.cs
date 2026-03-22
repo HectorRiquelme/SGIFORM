@@ -22,6 +22,7 @@ public class Operador : SoftDeleteEntity
     public Empresa Empresa { get; set; } = null!;
     public Usuario? Usuario { get; set; }
     public ICollection<AsignacionInspeccion> Asignaciones { get; set; } = new List<AsignacionInspeccion>();
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 
     public string NombreCompleto => $"{Nombre} {Apellido}";
 }

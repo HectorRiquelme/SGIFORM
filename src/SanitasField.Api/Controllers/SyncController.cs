@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using SanitasField.Domain.Entities;
 using SanitasField.Domain.Enums;
 using SanitasField.Infrastructure.Persistence;
+using SanitasField.Infrastructure.Services;
 using System.Text.Json;
 
 namespace SanitasField.Api.Controllers;
@@ -26,12 +27,15 @@ public class SyncController : ControllerBase
     private readonly AppDbContext _db;
     private readonly IConfiguration _config;
     private readonly ILogger<SyncController> _logger;
+    private readonly IFlowValidatorService _flowValidator;
 
-    public SyncController(AppDbContext db, IConfiguration config, ILogger<SyncController> logger)
+    public SyncController(AppDbContext db, IConfiguration config,
+        ILogger<SyncController> logger, IFlowValidatorService flowValidator)
     {
         _db = db;
         _config = config;
         _logger = logger;
+        _flowValidator = flowValidator;
     }
 
     private Guid OperadorId =>
@@ -189,6 +193,23 @@ public class SyncController : ControllerBase
                     }
                 }
 
+                // Validación server-side del flujo
+                var validacion = await _flowValidator.ValidarAsync(
+                    inspeccion.FlujoVersionId,
+                    inspeccion.Respuestas.ToList(),
+                    inspeccion.TotalFotografias,
+                    inspeccion.Estado);
+
+                // Inspecciones finalizadas con errores de validación se marcan como "Observada"
+                if (!validacion.EsValida &&
+                    (inspeccion.Estado == EstadoInspeccion.Completada ||
+                     inspeccion.Estado == EstadoInspeccion.Enviada))
+                {
+                    _logger.LogWarning(
+                        "Inspección {AsignacionId} tiene errores de validación: {Errores}",
+                        inspReq.AsignacionId, string.Join("; ", validacion.Errores));
+                }
+
                 // Actualizar estado de asignación
                 if (inspeccion.Estado == EstadoInspeccion.Completada ||
                     inspeccion.Estado == EstadoInspeccion.Enviada)
@@ -207,7 +228,10 @@ public class SyncController : ControllerBase
                     InspeccionId = inspeccion.Id,
                     OperadorId = OperadorId,
                     Accion = "sync_upload",
-                    EstadoNuevo = inspeccion.Estado
+                    EstadoNuevo = inspeccion.Estado,
+                    MetadataJson = validacion.Advertencias.Any()
+                        ? System.Text.Json.JsonSerializer.Serialize(new { advertencias = validacion.Advertencias })
+                        : null
                 });
 
                 await _db.SaveChangesAsync();
@@ -237,7 +261,10 @@ public class SyncController : ControllerBase
             procesados,
             errores_count = errores.Count,
             errores,
-            timestamp = DateTimeOffset.UtcNow
+            timestamp = DateTimeOffset.UtcNow,
+            nota = procesados > 0
+                ? "Las advertencias de validación se registran en el historial de cada inspección."
+                : null
         });
     }
 

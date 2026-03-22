@@ -129,6 +129,7 @@ try
     // ─── Servicios de aplicación ──────────────────────────────────────────────
     builder.Services.AddScoped<IAuthService, AuthService>();
     builder.Services.AddScoped<IExcelImportService, ExcelImportService>();
+    builder.Services.AddScoped<IFlowValidatorService, FlowValidatorService>();
 
     // ─── Controllers + JSON ───────────────────────────────────────────────────
     builder.Services.AddControllers()
@@ -227,7 +228,9 @@ try
     });
 
     app.MapControllers();
-    app.MapHealthChecks("/health");
+    // Health check restringido a red local (no expuesto públicamente)
+    // Nota: ::1 (IPv6) no se usa en RequireHost — localhost cubre ambos en la mayoría de entornos
+    app.MapHealthChecks("/health").RequireHost("localhost", "127.0.0.1");
 
     // ─── Auto-run migrations en desarrollo ────────────────────────────────────
     if (app.Environment.IsDevelopment())

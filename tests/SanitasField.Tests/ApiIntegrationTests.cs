@@ -65,6 +65,94 @@ public class AuthTests : IClassFixture<TestFixture>
         var data = await resp.Content.ReadFromJsonAsync<JsonElement>();
         data.GetProperty("access_token").GetString().Should().NotBeNullOrEmpty();
         data.GetProperty("operador_id").GetString().Should().NotBeNullOrEmpty();
+        // Ahora el login móvil también entrega refresh_token (revocable)
+        data.GetProperty("refresh_token").GetString().Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task RefreshMovil_ConTokenValido_RetornaNuevoToken()
+    {
+        var client = _factory.CreateClient();
+
+        // 1. Login móvil
+        var loginResp = await client.PostAsJsonAsync("api/v1/auth/login-movil",
+            new { codigo_operador = "OP001", empresa_slug = "test", password = "Op@123" },
+            TestFixture.JsonOpts);
+        loginResp.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var loginData = await loginResp.Content.ReadFromJsonAsync<JsonElement>();
+        var refreshToken = loginData.GetProperty("refresh_token").GetString();
+        refreshToken.Should().NotBeNullOrEmpty();
+
+        // 2. Usar refresh token para obtener nuevo access token
+        var refreshResp = await client.PostAsJsonAsync("api/v1/auth/refresh",
+            new { refresh_token = refreshToken }, TestFixture.JsonOpts);
+        refreshResp.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var refreshData = await refreshResp.Content.ReadFromJsonAsync<JsonElement>();
+        refreshData.GetProperty("access_token").GetString().Should().NotBeNullOrEmpty();
+        refreshData.GetProperty("refresh_token").GetString().Should().NotBeNullOrEmpty();
+        // El nuevo refresh token debe ser diferente (rotación)
+        refreshData.GetProperty("refresh_token").GetString().Should().NotBe(refreshToken);
+    }
+
+    [Fact]
+    public async Task RefreshMovil_TokenUsadoDosVeces_SegundoUsoRetorna401()
+    {
+        var client = _factory.CreateClient();
+
+        // 1. Login móvil
+        var loginData = await (await client.PostAsJsonAsync("api/v1/auth/login-movil",
+            new { codigo_operador = "OP002", empresa_slug = "test", password = "Op@123" },
+            TestFixture.JsonOpts)).Content.ReadFromJsonAsync<JsonElement>();
+        var refreshToken = loginData.GetProperty("refresh_token").GetString()!;
+
+        // 2. Primer refresh (exitoso)
+        var r1 = await client.PostAsJsonAsync("api/v1/auth/refresh",
+            new { refresh_token = refreshToken }, TestFixture.JsonOpts);
+        r1.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        // 3. Segundo refresh con el MISMO token (debe fallar — token ya rotado)
+        var r2 = await client.PostAsJsonAsync("api/v1/auth/refresh",
+            new { refresh_token = refreshToken }, TestFixture.JsonOpts);
+        r2.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task RefreshMovil_OperadorDesactivado_Retorna401()
+    {
+        // Usamos un operador TEMPORAL creado en este test para no afectar OP001/OP002
+        var adminClient = await _factory.CreateAuthenticatedClientAsync();
+
+        // 1. Crear operador temporal exclusivo de este test
+        var createResp = await adminClient.PostAsJsonAsync("api/v1/operadores", new
+        {
+            codigo_operador = "OP_DEACTIVATE_TEST",
+            nombre = "Temporal", apellido = "Desactivar",
+            password = "Temp@123"
+        }, TestFixture.JsonOpts);
+        createResp.StatusCode.Should().Be(HttpStatusCode.Created);
+        var created = await createResp.Content.ReadFromJsonAsync<JsonElement>();
+        var tempId = created.GetProperty("id").GetString();
+
+        // 2. Login móvil con el operador temporal
+        var client = _factory.CreateClient();
+        var loginResp = await client.PostAsJsonAsync("api/v1/auth/login-movil",
+            new { codigo_operador = "OP_DEACTIVATE_TEST", empresa_slug = "test", password = "Temp@123" },
+            TestFixture.JsonOpts);
+        loginResp.StatusCode.Should().Be(HttpStatusCode.OK);
+        var loginData = await loginResp.Content.ReadFromJsonAsync<JsonElement>();
+        var refreshToken = loginData.GetProperty("refresh_token").GetString()!;
+
+        // 3. Admin desactiva el operador temporal (simula despido o pérdida de dispositivo)
+        await adminClient.PutAsJsonAsync(
+            $"api/v1/operadores/{tempId}",
+            new { activo = false }, TestFixture.JsonOpts);
+
+        // 4. Intentar refresh — debe fallar porque el operador está desactivado
+        var refreshResp = await client.PostAsJsonAsync("api/v1/auth/refresh",
+            new { refresh_token = refreshToken }, TestFixture.JsonOpts);
+        refreshResp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     [Fact]

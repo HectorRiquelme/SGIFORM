@@ -63,7 +63,10 @@ public class RolPermiso
 
 public class RefreshToken : BaseEntity
 {
-    public Guid UsuarioId { get; set; }
+    /// <summary>FK a usuario web. Nulo si el token pertenece a un operador móvil.</summary>
+    public Guid? UsuarioId { get; set; }
+    /// <summary>FK a operador móvil. Nulo si el token pertenece a un usuario web.</summary>
+    public Guid? OperadorId { get; set; }
     public string Token { get; set; } = null!;
     public DateTimeOffset ExpiraEn { get; set; }
     public bool Revocado { get; set; } = false;
@@ -71,5 +74,6 @@ public class RefreshToken : BaseEntity
     public string? UserAgent { get; set; }
 
     // Navigation
-    public Usuario Usuario { get; set; } = null!;
+    public Usuario? Usuario { get; set; }
+    public Operador? Operador { get; set; }
 }

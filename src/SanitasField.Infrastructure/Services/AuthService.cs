@@ -24,7 +24,9 @@ public record AuthResult(bool Success, string? Token, string? RefreshToken, stri
 
 /// <summary>
 /// Servicio de autenticación para usuarios web y operadores móviles.
-/// Genera JWT con claims de empresa/tenant para el middleware multitenant.
+/// Genera JWT de corta duración + refresh token rotativo para ambos tipos de sesión.
+/// El token móvil ahora es revocable: si se desactiva un operador o pierde su dispositivo,
+/// el administrador puede invalidar la sesión sin esperar la expiración del JWT.
 /// </summary>
 public class AuthService : IAuthService
 {
@@ -37,9 +39,7 @@ public class AuthService : IAuthService
         _config = config;
     }
 
-    // -------------------------------------------------------------------------
-    // Login usuario web
-    // -------------------------------------------------------------------------
+    // ─── Login usuario web ────────────────────────────────────────────────────
     public async Task<AuthResult> LoginUsuarioAsync(string email, string password, string? ipOrigen = null)
     {
         var usuario = await _db.Usuarios
@@ -65,32 +65,24 @@ public class AuthService : IAuthService
             return Fail("Credenciales inválidas");
         }
 
-        // Reset bloqueo
+        // Reset bloqueo en login exitoso
         usuario.IntentosFallidos = 0;
         usuario.BloqueadoHasta = null;
         usuario.UltimoAcceso = DateTimeOffset.UtcNow;
         await _db.SaveChangesAsync();
 
-        var claims = new List<Claim>
-        {
-            new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-            new(ClaimTypes.Email, usuario.Email),
-            new(ClaimTypes.Name, usuario.NombreCompleto),
-            new(ClaimTypes.Role, usuario.Rol.Codigo),
-            new("empresa_id", usuario.EmpresaId.ToString()),
-            new("tenant_slug", usuario.Empresa.TenantSlug),
-            new("tipo_usuario", "web")
-        };
-
-        var (jwt, refresh) = await GenerarTokensAsync(claims, usuario.Id, ipOrigen);
+        var claims = BuildUsuarioClaims(usuario);
+        var (jwt, refresh) = await GenerarTokensAsync(claims, usuarioId: usuario.Id, operadorId: null, ipOrigen);
         return new AuthResult(true, jwt, refresh, null,
             usuario.Id, usuario.NombreCompleto, usuario.Rol.Codigo,
             usuario.EmpresaId, usuario.Empresa.TenantSlug);
     }
 
-    // -------------------------------------------------------------------------
-    // Login operador móvil
-    // -------------------------------------------------------------------------
+    // ─── Login operador móvil ─────────────────────────────────────────────────
+    /// <summary>
+    /// Emite JWT de 24 horas + refresh token rotativo de 30 días.
+    /// Esto permite revocar el acceso de un operador inmediatamente desde la web.
+    /// </summary>
     public async Task<AuthResult> LoginOperadorAsync(string codigoOperador, string empresaSlug, string password, string? deviceId = null)
     {
         var empresa = await _db.Empresas
@@ -117,73 +109,80 @@ public class AuthService : IAuthService
 
         await _db.SaveChangesAsync();
 
-        var claims = new List<Claim>
-        {
-            new(ClaimTypes.NameIdentifier, operador.Id.ToString()),
-            new(ClaimTypes.Name, operador.NombreCompleto),
-            new(ClaimTypes.Role, "operador"),
-            new("empresa_id", empresa.Id.ToString()),
-            new("tenant_slug", empresa.TenantSlug),
-            new("tipo_usuario", "movil"),
-            new("operador_id", operador.Id.ToString()),
-            new("device_id", deviceId ?? "")
-        };
+        var claims = BuildOperadorClaims(operador, empresa, deviceId ?? operador.DeviceIdRegistrado);
+        // JWT de 24h (antes eran 7 días hardcodeados sin refresh)
+        var (jwt, refresh) = await GenerarTokensAsync(claims, usuarioId: null, operadorId: operador.Id, ipOrigen: null,
+            expMinutesOverride: 60 * 24);
 
-        // Login móvil: JWT de larga duración (7 días), sin refresh token
-        // porque la tabla refresh_token tiene FK a usuario, no a operador
-        var jwt = GenerarJwt(claims, expMinutesOverride: 60 * 24 * 7);
-        return new AuthResult(true, jwt, null, null,
+        return new AuthResult(true, jwt, refresh, null,
             operador.Id, operador.NombreCompleto, "operador",
             empresa.Id, empresa.TenantSlug);
     }
 
-    // -------------------------------------------------------------------------
-    // Refresh Token
-    // -------------------------------------------------------------------------
+    // ─── Refresh Token ────────────────────────────────────────────────────────
+    /// <summary>
+    /// Renueva el JWT usando el refresh token.
+    /// Maneja tanto sesiones de usuarios web como de operadores móviles.
+    /// Si el operador fue desactivado o eliminado, el refresh falla inmediatamente.
+    /// </summary>
     public async Task<AuthResult> RefreshTokenAsync(string refreshToken)
     {
         var token = await _db.RefreshTokens
-            .Include(t => t.Usuario)
-                .ThenInclude(u => u.Empresa)
-            .Include(t => t.Usuario)
-                .ThenInclude(u => u.Rol)
+            .Include(t => t.Usuario).ThenInclude(u => u!.Empresa)
+            .Include(t => t.Usuario).ThenInclude(u => u!.Rol)
+            .Include(t => t.Operador).ThenInclude(o => o!.Empresa)
             .FirstOrDefaultAsync(t => t.Token == refreshToken);
 
         if (token == null || token.Revocado || token.ExpiraEn < DateTimeOffset.UtcNow)
             return Fail("Token inválido o expirado");
 
-        var usuario = token.Usuario;
-
-        // Validar que el usuario siga activo
-        if (usuario.DeletedAt != null)
-            return Fail("Usuario no encontrado");
-
-        if (usuario.Estado == EstadoUsuario.Bloqueado)
-            return Fail("Cuenta bloqueada. Contacte al administrador.");
-
-        if (usuario.BloqueadoHasta.HasValue && usuario.BloqueadoHasta > DateTimeOffset.UtcNow)
-            return Fail($"Cuenta bloqueada temporalmente hasta {usuario.BloqueadoHasta:HH:mm}.");
-
-        // Revocar el token anterior (rotación de refresh tokens)
+        // Rotación de refresh token: revocar el anterior
         token.Revocado = true;
         await _db.SaveChangesAsync();
 
-        // Generar nuevos tokens directamente sin re-validar password
-        var claims = new List<Claim>
+        // ── Rama operador móvil ──────────────────────────────────────────────
+        if (token.OperadorId.HasValue && token.Operador != null)
         {
-            new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-            new(ClaimTypes.Email, usuario.Email),
-            new(ClaimTypes.Name, usuario.NombreCompleto),
-            new(ClaimTypes.Role, usuario.Rol.Codigo),
-            new("empresa_id", usuario.EmpresaId.ToString()),
-            new("tenant_slug", usuario.Empresa.TenantSlug),
-            new("tipo_usuario", "web")
-        };
+            var operador = token.Operador;
 
-        var (jwt, newRefresh) = await GenerarTokensAsync(claims, usuario.Id, null);
-        return new AuthResult(true, jwt, newRefresh, null,
-            usuario.Id, usuario.NombreCompleto, usuario.Rol.Codigo,
-            usuario.EmpresaId, usuario.Empresa.TenantSlug);
+            // Verificar que el operador sigue activo — si fue desactivado, acceso denegado
+            if (operador.DeletedAt != null)
+                return Fail("Operador eliminado. Contacte al administrador.");
+
+            if (!operador.Activo)
+                return Fail("Operador desactivado. Contacte al administrador.");
+
+            var claims = BuildOperadorClaims(operador, operador.Empresa, operador.DeviceIdRegistrado);
+            var (jwt, newRefresh) = await GenerarTokensAsync(claims, usuarioId: null, operadorId: operador.Id, ipOrigen: null,
+                expMinutesOverride: 60 * 24);
+
+            return new AuthResult(true, jwt, newRefresh, null,
+                operador.Id, operador.NombreCompleto, "operador",
+                operador.EmpresaId, operador.Empresa.TenantSlug);
+        }
+
+        // ── Rama usuario web ─────────────────────────────────────────────────
+        if (token.UsuarioId.HasValue && token.Usuario != null)
+        {
+            var usuario = token.Usuario;
+
+            if (usuario.DeletedAt != null)
+                return Fail("Usuario no encontrado");
+
+            if (usuario.Estado == EstadoUsuario.Bloqueado)
+                return Fail("Cuenta bloqueada. Contacte al administrador.");
+
+            if (usuario.BloqueadoHasta.HasValue && usuario.BloqueadoHasta > DateTimeOffset.UtcNow)
+                return Fail($"Cuenta bloqueada temporalmente hasta {usuario.BloqueadoHasta:HH:mm}.");
+
+            var claims = BuildUsuarioClaims(usuario);
+            var (jwt, newRefresh) = await GenerarTokensAsync(claims, usuarioId: usuario.Id, operadorId: null, ipOrigen: null);
+            return new AuthResult(true, jwt, newRefresh, null,
+                usuario.Id, usuario.NombreCompleto, usuario.Rol.Codigo,
+                usuario.EmpresaId, usuario.Empresa.TenantSlug);
+        }
+
+        return Fail("Token inválido: sin sujeto asociado");
     }
 
     public async Task RevocarTokenAsync(string refreshToken)
@@ -196,11 +195,33 @@ public class AuthService : IAuthService
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Helpers privados
-    // -------------------------------------------------------------------------
+    // ─── Helpers de construcción de claims ───────────────────────────────────
 
-    /// <summary>Genera solo el JWT (sin refresh token). Usado para login móvil.</summary>
+    private static List<Claim> BuildUsuarioClaims(Usuario usuario) =>
+    [
+        new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+        new(ClaimTypes.Email, usuario.Email),
+        new(ClaimTypes.Name, usuario.NombreCompleto),
+        new(ClaimTypes.Role, usuario.Rol.Codigo),
+        new("empresa_id", usuario.EmpresaId.ToString()),
+        new("tenant_slug", usuario.Empresa.TenantSlug),
+        new("tipo_usuario", "web")
+    ];
+
+    private static List<Claim> BuildOperadorClaims(Operador operador, Empresa empresa, string? deviceId) =>
+    [
+        new(ClaimTypes.NameIdentifier, operador.Id.ToString()),
+        new(ClaimTypes.Name, operador.NombreCompleto),
+        new(ClaimTypes.Role, "operador"),
+        new("empresa_id", empresa.Id.ToString()),
+        new("tenant_slug", empresa.TenantSlug),
+        new("tipo_usuario", "movil"),
+        new("operador_id", operador.Id.ToString()),
+        new("device_id", deviceId ?? "")
+    ];
+
+    // ─── Generación de tokens ─────────────────────────────────────────────────
+
     private string GenerarJwt(List<Claim> claims, int? expMinutesOverride = null)
     {
         var jwtKey = _config["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key no configurado");
@@ -222,19 +243,19 @@ public class AuthService : IAuthService
         return new JwtSecurityTokenHandler().WriteToken(jwtToken);
     }
 
-    /// <summary>Genera JWT + refresh token (para usuarios web).</summary>
     private async Task<(string jwt, string refresh)> GenerarTokensAsync(
-        List<Claim> claims, Guid usuarioId, string? ipOrigen)
+        List<Claim> claims, Guid? usuarioId, Guid? operadorId, string? ipOrigen,
+        int? expMinutesOverride = null)
     {
-        var jwt = GenerarJwt(claims);
+        var jwt = GenerarJwt(claims, expMinutesOverride);
 
-        // Generar refresh token
         var refreshBytes = RandomNumberGenerator.GetBytes(64);
         var refreshToken = Convert.ToBase64String(refreshBytes);
 
         var rt = new RefreshToken
         {
             UsuarioId = usuarioId,
+            OperadorId = operadorId,
             Token = refreshToken,
             ExpiraEn = DateTimeOffset.UtcNow.AddDays(30),
             IpOrigen = ipOrigen
