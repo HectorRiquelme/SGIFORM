@@ -1,5 +1,7 @@
 using System.Text;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -63,6 +65,66 @@ try
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials()));
+
+    // ─── Rate Limiting ────────────────────────────────────────────────────────
+    // Usa el middleware nativo de ASP.NET Core 8 (sin NuGet adicional).
+    // En Testing se usan límites permisivos para no interferir con los tests.
+    bool isTesting = builder.Environment.EnvironmentName == "Testing";
+    var rl = builder.Configuration.GetSection("RateLimiting");
+
+    builder.Services.AddRateLimiter(opt =>
+    {
+        opt.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+        opt.OnRejected = async (ctx, _) =>
+        {
+            ctx.HttpContext.Response.ContentType = "application/json";
+            await ctx.HttpContext.Response.WriteAsJsonAsync(new
+            {
+                error = "Demasiadas solicitudes. Espere un momento antes de reintentar.",
+                retry_after_seconds = 60
+            });
+        };
+
+        // Política "auth": para login y login-movil
+        // Límite: 10 req/min por IP en producción (1000 en Testing)
+        opt.AddPolicy("auth", context =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "anon",
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit        = isTesting ? 1000 : rl.GetValue("AuthPermitLimit", 10),
+                    Window             = TimeSpan.FromSeconds(rl.GetValue("AuthWindowSeconds", 60)),
+                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                    QueueLimit         = 0
+                }));
+
+        // Política "api": para endpoints generales autenticados
+        // Límite: 120 req/min por IP (2 req/seg) en producción
+        opt.AddPolicy("api", context =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "anon",
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit        = isTesting ? 5000 : rl.GetValue("ApiPermitLimit", 120),
+                    Window             = TimeSpan.FromSeconds(rl.GetValue("ApiWindowSeconds", 60)),
+                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                    QueueLimit         = 5
+                }));
+
+        // Política "sync": para uploads de fotos (más permisiva, son operadores en campo)
+        opt.AddPolicy("sync", context =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: context.User.FindFirst("operador_id")?.Value
+                              ?? context.Connection.RemoteIpAddress?.ToString()
+                              ?? "anon",
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit        = isTesting ? 5000 : rl.GetValue("SyncPermitLimit", 30),
+                    Window             = TimeSpan.FromSeconds(rl.GetValue("SyncWindowSeconds", 60)),
+                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                    QueueLimit         = 10
+                }));
+    });
 
     // ─── Servicios de aplicación ──────────────────────────────────────────────
     builder.Services.AddScoped<IAuthService, AuthService>();
@@ -138,6 +200,7 @@ try
 
     app.UseHttpsRedirection();
     app.UseCors();
+    app.UseRateLimiter();       // ← Rate limiting antes de auth
     app.UseAuthentication();
     app.UseAuthorization();
 

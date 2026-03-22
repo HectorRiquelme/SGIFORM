@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using SanitasField.Domain.Entities;
 using SanitasField.Domain.Enums;
@@ -19,6 +20,7 @@ namespace SanitasField.Api.Controllers;
 [ApiController]
 [Route("api/v1/sync")]
 [Authorize(Roles = "operador")]
+[EnableRateLimiting("sync")]
 public class SyncController : ControllerBase
 {
     private readonly AppDbContext _db;

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SanitasField.Infrastructure.Services;
 
 namespace SanitasField.Api.Controllers;
@@ -15,6 +16,7 @@ public class AuthController : ControllerBase
     /// <summary>Login para usuarios web (administrador, supervisor, auditor, etc.)</summary>
     [HttpPost("login")]
     [AllowAnonymous]
+    [EnableRateLimiting("auth")]
     public async Task<IActionResult> Login([FromBody] LoginRequest req)
     {
         var result = await _auth.LoginUsuarioAsync(req.Email, req.Password,
@@ -38,6 +40,7 @@ public class AuthController : ControllerBase
     /// <summary>Login para operadores móviles Android</summary>
     [HttpPost("login-movil")]
     [AllowAnonymous]
+    [EnableRateLimiting("auth")]
     public async Task<IActionResult> LoginMovil([FromBody] LoginMovilRequest req)
     {
         var result = await _auth.LoginOperadorAsync(
@@ -61,6 +64,7 @@ public class AuthController : ControllerBase
     /// <summary>Renovar token JWT usando refresh token</summary>
     [HttpPost("refresh")]
     [AllowAnonymous]
+    [EnableRateLimiting("auth")]
     public async Task<IActionResult> Refresh([FromBody] RefreshRequest req)
     {
         var result = await _auth.RefreshTokenAsync(req.RefreshToken);
