@@ -1,0 +1,68 @@
+name: publish-apk
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch o tag para generar APK"
+        required: true
+        default: "main"
+        type: string
+      apk_drop_path:
+        description: "Ruta destino (opcional) en servidor/compartido"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build-apk:
+    runs-on: [self-hosted, windows, android]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install MAUI Android workload
+        shell: pwsh
+        run: dotnet workload install maui-android
+
+      - name: Publish APK (Release)
+        shell: pwsh
+        run: |
+          dotnet publish src/SanitasField.Mobile/SanitasField.Mobile.csproj `
+            -f net8.0-android -c Release `
+            -p:AndroidPackageFormat=apk
+
+      - name: Locate APK
+        id: apk
+        shell: pwsh
+        run: |
+          $apk = Get-ChildItem "src/SanitasField.Mobile/bin/Release/net8.0-android/publish" -Filter *.apk -Recurse |
+                 Sort-Object LastWriteTime -Descending |
+                 Select-Object -First 1
+
+          if (-not $apk) { throw "No se encontró APK generado." }
+          "path=$($apk.FullName)" >> $env:GITHUB_OUTPUT
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanitasfield-apk
+          path: ${{ steps.apk.outputs.path }}
+
+      - name: Copy APK to drop path
+        if: ${{ inputs.apk_drop_path != '' }}
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path "${{ inputs.apk_drop_path }}" -Force | Out-Null
+          Copy-Item "${{ steps.apk.outputs.path }}" "${{ inputs.apk_drop_path }}" -Force

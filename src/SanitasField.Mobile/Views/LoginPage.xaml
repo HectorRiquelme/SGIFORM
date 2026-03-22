@@ -87,6 +87,16 @@
                         <Entry Text="{Binding ApiUrl}"
                                Placeholder="https://api.sgi-form.cl"
                                BackgroundColor="#f9fafb" FontSize="12" />
+
+                        <Button Text="Ver notas de versión"
+                                Command="{Binding VerNotasVersionCommand}"
+                                BackgroundColor="#ffffff"
+                                BorderColor="#d1d5db"
+                                BorderWidth="1"
+                                TextColor="#1f2937"
+                                CornerRadius="8"
+                                HeightRequest="40"
+                                Margin="0,8,0,0" />
                     </VerticalStackLayout>
 
                 </VerticalStackLayout>

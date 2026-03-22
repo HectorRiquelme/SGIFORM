@@ -8,11 +8,13 @@ public partial class LoginViewModel : ObservableObject
 {
     private readonly AuthService _auth;
     private readonly SyncService _sync;
+    private readonly ReleaseNotesService _releaseNotes;
 
-    public LoginViewModel(AuthService auth, SyncService sync)
+    public LoginViewModel(AuthService auth, SyncService sync, ReleaseNotesService releaseNotes)
     {
         _auth = auth;
         _sync = sync;
+        _releaseNotes = releaseNotes;
         // Leer URL guardada
         ApiUrl = Preferences.Get("api_url", "https://api.sanitasfield.cl");
     }
@@ -69,4 +71,27 @@ public partial class LoginViewModel : ObservableObject
     [RelayCommand]
     private void ToggleConfigAvanzada() =>
         MostrarConfigAvanzada = !MostrarConfigAvanzada;
+
+    [RelayCommand]
+    private async Task VerNotasVersionAsync()
+    {
+        var documento = await _releaseNotes.GetAsync();
+        if (documento.Notes.Count == 0)
+        {
+            await Shell.Current.DisplayAlert(
+                "Notas de versión",
+                "No hay notas de versión disponibles localmente.",
+                "OK");
+            return;
+        }
+
+        var ultima = documento.Notes
+            .OrderByDescending(n => n.Date)
+            .First();
+
+        var detalle = string.Join("\n", ultima.Changes.Select(c => $"- {c}"));
+        var mensaje = $"v{ultima.Version} ({ultima.Date})\n{ultima.Title}\n\n{detalle}";
+
+        await Shell.Current.DisplayAlert("Notas de versión", mensaje, "Cerrar");
+    }
 }

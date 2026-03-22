@@ -70,6 +70,15 @@
             <Label Text="{Binding AppVersion}" FontSize="11" TextColor="#9ca3af"
                    HorizontalTextAlignment="Center" />
 
+            <Button Text="Ver notas de versión"
+                    Command="{Binding VerNotasVersionCommand}"
+                    BackgroundColor="#ffffff"
+                    BorderColor="#d1d5db"
+                    BorderWidth="1"
+                    TextColor="#1f2937"
+                    CornerRadius="8"
+                    HeightRequest="44" />
+
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

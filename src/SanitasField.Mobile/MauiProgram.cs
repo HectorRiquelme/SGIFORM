@@ -44,6 +44,7 @@ public static class MauiProgram
         // ─── Servicios ────────────────────────────────────────────────────────
         builder.Services.AddSingleton<AuthService>();
         builder.Services.AddSingleton<SyncService>();
+        builder.Services.AddSingleton<ReleaseNotesService>();
         builder.Services.AddTransient<FlowEngine>();
 
         // ─── ViewModels ───────────────────────────────────────────────────────

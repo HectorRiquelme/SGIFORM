@@ -10,6 +10,7 @@ builder.Services.AddRazorComponents()
 // ─── Estado de autenticación (Scoped = por circuito Blazor) ──────────────────
 // AuthStateService reemplaza Session/IHttpContextAccessor en componentes Blazor.
 builder.Services.AddScoped<AuthStateService>();
+builder.Services.AddSingleton<ReleaseNotesService>();
 
 // ─── Cliente HTTP para la API ─────────────────────────────────────────────────
 // AddHttpClient<ApiClient> registra ApiClient como Scoped automáticamente

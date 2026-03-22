@@ -37,6 +37,7 @@
 
     <!-- Raw Assets -->
     <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+    <MauiAsset Include="..\..\release-notes.json" LogicalName="release-notes.json" />
   </ItemGroup>
 
   <ItemGroup>

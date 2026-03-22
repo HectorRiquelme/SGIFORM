@@ -1,0 +1,57 @@
+name: github-release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build release body from local notes
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+
+          tag = os.environ.get("GITHUB_REF_NAME", "v0.0.0")
+          version = tag[1:] if tag.startswith("v") else tag
+
+          body = [f"## Version {tag}", ""]
+
+          try:
+              with open("release-notes.json", "r", encoding="utf-8") as f:
+                  data = json.load(f)
+
+              notes = data.get("notes", [])
+              note = next((n for n in notes if str(n.get("version")) == version), None)
+              if note:
+                  body.append(f"### {note.get('title', 'Notas de versión')}")
+                  body.append(f"Fecha: {note.get('date', '-')}")
+                  body.append("")
+                  for item in note.get("changes", []):
+                      body.append(f"- {item}")
+              else:
+                  body.append("- Sin notas específicas para esta versión en `release-notes.json`.")
+          except Exception:
+              body.append("- No se pudo leer `release-notes.json`.")
+
+          with open("release-body.md", "w", encoding="utf-8") as out:
+              out.write("\n".join(body) + "\n")
+          PY
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body_path: release-body.md
+          generate_release_notes: true

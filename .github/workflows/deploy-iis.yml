@@ -1,0 +1,81 @@
+name: deploy-iis
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch o tag a desplegar"
+        required: true
+        default: "main"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, windows, iis]
+    env:
+      IIS_WEB_PATH: ${{ secrets.IIS_WEB_PATH }}
+      IIS_API_PATH: ${{ secrets.IIS_API_PATH }}
+      IIS_WEB_APPPOOL: ${{ secrets.IIS_WEB_APPPOOL }}
+      IIS_API_APPPOOL: ${{ secrets.IIS_API_APPPOOL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore SanitasField.sln
+
+      - name: Build
+        run: dotnet build SanitasField.sln -c Release --no-restore
+
+      - name: Test
+        run: dotnet test tests/SanitasField.Tests/SanitasField.Tests.csproj -c Release --no-build
+
+      - name: Publish API
+        run: dotnet publish src/SanitasField.Api/SanitasField.Api.csproj -c Release -o artifacts/api
+
+      - name: Publish Web
+        run: dotnet publish src/SanitasField.Web/SanitasField.Web.csproj -c Release -o artifacts/web
+
+      - name: Deploy to IIS paths
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:IIS_WEB_PATH) -or [string]::IsNullOrWhiteSpace($env:IIS_API_PATH)) {
+            throw "Define los secretos IIS_WEB_PATH e IIS_API_PATH antes de desplegar."
+          }
+
+          $appcmd = "$env:windir\system32\inetsrv\appcmd.exe"
+
+          if (Test-Path $appcmd) {
+            if (![string]::IsNullOrWhiteSpace($env:IIS_WEB_APPPOOL)) {
+              & $appcmd stop apppool /apppool.name:"$env:IIS_WEB_APPPOOL" | Out-Null
+            }
+            if (![string]::IsNullOrWhiteSpace($env:IIS_API_APPPOOL)) {
+              & $appcmd stop apppool /apppool.name:"$env:IIS_API_APPPOOL" | Out-Null
+            }
+          }
+
+          robocopy "artifacts/web" "$env:IIS_WEB_PATH" /MIR /R:2 /W:2 /NFL /NDL /NP /NJH /NJS
+          if ($LASTEXITCODE -gt 7) { throw "Robocopy WEB falló con código $LASTEXITCODE" }
+
+          robocopy "artifacts/api" "$env:IIS_API_PATH" /MIR /R:2 /W:2 /NFL /NDL /NP /NJH /NJS
+          if ($LASTEXITCODE -gt 7) { throw "Robocopy API falló con código $LASTEXITCODE" }
+
+          if (Test-Path $appcmd) {
+            if (![string]::IsNullOrWhiteSpace($env:IIS_WEB_APPPOOL)) {
+              & $appcmd start apppool /apppool.name:"$env:IIS_WEB_APPPOOL" | Out-Null
+            }
+            if (![string]::IsNullOrWhiteSpace($env:IIS_API_APPPOOL)) {
+              & $appcmd start apppool /apppool.name:"$env:IIS_API_APPPOOL" | Out-Null
+            }
+          }

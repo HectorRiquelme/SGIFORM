@@ -102,6 +102,9 @@ dotnet build src/SanitasField.Mobile/SanitasField.Mobile.csproj -f net8.0-androi
 |---|---|
 | `DOCUMENTACION_TECNICA.md` | Arquitectura completa, decisiones, diagramas, glosario |
 | `DOCUMENTACION_TECNICA.pdf` | Version PDF con diagramas renderizados |
+| `CHANGELOG.md` | Historial de cambios por versión |
+| `release-notes.json` | Notas de versión consumidas localmente por Web y Mobile |
+| `DEPLOY_GITHUB_IIS.md` | Guía de deploy a IIS y publicación de APK desde GitHub |
 | `PROMPT_MAESTRO_CONTINUIDAD.md` | Prompt de continuidad para nuevos chats de desarrollo |
 
 ## Endpoints principales

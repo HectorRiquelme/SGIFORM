@@ -10,12 +10,18 @@ public partial class SincronizacionViewModel : ObservableObject
     private readonly AuthService _auth;
     private readonly SyncService _sync;
     private readonly AppDatabase _db;
+    private readonly ReleaseNotesService _releaseNotes;
 
-    public SincronizacionViewModel(AuthService auth, SyncService sync, AppDatabase db)
+    public SincronizacionViewModel(
+        AuthService auth,
+        SyncService sync,
+        AppDatabase db,
+        ReleaseNotesService releaseNotes)
     {
         _auth = auth;
         _sync = sync;
         _db = db;
+        _releaseNotes = releaseNotes;
     }
 
     [ObservableProperty] private string nombreOperador = "";
@@ -88,5 +94,28 @@ public partial class SincronizacionViewModel : ObservableObject
 
         await _auth.LogoutAsync();
         await Shell.Current.GoToAsync("//login");
+    }
+
+    [RelayCommand]
+    public async Task VerNotasVersionAsync()
+    {
+        var documento = await _releaseNotes.GetAsync();
+        if (documento.Notes.Count == 0)
+        {
+            await Shell.Current.DisplayAlert(
+                "Notas de versión",
+                "No hay notas de versión disponibles localmente.",
+                "OK");
+            return;
+        }
+
+        var ultima = documento.Notes
+            .OrderByDescending(n => n.Date)
+            .First();
+
+        var detalle = string.Join("\n", ultima.Changes.Select(c => $"- {c}"));
+        var mensaje = $"v{ultima.Version} ({ultima.Date})\n{ultima.Title}\n\n{detalle}";
+
+        await Shell.Current.DisplayAlert("Notas de versión", mensaje, "Cerrar");
     }
 }
