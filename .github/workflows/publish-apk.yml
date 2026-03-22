@@ -39,7 +39,7 @@ jobs:
       - name: Publish APK (Release)
         shell: pwsh
         run: |
-          dotnet publish src/SanitasField.Mobile/SanitasField.Mobile.csproj `
+          dotnet publish src/SgiForm.Mobile/SgiForm.Mobile.csproj `
             -f net8.0-android -c Release `
             -p:AndroidPackageFormat=apk
 
@@ -47,7 +47,7 @@ jobs:
         id: apk
         shell: pwsh
         run: |
-          $apk = Get-ChildItem "src/SanitasField.Mobile/bin/Release/net8.0-android/publish" -Filter *.apk -Recurse |
+          $apk = Get-ChildItem "src/SgiForm.Mobile/bin/Release/net8.0-android/publish" -Filter *.apk -Recurse |
                  Sort-Object LastWriteTime -Descending |
                  Select-Object -First 1
 
@@ -57,7 +57,7 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sanitasfield-apk
+          name: sgiform-apk
           path: ${{ steps.apk.outputs.path }}
 
       - name: Copy APK to drop path

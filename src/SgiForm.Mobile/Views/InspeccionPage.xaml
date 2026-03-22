@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SgiForm.Mobile.ViewModels"
+             xmlns:models="clr-namespace:SgiForm.Mobile.Models"
+             x:Class="SgiForm.Mobile.Views.InspeccionPage"
+             x:DataType="vm:InspeccionViewModel"
+             Title="{Binding Asignacion.IdServicio, StringFormat='Servicio {0}'}">
+
+    <Shell.TitleView>
+        <Grid ColumnDefinitions="*,Auto" Padding="0,0,8,0">
+            <VerticalStackLayout VerticalOptions="Center">
+                <Label Text="{Binding Asignacion.IdServicio}" FontSize="15" FontAttributes="Bold" TextColor="White" />
+                <Label Text="{Binding Asignacion.Direccion}" FontSize="11" TextColor="#bfdbfe"
+                       LineBreakMode="TailTruncation" />
+            </VerticalStackLayout>
+            <Label Grid.Column="1"
+                   Text="{Binding PorcentajeAvance, StringFormat='{0}%'}"
+                   TextColor="White" FontSize="18" FontAttributes="Bold"
+                   VerticalOptions="Center" />
+        </Grid>
+    </Shell.TitleView>
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+        <!-- Barra de progreso -->
+        <ProgressBar Grid.Row="0"
+                     Progress="{Binding PorcentajeAvance, Converter={StaticResource IntToProgressConverter}}"
+                     ProgressColor="#3b82f6"
+                     BackgroundColor="#dbeafe"
+                     HeightRequest="6" />
+
+        <!-- Cabecera de sección -->
+        <Frame Grid.Row="1" BackgroundColor="#f0f9ff" Padding="12,8" Margin="8,4" CornerRadius="6">
+            <Grid ColumnDefinitions="*,Auto">
+                <VerticalStackLayout>
+                    <Label Text="{Binding TituloSeccion}"
+                           FontSize="15" FontAttributes="Bold" TextColor="#1e40af" />
+                    <Label Text="{Binding ProgressText}"
+                           FontSize="11" TextColor="#6b7280" />
+                </VerticalStackLayout>
+                <Label Grid.Column="1"
+                       Text="{Binding EstadoBadge}"
+                       TextColor="#1e40af" FontSize="12"
+                       VerticalOptions="Center" />
+            </Grid>
+        </Frame>
+
+        <!-- Preguntas del formulario -->
+        <ScrollView Grid.Row="2">
+            <VerticalStackLayout Padding="8" Spacing="8">
+
+                <!-- Error general -->
+                <Frame IsVisible="{Binding MensajeError, Converter={StaticResource StringNotNullConverter}}"
+                       BackgroundColor="#fee2e2" BorderColor="#fecaca"
+                       CornerRadius="6" Padding="10">
+                    <Label Text="{Binding MensajeError}" TextColor="#991b1b" FontSize="13" />
+                </Frame>
+
+                <!-- Preguntas dinámicas -->
+                <!-- Nota: En la implementación completa, cada PreguntaLocal se renderiza
+                     con un control apropiado según su TipoControl.
+                     Aquí se muestra la estructura básica. -->
+                <CollectionView ItemsSource="{Binding PreguntasActuales}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:PreguntaLocal">
+                            <Frame Margin="0,2" CornerRadius="8" Padding="12" BackgroundColor="White">
+                                <Label Text="{Binding Texto}"
+                                       FontSize="14" TextColor="#374151" />
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Navegación entre secciones -->
+        <Grid Grid.Row="3" ColumnDefinitions="Auto,*,Auto" Padding="8" ColumnSpacing="8">
+            <Button Grid.Column="0"
+                    Text="← Atrás"
+                    Command="{Binding AnteriorSeccionCommand}"
+                    IsEnabled="{Binding EsPrimeraSeccion, Converter={StaticResource InvertBoolConverter}}"
+                    BackgroundColor="#f3f4f6" TextColor="#374151"
+                    CornerRadius="8" HeightRequest="44"
+                    IsVisible="{Binding EsPrimeraSeccion, Converter={StaticResource InvertBoolConverter}}" />
+
+            <!-- Guardar borrador -->
+            <Button Grid.Column="1"
+                    Text="Guardar"
+                    Command="{Binding GuardarBorradorCommand}"
+                    BackgroundColor="#f3f4f6" TextColor="#374151"
+                    CornerRadius="8" HeightRequest="44" />
+
+            <!-- Siguiente / Cerrar -->
+            <Button Grid.Column="2"
+                    Text="{Binding EsUltimaSeccion, Converter={StaticResource BoolToNavTextConverter}}"
+                    Command="{Binding EsUltimaSeccion, Converter={StaticResource BoolToCommandConverter},
+                              ConverterParameter={Binding Source={RelativeSource Self}}}"
+                    BackgroundColor="#1a56db" TextColor="White"
+                    CornerRadius="8" HeightRequest="44"
+                    MinimumWidthRequest="100" />
+        </Grid>
+
+    </Grid>
+</ContentPage>

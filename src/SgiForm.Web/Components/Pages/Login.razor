@@ -1,0 +1,105 @@
+@page "/login"
+@layout SgiForm.Web.Components.Layout.EmptyLayout
+@inject ApiClient Api
+@inject AuthStateService Auth
+@inject NavigationManager Nav
+
+<PageTitle>Iniciar sesi&#243;n — SGI-FORM</PageTitle>
+
+<div class="sf-login-container">
+    <div class="sf-login-card">
+
+        <div class="sf-login-header">
+            <div class="sf-login-logo">
+                <span style="font-size:2.2rem;font-weight:800;letter-spacing:-1px;color:#1a56db">SGI</span><span style="font-size:2.2rem;font-weight:300;color:#374151">-FORM</span>
+            </div>
+            <p style="font-size:0.95rem;color:#6b7280;margin-top:4px;letter-spacing:0.5px">Gesti&#243;n inteligente de inspecciones en terreno</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMsg))
+        {
+            <div class="sf-alert sf-alert-danger">@errorMsg</div>
+        }
+
+        <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+
+            <div class="sf-form-group">
+                <label for="email">Email</label>
+                <InputText id="email"
+                           @bind-Value="loginModel.Email"
+                           class="sf-input"
+                           placeholder="usuario@empresa.cl"
+                           autocomplete="email" />
+                <ValidationMessage For="@(() => loginModel.Email)" />
+            </div>
+
+            <div class="sf-form-group">
+                <label for="password">Contraseña</label>
+                <InputText id="password"
+                           @bind-Value="loginModel.Password"
+                           type="password"
+                           class="sf-input"
+                           placeholder="••••••••"
+                           autocomplete="current-password" />
+                <ValidationMessage For="@(() => loginModel.Password)" />
+            </div>
+
+            <button type="submit"
+                    class="sf-btn sf-btn-primary sf-btn-full"
+                    disabled="@loading">
+                @if (loading)
+                {
+                    <span>Iniciando sesión...</span>
+                }
+                else
+                {
+                    <span>Iniciar sesión</span>
+                }
+            </button>
+        </EditForm>
+
+        <p class="sf-login-footer">v1.0.0 — SGI-FORM</p>
+    </div>
+</div>
+
+@code {
+    private LoginModel loginModel = new();
+    private string? errorMsg;
+    private bool loading = false;
+
+    protected override void OnInitialized()
+    {
+        // Si ya está autenticado, redirigir al dashboard
+        if (Auth.EsAutenticado)
+            Nav.NavigateTo("/", forceLoad: false);
+    }
+
+    private async Task HandleLogin()
+    {
+        loading = true;
+        errorMsg = null;
+
+        var result = await Api.LoginAsync(loginModel.Email, loginModel.Password);
+
+        if (result.Success)
+        {
+            Nav.NavigateTo("/", forceLoad: false);
+        }
+        else
+        {
+            errorMsg = result.Error ?? "Error al iniciar sesión.";
+            loading = false;
+        }
+    }
+
+    private class LoginModel
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "El email es obligatorio")]
+        [System.ComponentModel.DataAnnotations.EmailAddress(ErrorMessage = "Email inválido")]
+        public string Email { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "La contraseña es obligatoria")]
+        public string Password { get; set; } = "";
+    }
+}

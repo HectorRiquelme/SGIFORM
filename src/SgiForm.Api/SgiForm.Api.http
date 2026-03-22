@@ -1,0 +1,6 @@
+@SgiForm.Api_HostAddress = http://localhost:5043
+
+GET {{SgiForm.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

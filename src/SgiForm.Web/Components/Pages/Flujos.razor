@@ -1,0 +1,491 @@
+@page "/flujos"
+@layout SgiForm.Web.Components.Layout.MainLayout
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+<PageTitle>Constructor de Flujos — SGI-FORM</PageTitle>
+
+<div class="sf-page-header">
+    <div>
+        <h2>Constructor de Flujos</h2>
+        <span class="sf-text-muted">Define las preguntas y lógica de cada tipo de inspección</span>
+    </div>
+    <button class="sf-btn sf-btn-primary" @onclick="AbrirNuevo">+ Nuevo flujo</button>
+</div>
+
+@if (loading)
+{
+    <div class="sf-loading-center"><div class="sf-spinner"></div></div>
+}
+else if (flujoSeleccionado == null)
+{
+    <!-- LISTA DE FLUJOS -->
+    <div class="sf-card">
+        <table class="sf-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Tipo de Inspección</th>
+                    <th>Versiones</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (flujos.Any())
+                {
+                    @foreach (var f in flujos)
+                    {
+                        var vPublicada = f.Versiones?.FirstOrDefault(v => v.Estado == "publicado");
+                        var vBorrador  = f.Versiones?.FirstOrDefault(v => v.Estado == "borrador");
+
+                        <tr>
+                            <td><strong>@f.Nombre</strong>
+                                <div class="sf-text-muted sf-text-xs">@f.Descripcion</div>
+                            </td>
+                            <td>@(f.TipoInspeccion?.Nombre ?? "—")</td>
+                            <td>
+                                <span class="sf-badge sf-badge-secondary">
+                                    @(f.Versiones?.Count ?? 0) versiones
+                                </span>
+                            </td>
+                            <td>
+                                @if (vPublicada != null)
+                                {
+                                    <span class="sf-badge sf-badge-success">v@(vPublicada.NumeroVersion) Publicado</span>
+                                }
+                                @if (vBorrador != null)
+                                {
+                                    <span class="sf-badge sf-badge-warning">v@(vBorrador.NumeroVersion) Borrador</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="sf-action-btns">
+                                    <button class="sf-btn sf-btn-primary sf-btn-sm"
+                                            @onclick="() => AbrirConstructor(f)">
+                                        ✏️ Editar
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="sf-text-center sf-text-muted" style="padding:32px">
+                            No hay flujos creados. Crea el primero para comenzar.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <!-- CONSTRUCTOR DE FLUJO -->
+    <div class="sf-card" style="margin-bottom:12px">
+        <div class="sf-card-header">
+            <div>
+                <button class="sf-btn sf-btn-secondary sf-btn-sm" @onclick="() => flujoSeleccionado = null">
+                    ← Volver a flujos
+                </button>
+                <strong style="margin-left:12px">@flujoSeleccionado.Nombre</strong>
+                @if (versionActual != null)
+                {
+                    <span class="sf-badge @(versionActual.Estado=="publicado" ? "sf-badge-success" : "sf-badge-warning")"
+                          style="margin-left:8px">
+                        v@(versionActual.NumeroVersion) — @versionActual.Estado
+                    </span>
+                }
+            </div>
+            @if (versionActual?.Estado == "borrador")
+            {
+                <button class="sf-btn sf-btn-success sf-btn-sm" @onclick="PublicarVersion">
+                    ✅ Publicar versión
+                </button>
+            }
+        </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:260px 1fr;gap:16px">
+
+        <!-- Panel izquierdo: Secciones -->
+        <div class="sf-card" style="padding:0;align-self:start">
+            <div class="sf-card-header">
+                <h4 style="font-size:13px">Secciones</h4>
+                @if (versionActual?.Estado == "borrador")
+                {
+                    <button class="sf-btn sf-btn-primary sf-btn-sm" @onclick="AgregarSeccion">+ Agregar</button>
+                }
+            </div>
+            @if (secciones.Any())
+            {
+                <ul style="list-style:none;padding:0;margin:0">
+                    @foreach (var sec in secciones.OrderBy(s => s.Orden))
+                    {
+                        <li @onclick="() => seccionSeleccionada = sec"
+                            style="padding:10px 16px;cursor:pointer;border-bottom:1px solid #f3f4f6;
+                                   background:@(seccionSeleccionada?.Id == sec.Id ? "#eff6ff" : "white")">
+                            <div style="font-weight:500;font-size:13px">@sec.Titulo</div>
+                            <div class="sf-text-muted sf-text-xs">
+                                @preguntas.Count(p => p.SeccionId == sec.Id) preguntas
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="sf-text-muted" style="padding:16px;font-size:12px">Sin secciones</p>
+            }
+        </div>
+
+        <!-- Panel derecho: Preguntas de la sección seleccionada -->
+        <div>
+            @if (seccionSeleccionada != null)
+            {
+                <div class="sf-card" style="margin-bottom:12px">
+                    <div class="sf-card-header">
+                        <h4>@seccionSeleccionada.Titulo</h4>
+                        @if (versionActual?.Estado == "borrador")
+                        {
+                            <button class="sf-btn sf-btn-primary sf-btn-sm" @onclick="AbrirNuevaPregunta">
+                                + Pregunta
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                @foreach (var preg in preguntas
+                    .Where(p => p.SeccionId == seccionSeleccionada.Id)
+                    .OrderBy(p => p.Orden))
+                {
+                    <div class="sf-card" style="margin-bottom:8px;padding:12px 16px">
+                        <div style="display:flex;justify-content:space-between;align-items:start">
+                            <div style="flex:1">
+                                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                                    <span class="sf-badge sf-badge-secondary" style="font-size:10px">
+                                        @GetTipoLabel(preg.TipoControl)
+                                    </span>
+                                    @if (preg.Obligatorio)
+                                    {
+                                        <span class="sf-badge sf-badge-danger" style="font-size:10px">Obligatorio</span>
+                                    }
+                                </div>
+                                <strong style="font-size:14px">@preg.Texto</strong>
+                                <div class="sf-text-muted sf-text-xs">código: @preg.Codigo</div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (!preguntas.Any(p => p.SeccionId == seccionSeleccionada.Id))
+                {
+                    <div class="sf-card" style="padding:24px;text-align:center">
+                        <p class="sf-text-muted">Sin preguntas en esta sección</p>
+                        @if (versionActual?.Estado == "borrador")
+                        {
+                            <button class="sf-btn sf-btn-primary sf-btn-sm" @onclick="AbrirNuevaPregunta">
+                                + Agregar primera pregunta
+                            </button>
+                        }
+                    </div>
+                }
+
+                <!-- Reglas de la versión -->
+                @if (reglas.Any())
+                {
+                    <div class="sf-card" style="margin-top:16px">
+                        <div class="sf-card-header">
+                            <h4>Reglas lógicas (@reglas.Count)</h4>
+                        </div>
+                        <table class="sf-table sf-table-sm">
+                            <thead>
+                                <tr><th>Si</th><th>Condición</th><th>Entonces</th><th>Sobre</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var r in reglas.Take(10))
+                                {
+                                    <tr>
+                                        <td class="sf-text-xs">@r.Codigo</td>
+                                        <td class="sf-text-xs">@r.Operador = @r.ValorComparacion</td>
+                                        <td>
+                                            <span class="sf-badge sf-badge-info" style="font-size:10px">
+                                                @r.Accion
+                                            </span>
+                                        </td>
+                                        <td class="sf-text-xs">@(r.PreguntaDestinoId?.ToString()[..8] ?? "—")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="sf-card" style="padding:48px;text-align:center">
+                    <p class="sf-text-muted">← Selecciona una sección para ver sus preguntas</p>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<!-- Modal nuevo flujo -->
+@if (mostrarModalFlujo)
+{
+    <div class="sf-modal-overlay">
+        <div class="sf-modal">
+            <div class="sf-modal-header">
+                <h3>Nuevo flujo</h3>
+                <button class="sf-btn-close" @onclick="() => mostrarModalFlujo = false">✕</button>
+            </div>
+            <div class="sf-modal-body">
+                @if (!string.IsNullOrEmpty(formError))
+                {
+                    <div class="sf-alert sf-alert-danger">@formError</div>
+                }
+                <div class="sf-form-group">
+                    <label>Nombre *</label>
+                    <input class="sf-input" @bind="nuevoFlujoNombre" placeholder="Flujo Inspección de Medidor" />
+                </div>
+                <div class="sf-form-group">
+                    <label>Descripción</label>
+                    <input class="sf-input" @bind="nuevoFlujoDesc" />
+                </div>
+                <div class="sf-form-group">
+                    <label>Tipo de Inspección</label>
+                    <select class="sf-select" @bind="nuevoFlujoTipoId">
+                        <option value="">— Selecciona —</option>
+                        @foreach (var t in tiposDisponibles)
+                        {
+                            <option value="@t.Id">@t.Nombre</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="sf-modal-footer">
+                <button class="sf-btn sf-btn-secondary" @onclick="() => mostrarModalFlujo = false">Cancelar</button>
+                <button class="sf-btn sf-btn-primary" @onclick="CrearFlujo" disabled="@guardando">
+                    @(guardando ? "Creando..." : "Crear flujo")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal nueva pregunta -->
+@if (mostrarModalPregunta)
+{
+    <div class="sf-modal-overlay">
+        <div class="sf-modal">
+            <div class="sf-modal-header">
+                <h3>Nueva pregunta</h3>
+                <button class="sf-btn-close" @onclick="() => mostrarModalPregunta = false">✕</button>
+            </div>
+            <div class="sf-modal-body">
+                @if (!string.IsNullOrEmpty(formError))
+                {
+                    <div class="sf-alert sf-alert-danger">@formError</div>
+                }
+                <div class="sf-form-grid">
+                    <div class="sf-form-group">
+                        <label>Código *</label>
+                        <input class="sf-input" @bind="pregForm.Codigo" placeholder="p_medidor_visible" />
+                    </div>
+                    <div class="sf-form-group">
+                        <label>Tipo de control *</label>
+                        <select class="sf-select" @bind="pregForm.TipoControl">
+                            @foreach (var t in tiposControl)
+                            {
+                                <option value="@t.Value">@t.Label</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="sf-form-group sf-form-group-full">
+                        <label>Texto de la pregunta *</label>
+                        <input class="sf-input" @bind="pregForm.Texto"
+                               placeholder="¿El medidor es visible y accesible?" />
+                    </div>
+                    <div class="sf-form-group">
+                        <label>Texto de ayuda</label>
+                        <input class="sf-input" @bind="pregForm.Ayuda" />
+                    </div>
+                    <div class="sf-form-group">
+                        <label style="display:flex;align-items:center;gap:8px">
+                            <input type="checkbox" @bind="pregForm.Obligatorio" /> Obligatorio
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="sf-modal-footer">
+                <button class="sf-btn sf-btn-secondary" @onclick="() => mostrarModalPregunta = false">Cancelar</button>
+                <button class="sf-btn sf-btn-primary" @onclick="CrearPregunta" disabled="@guardando">
+                    @(guardando ? "Guardando..." : "Agregar pregunta")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool loading = true;
+    private bool guardando = false;
+    private bool mostrarModalFlujo = false;
+    private bool mostrarModalPregunta = false;
+    private string? formError;
+    private List<FlujoItem> flujos = new();
+    private List<TipoRef> tiposDisponibles = new();
+    private FlujoItem? flujoSeleccionado;
+    private VersionItem? versionActual;
+    private List<SeccionItem> secciones = new();
+    private List<PreguntaItem> preguntas = new();
+    private List<ReglaItem> reglas = new();
+    private SeccionItem? seccionSeleccionada;
+    private string nuevoFlujoNombre = "";
+    private string nuevoFlujoDesc = "";
+    private string nuevoFlujoTipoId = "";
+    private PreguntaForm pregForm = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var fl = await Api.GetAsync<List<FlujoItem>>("api/v1/flujos");
+        flujos = fl ?? new();
+        var ts = await Api.GetAsync<List<TipoRef>>("api/v1/tipos-inspeccion");
+        tiposDisponibles = ts ?? new();
+        loading = false;
+    }
+
+    private async Task AbrirConstructor(FlujoItem f)
+    {
+        flujoSeleccionado = f;
+        versionActual = f.Versiones?.OrderByDescending(v => v.NumeroVersion).FirstOrDefault();
+        if (versionActual == null) return;
+
+        var full = await Api.GetAsync<VersionDetalle>(
+            $"api/v1/flujos/{f.Id}/versiones/{versionActual.Id}");
+
+        secciones = full?.Secciones ?? new();
+        preguntas = full?.Secciones?.SelectMany(s => s.Preguntas ?? new()).ToList() ?? new();
+        reglas    = full?.Reglas ?? new();
+        seccionSeleccionada = secciones.FirstOrDefault();
+    }
+
+    private void AbrirNuevo() { nuevoFlujoNombre = ""; nuevoFlujoDesc = ""; nuevoFlujoTipoId = ""; mostrarModalFlujo = true; }
+
+    private async Task CrearFlujo()
+    {
+        if (string.IsNullOrWhiteSpace(nuevoFlujoNombre))
+        { formError = "El nombre es obligatorio"; return; }
+
+        guardando = true;
+        var r = await Api.PostAsync<object>("api/v1/flujos", new
+        {
+            nombre = nuevoFlujoNombre,
+            descripcion = nuevoFlujoDesc,
+            tipo_inspeccion_id = string.IsNullOrEmpty(nuevoFlujoTipoId) ? (Guid?)null : Guid.Parse(nuevoFlujoTipoId)
+        });
+
+        if (r.Success)
+        {
+            mostrarModalFlujo = false;
+            var fl = await Api.GetAsync<List<FlujoItem>>("api/v1/flujos");
+            flujos = fl ?? new();
+        }
+        else formError = r.Error;
+        guardando = false;
+    }
+
+    private async Task AgregarSeccion()
+    {
+        if (versionActual == null || flujoSeleccionado == null) return;
+        var orden = secciones.Count + 1;
+        var r = await Api.PostAsync<object>(
+            $"api/v1/flujos/{flujoSeleccionado.Id}/versiones/{versionActual.Id}/secciones",
+            new { codigo = $"SEC_{orden:D2}", titulo = $"Sección {orden}", orden });
+        if (r.Success) await AbrirConstructor(flujoSeleccionado);
+    }
+
+    private void AbrirNuevaPregunta() { pregForm = new(); formError = null; mostrarModalPregunta = true; }
+
+    private async Task CrearPregunta()
+    {
+        if (seccionSeleccionada == null || versionActual == null || flujoSeleccionado == null) return;
+        if (string.IsNullOrWhiteSpace(pregForm.Codigo) || string.IsNullOrWhiteSpace(pregForm.Texto))
+        { formError = "Código y texto son obligatorios"; return; }
+
+        guardando = true;
+        var r = await Api.PostAsync<object>(
+            $"api/v1/flujos/{flujoSeleccionado.Id}/versiones/{versionActual.Id}/secciones/{seccionSeleccionada.Id}/preguntas",
+            new
+            {
+                codigo = pregForm.Codigo, texto = pregForm.Texto,
+                tipo_control = pregForm.TipoControl, ayuda = pregForm.Ayuda,
+                obligatorio = pregForm.Obligatorio
+            });
+
+        if (r.Success) { mostrarModalPregunta = false; await AbrirConstructor(flujoSeleccionado); }
+        else formError = r.Error;
+        guardando = false;
+    }
+
+    private async Task PublicarVersion()
+    {
+        if (versionActual == null || flujoSeleccionado == null) return;
+        var r = await Api.PostAsync<object>(
+            $"api/v1/flujos/{flujoSeleccionado.Id}/versiones/{versionActual.Id}/publicar", new { });
+        if (r.Success) await AbrirConstructor(flujoSeleccionado);
+    }
+
+    private static string GetTipoLabel(string? tipo) => tipo switch
+    {
+        "texto_corto" => "📝 Texto corto", "texto_largo" => "📄 Texto largo",
+        "entero" => "🔢 Número", "decimal" => "🔢 Decimal",
+        "fecha" => "📅 Fecha", "si_no" => "✅ Sí/No",
+        "seleccion_unica" => "⭕ Selección única", "seleccion_multiple" => "☑️ Selección múltiple",
+        "foto_unica" => "📷 Foto", "fotos_multiples" => "📸 Fotos múltiples",
+        "coordenadas" => "📍 GPS", "firma" => "✍️ Firma",
+        _ => tipo ?? "—"
+    };
+
+    private static readonly List<(string Value, string Label)> tiposControl = new()
+    {
+        ("texto_corto","📝 Texto corto"), ("texto_largo","📄 Texto largo"),
+        ("entero","🔢 Número entero"), ("decimal","🔢 Número decimal"),
+        ("fecha","📅 Fecha"), ("hora","🕐 Hora"), ("fecha_hora","📅 Fecha y hora"),
+        ("si_no","✅ Sí / No"), ("seleccion_unica","⭕ Selección única"),
+        ("seleccion_multiple","☑️ Selección múltiple"), ("lista","📋 Lista desplegable"),
+        ("foto_unica","📷 Foto única"), ("fotos_multiples","📸 Fotos múltiples"),
+        ("coordenadas","📍 Coordenadas GPS"), ("firma","✍️ Firma digital"),
+        ("calculado","🧮 Campo calculado"), ("etiqueta","🏷️ Etiqueta/Info"),
+        ("checkbox","☑️ Checkbox"),
+    };
+
+    // DTOs
+    private record FlujoItem(Guid Id, string? Nombre, string? Descripcion, bool Activo,
+        TipoRef? TipoInspeccion, List<VersionItem>? Versiones);
+    private record VersionItem(Guid Id, int NumeroVersion, string? Estado);
+    private record TipoRef(Guid Id, string? Nombre);
+    private record VersionDetalle(List<SeccionItem>? Secciones, List<ReglaItem>? Reglas);
+    private record SeccionItem(Guid Id, string? Codigo, string? Titulo, int Orden,
+        List<PreguntaItem>? Preguntas)
+    {
+        public Guid SeccionId => Id;
+    }
+    private record PreguntaItem(Guid Id, string? Codigo, string? Texto, string? TipoControl,
+        bool Obligatorio, int Orden, Guid SeccionId);
+    private record ReglaItem(Guid Id, string? Codigo, string? Operador,
+        string? ValorComparacion, string? Accion, Guid? PreguntaDestinoId);
+
+    private class PreguntaForm
+    {
+        public string Codigo { get; set; } = "";
+        public string Texto { get; set; } = "";
+        public string TipoControl { get; set; } = "texto_corto";
+        public string? Ayuda { get; set; }
+        public bool Obligatorio { get; set; }
+    }
+}

@@ -1,0 +1,133 @@
+@page "/"
+@layout SgiForm.Web.Components.Layout.MainLayout
+@inject ApiClient Api
+@inject AuthStateService Auth
+
+<PageTitle>Dashboard — SGI-FORM</PageTitle>
+
+<div class="sf-page-header">
+    <div>
+        <h2>Dashboard</h2>
+        <span class="sf-text-muted">Bienvenido, @Auth.Nombre</span>
+    </div>
+    <span class="sf-badge sf-badge-info">@DateTime.Now.ToString("dddd dd/MM/yyyy")</span>
+</div>
+
+@if (loading)
+{
+    <div class="sf-loading-center"><div class="sf-spinner"></div></div>
+}
+else if (resumen != null)
+{
+    <!-- KPI Cards -->
+    <div class="sf-kpi-grid">
+        <div class="sf-kpi-card sf-kpi-blue">
+            <div class="sf-kpi-icon">📍</div>
+            <div class="sf-kpi-data">
+                <span class="sf-kpi-value">@resumen.TotalServicios.ToString("N0")</span>
+                <span class="sf-kpi-label">Servicios cargados</span>
+            </div>
+        </div>
+
+        <div class="sf-kpi-card sf-kpi-yellow">
+            <div class="sf-kpi-icon">⏳</div>
+            <div class="sf-kpi-data">
+                <span class="sf-kpi-value">@GetEstadoCount("pendiente")</span>
+                <span class="sf-kpi-label">Pendientes</span>
+            </div>
+        </div>
+
+        <div class="sf-kpi-card sf-kpi-orange">
+            <div class="sf-kpi-icon">⚙️</div>
+            <div class="sf-kpi-data">
+                <span class="sf-kpi-value">@GetEstadoCount("en_ejecucion")</span>
+                <span class="sf-kpi-label">En ejecución</span>
+            </div>
+        </div>
+
+        <div class="sf-kpi-card sf-kpi-green">
+            <div class="sf-kpi-icon">✅</div>
+            <div class="sf-kpi-data">
+                <span class="sf-kpi-value">@GetEstadoCount("finalizada")</span>
+                <span class="sf-kpi-label">Finalizadas</span>
+            </div>
+        </div>
+
+        <div class="sf-kpi-card sf-kpi-teal">
+            <div class="sf-kpi-icon">🔄</div>
+            <div class="sf-kpi-data">
+                <span class="sf-kpi-value">@GetEstadoCount("sincronizada")</span>
+                <span class="sf-kpi-label">Sincronizadas</span>
+            </div>
+        </div>
+
+        <div class="sf-kpi-card sf-kpi-purple">
+            <div class="sf-kpi-icon">📸</div>
+            <div class="sf-kpi-data">
+                <span class="sf-kpi-value">@(resumen.TotalFotografias?.ToString("N0") ?? "0")</span>
+                <span class="sf-kpi-label">Fotografías</span>
+            </div>
+        </div>
+
+        <div class="sf-kpi-card sf-kpi-teal">
+            <div class="sf-kpi-icon">👷</div>
+            <div class="sf-kpi-data">
+                <span class="sf-kpi-value">@(resumen.OperadoresActivos ?? 0)</span>
+                <span class="sf-kpi-label">Operadores activos</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grillas de avance -->
+    <div class="sf-dashboard-grid">
+        <div class="sf-card">
+            <div class="sf-card-header">
+                <h3>Avance por localidad</h3>
+            </div>
+            <div style="padding:0">
+                <AvanceLocalidad />
+            </div>
+        </div>
+
+        <div class="sf-card">
+            <div class="sf-card-header">
+                <h3>Productividad por operador</h3>
+            </div>
+            <div style="padding:0">
+                <ResumenOperadores />
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="sf-alert sf-alert-warning">
+        No se pudo cargar el dashboard. Verifica la conexión con la API.
+    </div>
+}
+
+@code {
+    private bool loading = true;
+    private DashboardResumen? resumen;
+
+    protected override async Task OnInitializedAsync()
+    {
+        resumen = await Api.GetAsync<DashboardResumen>("api/v1/dashboard/resumen");
+        loading = false;
+    }
+
+    private int GetEstadoCount(string estado) =>
+        resumen?.Asignaciones?.FirstOrDefault(a => a.Estado == estado)?.Total ?? 0;
+
+    // DTOs locales
+    private record DashboardResumen(
+        int TotalServicios,
+        List<EstadoCount>? Asignaciones,
+        List<EstadoCount>? Inspecciones,
+        int? TotalFotografias,
+        int? InspeccionesConGps,
+        int? OperadoresActivos,
+        DateTimeOffset? FechaActualizacion);
+
+    private record EstadoCount(string? Estado, int Total);
+}

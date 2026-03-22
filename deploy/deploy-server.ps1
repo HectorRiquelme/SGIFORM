@@ -1,7 +1,7 @@
 #Requires -RunAsAdministrator
 <#
 .SYNOPSIS
-    Script de despliegue completo de SanitasField en Windows Server + IIS + PostgreSQL.
+    Script de despliegue completo de SgiForm en Windows Server + IIS + PostgreSQL.
 
 .DESCRIPTION
     Automatiza el despliegue de:
@@ -10,7 +10,7 @@
     Asume que PostgreSQL ya está instalado. Usa variables de entorno para secretos.
 
 .PARAMETER AppBasePath
-    Ruta base de instalación. Default: C:\SanitasField
+    Ruta base de instalación. Default: C:\SgiForm
 
 .PARAMETER ApiPublishPath
     Ruta donde está la publicación de la API (dotnet publish output).
@@ -31,10 +31,10 @@
     Puerto de PostgreSQL. Default: 5432
 
 .PARAMETER PgDatabase
-    Nombre de la base de datos. Default: sanitasfield
+    Nombre de la base de datos. Default: sgiform
 
 .PARAMETER PgAppUser
-    Usuario de aplicación en PostgreSQL. Default: sanitasfield
+    Usuario de aplicación en PostgreSQL. Default: sgiform
 
 .PARAMETER PgSaUser
     Superusuario de PostgreSQL. Default: postgres
@@ -62,15 +62,15 @@
 
 [CmdletBinding(SupportsShouldProcess)]
 param(
-    [string]$AppBasePath    = "C:\SanitasField",
+    [string]$AppBasePath    = "C:\SgiForm",
     [string]$ApiPublishPath = "",
     [string]$WebPublishPath = "",
     [int]   $ApiPort        = 5043,
     [int]   $WebPort        = 80,
     [string]$PgHost         = "localhost",
     [int]   $PgPort         = 5432,
-    [string]$PgDatabase     = "sanitasfield",
-    [string]$PgAppUser      = "sanitasfield",
+    [string]$PgDatabase     = "sgiform",
+    [string]$PgAppUser      = "sgiform",
     [string]$PgSaUser       = "postgres",
     [switch]$RunSqlScripts  = $false,
     [string]$SourceRepoPath = ""
@@ -93,10 +93,10 @@ $UploadsPath    = "$AppBasePath\uploads"
 $LogsPath       = "$AppBasePath\logs"
 $BackupsPath    = "$AppBasePath\backups"
 $ScriptsPath    = "$AppBasePath\scripts"
-$ApiPoolName    = "SanitasField-API"
-$WebPoolName    = "SanitasField-Web"
-$ApiSiteName    = "SanitasField-API"
-$WebSiteName    = "SanitasField-Web"
+$ApiPoolName    = "SgiForm-API"
+$WebPoolName    = "SgiForm-Web"
+$ApiSiteName    = "SgiForm-API"
+$WebSiteName    = "SgiForm-Web"
 $PgBin          = "C:\PostgreSQL\16\bin"
 $Timestamp      = Get-Date -Format "yyyyMMdd_HHmmss"
 
@@ -166,7 +166,7 @@ function Set-FolderPermission {
 # ═══════════════════════════════════════════════════════════════════════════════
 
 Write-Host "`n╔══════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host   "║    SanitasField — Script de Despliegue v1.0     ║" -ForegroundColor Cyan
+Write-Host   "║    SgiForm — Script de Despliegue v1.0     ║" -ForegroundColor Cyan
 Write-Host   "╚══════════════════════════════════════════════════╝`n" -ForegroundColor Cyan
 Write-Info "Timestamp: $Timestamp"
 Write-Info "Base path: $AppBasePath"
@@ -254,25 +254,25 @@ if ($SourceRepoPath -ne "") {
     Push-Location $SourceRepoPath
 
     Write-Info "Restaurando dependencias..."
-    dotnet restore SanitasField.sln
+    dotnet restore SgiForm.sln
     if ($LASTEXITCODE -ne 0) { throw "dotnet restore falló" }
 
     Write-Info "Compilando en Release..."
-    dotnet build SanitasField.sln -c Release --no-restore
+    dotnet build SgiForm.sln -c Release --no-restore
     if ($LASTEXITCODE -ne 0) { throw "dotnet build falló" }
 
     Write-Info "Ejecutando tests..."
-    dotnet test tests/SanitasField.Tests/SanitasField.Tests.csproj -c Release --no-build
+    dotnet test tests/SgiForm.Tests/SgiForm.Tests.csproj -c Release --no-build
     if ($LASTEXITCODE -ne 0) { throw "Tests fallaron. Despliegue cancelado." }
     Write-Ok "Tests pasados"
 
     Write-Info "Publicando API..."
-    dotnet publish src/SanitasField.Api/SanitasField.Api.csproj `
+    dotnet publish src/SgiForm.Api/SgiForm.Api.csproj `
         -c Release -o "$env:TEMP\sf_publish\api" --no-build
     $ApiPublishPath = "$env:TEMP\sf_publish\api"
 
     Write-Info "Publicando Web..."
-    dotnet publish src/SanitasField.Web/SanitasField.Web.csproj `
+    dotnet publish src/SgiForm.Web/SgiForm.Web.csproj `
         -c Release -o "$env:TEMP\sf_publish\web" --no-build
     $WebPublishPath = "$env:TEMP\sf_publish\web"
 
@@ -397,8 +397,8 @@ $apiVars = @{
     "ASPNETCORE_ENVIRONMENT"    = "Production"
     "ConnectionStrings__Default" = $connString
     "Jwt__Key"                   = $jwtKey
-    "Jwt__Issuer"                = "SanitasField"
-    "Jwt__Audience"              = "SanitasField"
+    "Jwt__Issuer"                = "SgiForm"
+    "Jwt__Audience"              = "SgiForm"
     "Jwt__ExpirationMinutes"     = "60"
     "Storage__UploadPath"        = $UploadsPath
     "Storage__MaxPhotoMb"        = "10"
@@ -492,7 +492,7 @@ try {
 # Estado AppPools
 Write-Info ""
 Get-ChildItem "IIS:\AppPools" |
-    Where-Object { $_.Name -match "SanitasField" } |
+    Where-Object { $_.Name -match "SgiForm" } |
     Select-Object Name, State |
     Format-Table -AutoSize
 

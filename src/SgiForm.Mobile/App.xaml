@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:conv="clr-namespace:SgiForm.Mobile.Converters"
+             x:Class="SgiForm.Mobile.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <!-- Colores globales -->
+            <Color x:Key="PrimaryColor">#1a56db</Color>
+            <Color x:Key="SuccessColor">#0e9f6e</Color>
+            <Color x:Key="DangerColor">#e02424</Color>
+            <Color x:Key="WarningColor">#c27803</Color>
+
+            <!-- Value Converters -->
+            <conv:StringNotNullConverter x:Key="StringNotNullConverter" />
+            <conv:InvertBoolConverter x:Key="InvertBoolConverter" />
+            <conv:BoolToLoginTextConverter x:Key="BoolToLoginTextConverter" />
+            <conv:BoolToColorConverter x:Key="BoolToColorConverter" />
+            <conv:BoolToConexionConverter x:Key="BoolToConexionConverter" />
+            <conv:BoolToSyncTextConverter x:Key="BoolToSyncTextConverter" />
+            <conv:EstadoColorConverter x:Key="EstadoColorConverter" />
+            <conv:IntToProgressConverter x:Key="IntToProgressConverter" />
+            <conv:BoolToNavTextConverter x:Key="BoolToNavTextConverter" />
+            <conv:BoolToCommandConverter x:Key="BoolToCommandConverter" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

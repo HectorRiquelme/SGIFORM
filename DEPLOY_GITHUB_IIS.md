@@ -35,8 +35,8 @@ Workflow: `.github/workflows/deploy-iis.yml`
 
 ### Secrets requeridos
 
-- `IIS_WEB_PATH` (ej: `C:\inetpub\wwwroot\sanitasfield-web`)
-- `IIS_API_PATH` (ej: `C:\inetpub\wwwroot\sanitasfield-api`)
+- `IIS_WEB_PATH` (ej: `C:\inetpub\wwwroot\sgiform-web`)
+- `IIS_API_PATH` (ej: `C:\inetpub\wwwroot\sgiform-api`)
 - `IIS_WEB_APPPOOL` (opcional)
 - `IIS_API_APPPOOL` (opcional)
 

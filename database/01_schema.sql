@@ -1,5 +1,5 @@
 -- =============================================================================
--- SanitasField - Schema PostgreSQL completo
+-- SgiForm - Schema PostgreSQL completo
 -- Version: 1.0.0
 -- Descripción: Sistema de inspecciones técnicas en terreno para sanitarias
 -- =============================================================================

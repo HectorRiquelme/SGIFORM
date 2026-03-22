@@ -1,0 +1,1465 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="5764845b-0f67-4852-bcf7-89b8b2329dcd" name="hecto@LAPTOP-T48NVNQQ 2026-03-18 20:03:02" runUser="LAPTOP-T48NVNQQ\hecto" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-03-18T20:03:02.5507739-03:00" queuing="2026-03-18T20:03:02.5507740-03:00" start="2026-03-18T20:03:01.1681083-03:00" finish="2026-03-18T20:03:05.9133130-03:00" />
+  <TestSettings name="default" id="a58d0960-2f46-4fb8-ba69-680d07f9052f">
+    <Deployment runDeploymentRoot="hecto_LAPTOP-T48NVNQQ_2026-03-18_20_03_02" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="5c4f83df-9d63-4ecd-ba87-67551997978a" testId="3bc90935-25fb-e51f-de90-1a3332cadefe" testName="SgiForm.Tests.ServiciosTests.GetAll_RetornaServicios" computerName="LAPTOP-T48NVNQQ" duration="00:00:02.8892942" startTime="2026-03-18T20:03:04.7930186-03:00" endTime="2026-03-18T20:03:04.7930189-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5c4f83df-9d63-4ecd-ba87-67551997978a">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.ServiciosTests.GetAll_RetornaServicios() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 293&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="5bc92ab3-afdc-4403-a882-def25cb8b557" testId="ef2567da-d121-0da1-6d53-3a316b88c608" testName="SgiForm.Tests.OperadoresTests.GetAll_RetornaOperadores" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.0072791" startTime="2026-03-18T20:03:05.4458456-03:00" endTime="2026-03-18T20:03:05.4458458-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5bc92ab3-afdc-4403-a882-def25cb8b557">
+      <Output>
+        <ErrorInfo>
+          <Message>System.Net.Http.HttpRequestException : Response status code does not indicate success: 401 (Unauthorized).</Message>
+          <StackTrace>   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 182&#xD;
+   at SgiForm.Tests.OperadoresTests.GetAll_RetornaOperadores() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 102&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="1c16f558-761d-4140-ba0e-e9d1523c562b" testId="d379c3c5-dd01-3832-8a66-72dcb47f3925" testName="SgiForm.Tests.FlowEngineTests.SnakeCaseEnumConverter_ConvierteCorrectamente" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.0006179" startTime="2026-03-18T20:03:01.9431911-03:00" endTime="2026-03-18T20:03:01.9431913-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1c16f558-761d-4140-ba0e-e9d1523c562b" />
+    <UnitTestResult executionId="62d2ec12-824f-46b0-bf46-23c71a1ccbf5" testId="f83b92b6-c4d8-3310-7f11-bb0de3cdf9aa" testName="SgiForm.Tests.UsuariosTests.GetAll_RetornaUsuarios" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.5501505" startTime="2026-03-18T20:03:02.4801810-03:00" endTime="2026-03-18T20:03:02.4801816-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="62d2ec12-824f-46b0-bf46-23c71a1ccbf5">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.UsuariosTests.GetAll_RetornaUsuarios() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 473&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="a6ee74e4-2451-4fe5-8de4-52c659461a4f" testId="9e51df5f-6b66-9023-8483-c748c87d73da" testName="SgiForm.Tests.AuthTests.LoginMovil_ConCredencialesValidas_RetornaToken" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.0362662" startTime="2026-03-18T20:03:04.8559235-03:00" endTime="2026-03-18T20:03:04.8559236-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a6ee74e4-2451-4fe5-8de4-52c659461a4f">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.AuthTests.LoginMovil_ConCredencialesValidas_RetornaToken() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 59&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="063afbcf-c53a-4cac-9d1b-564793e86785" testId="5b77ffea-9096-4b8d-5c09-4ef6b621ca56" testName="SgiForm.Tests.ServiciosTests.GetAll_ConFiltroLocalidad_Filtra" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.0274899" startTime="2026-03-18T20:03:04.8199717-03:00" endTime="2026-03-18T20:03:04.8199722-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="063afbcf-c53a-4cac-9d1b-564793e86785">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.ServiciosTests.GetAll_ConFiltroLocalidad_Filtra() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 302&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="322e565f-06ea-4e49-aeae-fc5a483f4ec1" testId="beabb9aa-3b8f-bf54-f0ac-2de86eb46091" testName="SgiForm.Tests.ReportesTests.PorOperador_RetornaDatos" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.0491409" startTime="2026-03-18T20:03:02.5252757-03:00" endTime="2026-03-18T20:03:02.5252764-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="322e565f-06ea-4e49-aeae-fc5a483f4ec1">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.ReportesTests.PorOperador_RetornaDatos() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 540&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="6c6959a2-e189-4aca-b6e5-8b26ba97c891" testId="e1fe35bb-a806-249e-9b3b-e322a99776bd" testName="SgiForm.Tests.FlowEngineTests.SnakeCaseEnumConverter_ParseDesdeSnakeCase" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.0045977" startTime="2026-03-18T20:03:01.9426371-03:00" endTime="2026-03-18T20:03:01.9426372-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6c6959a2-e189-4aca-b6e5-8b26ba97c891" />
+    <UnitTestResult executionId="289c12a0-299b-478d-873e-eff563b5c429" testId="8762ba86-e70b-0a25-66ec-2c64a0aef7c8" testName="SgiForm.Tests.ServiciosTests.GetAll_Paginacion_Funciona" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.4148097" startTime="2026-03-18T20:03:05.8062306-03:00" endTime="2026-03-18T20:03:05.8062308-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="289c12a0-299b-478d-873e-eff563b5c429">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.ServiciosTests.GetAll_Paginacion_Funciona() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 322&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="6d089127-dd4b-4f94-98a1-bfd26310b765" testId="f283175d-f879-041a-8ea6-1cc7625a4bd4" testName="SgiForm.Tests.AuthTests.EndpointProtegido_SinToken_Retorna401" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.5541536" startTime="2026-03-18T20:03:02.5183226-03:00" endTime="2026-03-18T20:03:02.5183227-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6d089127-dd4b-4f94-98a1-bfd26310b765">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.AuthTests.EndpointProtegido_SinToken_Retorna401() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 84&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="90004120-cbd3-4122-8021-1fa16e04c04e" testId="5832aedd-77c2-0ae4-a5ec-d2ff7e530454" testName="SgiForm.Tests.ReportesTests.PorLocalidad_RetornaDatos" computerName="LAPTOP-T48NVNQQ" duration="00:00:02.2820396" startTime="2026-03-18T20:03:04.7974768-03:00" endTime="2026-03-18T20:03:04.7974770-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="90004120-cbd3-4122-8021-1fa16e04c04e">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.ReportesTests.PorLocalidad_RetornaDatos() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 549&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="8b9397d3-dbf5-41a8-bebc-4fb981d4b861" testId="1179a13b-6a82-3513-47dc-b57c401ea9a1" testName="SgiForm.Tests.ReportesTests.Excel_GeneraArchivo" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.5551831" startTime="2026-03-18T20:03:02.4725588-03:00" endTime="2026-03-18T20:03:02.4725595-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8b9397d3-dbf5-41a8-bebc-4fb981d4b861">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.ReportesTests.Excel_GeneraArchivo() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 529&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="4575bba0-85c7-46c5-b700-77bb35c0bfbb" testId="cca82b3f-33cb-c794-0d52-f5881721ae00" testName="SgiForm.Tests.TiposInspeccionTests.Create_CreaTipoNuevo" computerName="LAPTOP-T48NVNQQ" duration="00:00:02.9213741" startTime="2026-03-18T20:03:05.4371247-03:00" endTime="2026-03-18T20:03:05.4371249-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4575bba0-85c7-46c5-b700-77bb35c0bfbb">
+      <Output>
+        <ErrorInfo>
+          <Message>System.Net.Http.HttpRequestException : Response status code does not indicate success: 401 (Unauthorized).</Message>
+          <StackTrace>   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 182&#xD;
+   at SgiForm.Tests.TiposInspeccionTests.Create_CreaTipoNuevo() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 191&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="8f7fe09a-057c-4bc9-92a9-1f565d9572c5" testId="de0dfd62-3bc6-4511-0af8-b65e38b629a1" testName="SgiForm.Tests.DashboardTests.Resumen_RetornaKPIs" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.0571167" startTime="2026-03-18T20:03:02.5374871-03:00" endTime="2026-03-18T20:03:02.5374876-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8f7fe09a-057c-4bc9-92a9-1f565d9572c5">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.DashboardTests.Resumen_RetornaKPIs() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 434&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3b384afe-abd4-4611-92fe-fb1faa3fe35a" testId="025fe7cd-996c-c67a-05eb-ef5ab4afe95a" testName="SgiForm.Tests.AsignacionesTests.Masiva_AsignaMultiples" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.5506683" startTime="2026-03-18T20:03:02.5173346-03:00" endTime="2026-03-18T20:03:02.5173354-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3b384afe-abd4-4611-92fe-fb1faa3fe35a">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.AsignacionesTests.Masiva_AsignaMultiples() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 361&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3c8f1feb-7626-4f15-a003-d2a0b3d325da" testId="ca24b47d-8c5c-00fc-1b32-725c7ab8f536" testName="SgiForm.Tests.FlujosTests.GetVersion_RetornaFlujoConSecciones" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.0061654" startTime="2026-03-18T20:03:05.4524983-03:00" endTime="2026-03-18T20:03:05.4524984-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3c8f1feb-7626-4f15-a003-d2a0b3d325da">
+      <Output>
+        <ErrorInfo>
+          <Message>System.Net.Http.HttpRequestException : Response status code does not indicate success: 401 (Unauthorized).</Message>
+          <StackTrace>   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 182&#xD;
+   at SgiForm.Tests.FlujosTests.GetVersion_RetornaFlujoConSecciones() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 237&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c5bdfbca-0c2f-4334-be76-c577441fec3d" testId="9bba3bf2-e601-7693-98bb-3ff2c65364ef" testName="SgiForm.Tests.AuthTests.Login_ConCredencialesInvalidas_Retorna401" computerName="LAPTOP-T48NVNQQ" duration="00:00:02.2411629" startTime="2026-03-18T20:03:04.7953830-03:00" endTime="2026-03-18T20:03:04.7953837-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c5bdfbca-0c2f-4334-be76-c577441fec3d">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.AuthTests.Login_ConCredencialesInvalidas_Retorna401() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 39&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="4cce8d2a-fa92-4878-aa55-fa0b1610f0fe" testId="59445331-8d75-7e0f-9dd8-193d3eb4759c" testName="SgiForm.Tests.InspeccionesTests.GetAll_SinInspecciones_RetornaVacio" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.5520608" startTime="2026-03-18T20:03:02.4751311-03:00" endTime="2026-03-18T20:03:02.4751314-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4cce8d2a-fa92-4878-aa55-fa0b1610f0fe">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.InspeccionesTests.GetAll_SinInspecciones_RetornaVacio() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 416&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="b92ac619-92e5-4ba1-b59b-677fa8369d48" testId="bf205d95-4ac6-413d-6a7a-bce5f69ee10e" testName="SgiForm.Tests.TiposInspeccionTests.Create_CodigoDuplicado_Retorna409" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.5511694" startTime="2026-03-18T20:03:02.5130147-03:00" endTime="2026-03-18T20:03:02.5130149-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b92ac619-92e5-4ba1-b59b-677fa8369d48">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.TiposInspeccionTests.Create_CodigoDuplicado_Retorna409() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 205&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="4211f4d4-a2f2-4adb-abf4-5023074901ed" testId="5dd746d8-0370-db4e-4f28-096b5cd1497d" testName="SgiForm.Tests.FlujosTests.GetAll_RetornaFlujos" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.0640201" startTime="2026-03-18T20:03:02.5387330-03:00" endTime="2026-03-18T20:03:02.5387332-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4211f4d4-a2f2-4adb-abf4-5023074901ed">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.FlujosTests.GetAll_RetornaFlujos() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 227&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c3d1dfdb-6c1b-42ed-98eb-565f5d95b627" testId="e5b7b4ef-a95a-5fa0-81e8-985cba1b1e33" testName="SgiForm.Tests.TiposInspeccionTests.GetAll_RetornaTipos" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.0508179" startTime="2026-03-18T20:03:02.5361125-03:00" endTime="2026-03-18T20:03:02.5361127-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c3d1dfdb-6c1b-42ed-98eb-565f5d95b627">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.TiposInspeccionTests.GetAll_RetornaTipos() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 181&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="fced4d14-b884-4c84-970d-b432b32ccfef" testId="24ea0cb3-b047-26e7-543e-66d9c2dbc586" testName="SgiForm.Tests.FlowEngineTests.SnakeCaseEnumConverter_TodosLosEstados" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.0334968" startTime="2026-03-18T20:03:01.9372621-03:00" endTime="2026-03-18T20:03:01.9373050-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fced4d14-b884-4c84-970d-b432b32ccfef" />
+    <UnitTestResult executionId="05a28d92-f6bc-45a2-8b67-3d4306497f12" testId="454ab5f9-c541-270d-b9dc-203784f1b3f7" testName="SgiForm.Tests.UsuariosTests.Create_EmailDuplicado_Retorna409" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.5975133" startTime="2026-03-18T20:03:05.3882096-03:00" endTime="2026-03-18T20:03:05.3882100-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="05a28d92-f6bc-45a2-8b67-3d4306497f12">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.UsuariosTests.Create_EmailDuplicado_Retorna409() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 506&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="a9899c63-eb3b-4a22-8dd5-d1f91571d3c0" testId="4e9421e7-dc16-6239-bd13-db4f2ca8d454" testName="SgiForm.Tests.AuthTests.LoginMovil_ConEmpresaInvalida_Retorna401" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.0893562" startTime="2026-03-18T20:03:02.5554187-03:00" endTime="2026-03-18T20:03:02.5554190-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a9899c63-eb3b-4a22-8dd5-d1f91571d3c0">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.AuthTests.LoginMovil_ConEmpresaInvalida_Retorna401() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 73&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="ac6bd0ce-8d6d-4bb6-99e8-79da6bfa57e6" testId="91d05fbf-653e-acf8-9f3f-f4f120a87885" testName="SgiForm.Tests.FlujosTests.Create_CreaFlujoConVersionBorrador" computerName="LAPTOP-T48NVNQQ" duration="00:00:02.9081534" startTime="2026-03-18T20:03:05.4377343-03:00" endTime="2026-03-18T20:03:05.4377344-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ac6bd0ce-8d6d-4bb6-99e8-79da6bfa57e6">
+      <Output>
+        <ErrorInfo>
+          <Message>System.Net.Http.HttpRequestException : Response status code does not indicate success: 401 (Unauthorized).</Message>
+          <StackTrace>   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 182&#xD;
+   at SgiForm.Tests.FlujosTests.Create_CreaFlujoConVersionBorrador() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 247&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="23d45c12-1e98-4885-8251-f0ac3ee192a4" testId="b6e960f0-b5ee-52c3-04b6-d55c8ace4fd3" testName="SgiForm.Tests.DashboardTests.PorOperador_RetornaOperadores" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.5535387" startTime="2026-03-18T20:03:02.4769094-03:00" endTime="2026-03-18T20:03:02.4769097-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="23d45c12-1e98-4885-8251-f0ac3ee192a4">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.DashboardTests.PorOperador_RetornaOperadores() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 444&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="2534b840-07fe-4a61-84ef-962e9e2d3e93" testId="0c8d306a-4495-14ff-3d63-392d907cf61c" testName="SgiForm.Tests.UsuariosTests.Create_CreaUsuario" computerName="LAPTOP-T48NVNQQ" duration="00:00:02.3300690" startTime="2026-03-18T20:03:04.7910886-03:00" endTime="2026-03-18T20:03:04.7910891-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2534b840-07fe-4a61-84ef-962e9e2d3e93">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.UsuariosTests.Create_CreaUsuario() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 492&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="a2161f49-ab36-4e5d-a59e-3ccbd3ad1045" testId="265e1b71-6747-20ae-341e-11d58ea28197" testName="SgiForm.Tests.AsignacionesTests.CambiarEstado_Funciona" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.0487557" startTime="2026-03-18T20:03:02.5226953-03:00" endTime="2026-03-18T20:03:02.5226956-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a2161f49-ab36-4e5d-a59e-3ccbd3ad1045">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.AsignacionesTests.CambiarEstado_Funciona() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 380&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="d33b649f-cb78-47e9-b3d3-d10d988dc689" testId="b5b9ad3e-1135-715c-d7b6-ab83e9cbd90b" testName="SgiForm.Tests.OperadoresTests.Create_CreaOperadorNuevo" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.5547692" startTime="2026-03-18T20:03:02.5146617-03:00" endTime="2026-03-18T20:03:02.5146621-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d33b649f-cb78-47e9-b3d3-d10d988dc689">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.OperadoresTests.Create_CreaOperadorNuevo() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 123&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="2996d0f0-0b75-487a-9bab-ef1b18fb427b" testId="a99f7643-7994-1a0f-48e7-397840fd6d6f" testName="SgiForm.Tests.DashboardTests.PorLocalidad_RetornaLocalidades" computerName="LAPTOP-T48NVNQQ" duration="00:00:02.9150399" startTime="2026-03-18T20:03:05.4392357-03:00" endTime="2026-03-18T20:03:05.4392359-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2996d0f0-0b75-487a-9bab-ef1b18fb427b">
+      <Output>
+        <ErrorInfo>
+          <Message>System.Net.Http.HttpRequestException : Response status code does not indicate success: 401 (Unauthorized).</Message>
+          <StackTrace>   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 182&#xD;
+   at SgiForm.Tests.DashboardTests.PorLocalidad_RetornaLocalidades() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 454&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="33880e5f-3e69-4ece-833a-37a98a40f33d" testId="a7655d6b-177f-e49b-ea0b-5d5eea3f9aa6" testName="SgiForm.Tests.AsignacionesTests.Create_AsignacionIndividual_Funciona" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.0301331" startTime="2026-03-18T20:03:02.5545947-03:00" endTime="2026-03-18T20:03:02.5545951-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="33880e5f-3e69-4ece-833a-37a98a40f33d">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.AsignacionesTests.Create_AsignacionIndividual_Funciona() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 341&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3c86860d-b69e-428a-89c7-1b9a09d91a2f" testId="aef672e6-4ab4-52e8-bd46-9ed2667dac58" testName="SgiForm.Tests.OperadoresTests.Delete_SoftDelete_Funciona" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.0062248" startTime="2026-03-18T20:03:05.4529295-03:00" endTime="2026-03-18T20:03:05.4529296-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3c86860d-b69e-428a-89c7-1b9a09d91a2f">
+      <Output>
+        <ErrorInfo>
+          <Message>System.Net.Http.HttpRequestException : Response status code does not indicate success: 401 (Unauthorized).</Message>
+          <StackTrace>   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 182&#xD;
+   at SgiForm.Tests.OperadoresTests.Delete_SoftDelete_Funciona() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 151&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="15ef3d34-58dc-483d-b2f9-d74503639211" testId="ad990ab6-b7ce-d3b5-ddd6-5b6f5381d8df" testName="SgiForm.Tests.OperadoresTests.GetById_RetornaOperador" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.0788102" startTime="2026-03-18T20:03:02.5537404-03:00" endTime="2026-03-18T20:03:02.5537407-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="15ef3d34-58dc-483d-b2f9-d74503639211">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.OperadoresTests.GetById_RetornaOperador() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 112&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="50d5e7ad-8b9f-4d43-a7ae-db24a9334863" testId="ee1e4d43-03e8-1275-a462-414de4ab467c" testName="SgiForm.Tests.FlujosTests.AgregarSeccion_AVersion_Publicada_Retorna404" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.0073041" startTime="2026-03-18T20:03:05.4464564-03:00" endTime="2026-03-18T20:03:05.4464565-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="50d5e7ad-8b9f-4d43-a7ae-db24a9334863">
+      <Output>
+        <ErrorInfo>
+          <Message>System.Net.Http.HttpRequestException : Response status code does not indicate success: 401 (Unauthorized).</Message>
+          <StackTrace>   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 182&#xD;
+   at SgiForm.Tests.FlujosTests.AgregarSeccion_AVersion_Publicada_Retorna404() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 272&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="91a2adc6-a1cd-4186-864c-d4e7734a689b" testId="5fc60887-2964-48cd-74a3-b75551cf1259" testName="SgiForm.Tests.ServiciosTests.GetAll_ConBusquedaTexto_Filtra" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.5719537" startTime="2026-03-18T20:03:05.3909837-03:00" endTime="2026-03-18T20:03:05.3909838-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="91a2adc6-a1cd-4186-864c-d4e7734a689b">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.ServiciosTests.GetAll_ConBusquedaTexto_Filtra() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 312&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="5de444b5-e4b0-4340-8cf2-55f97d8b5320" testId="38456810-3bc4-b833-7c90-c7929b93a580" testName="SgiForm.Tests.OperadoresTests.Create_CodigoDuplicado_Retorna409" computerName="LAPTOP-T48NVNQQ" duration="00:00:02.8931689" startTime="2026-03-18T20:03:05.4383595-03:00" endTime="2026-03-18T20:03:05.4383598-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5de444b5-e4b0-4340-8cf2-55f97d8b5320">
+      <Output>
+        <ErrorInfo>
+          <Message>System.Net.Http.HttpRequestException : Response status code does not indicate success: 401 (Unauthorized).</Message>
+          <StackTrace>   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 182&#xD;
+   at SgiForm.Tests.OperadoresTests.Create_CodigoDuplicado_Retorna409() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 138&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="9d0bc0a5-0666-4242-8246-917309f20284" testId="cd3596cc-4185-dc86-2391-1dabd860af97" testName="SgiForm.Tests.FlujosTests.Publicar_VersionYaPublicada_Retorna400" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.5528396" startTime="2026-03-18T20:03:02.4785597-03:00" endTime="2026-03-18T20:03:02.4785600-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9d0bc0a5-0666-4242-8246-917309f20284">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 178&#xD;
+   at SgiForm.Tests.FlujosTests.Publicar_VersionYaPublicada_Retorna400() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 261&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="980b56f8-5240-439d-9645-4837c8bf7184" testId="b5caba75-da38-ed4b-80f1-bf9788d5f6a8" testName="SgiForm.Tests.UsuariosTests.GetRoles_RetornaRoles" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.4506692" startTime="2026-03-18T20:03:05.8386659-03:00" endTime="2026-03-18T20:03:05.8386660-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="980b56f8-5240-439d-9645-4837c8bf7184">
+      <Output>
+        <ErrorInfo>
+          <Message>System.Net.Http.HttpRequestException : Response status code does not indicate success: 401 (Unauthorized).</Message>
+          <StackTrace>   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()&#xD;
+   at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs:line 182&#xD;
+   at SgiForm.Tests.UsuariosTests.GetRoles_RetornaRoles() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 482&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="cc473def-ddcf-4bf7-b209-7e902d81692d" testId="3d32fdcb-6e39-5d7d-6d9a-e337dba1777d" testName="SgiForm.Tests.AuthTests.Login_ConEmailInexistente_Retorna401" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.5626849" startTime="2026-03-18T20:03:05.4250137-03:00" endTime="2026-03-18T20:03:05.4250139-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cc473def-ddcf-4bf7-b209-7e902d81692d">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.AuthTests.Login_ConEmailInexistente_Retorna401() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 49&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="0348b987-519b-45b2-bb69-eddd5033916e" testId="8e008fb1-4b5a-57a3-5a58-a01092136940" testName="SgiForm.Tests.AuthTests.Login_ConCredencialesValidas_RetornaToken" computerName="LAPTOP-T48NVNQQ" duration="00:00:00.0270857" startTime="2026-03-18T20:03:04.8225094-03:00" endTime="2026-03-18T20:03:04.8225097-03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0348b987-519b-45b2-bb69-eddd5033916e">
+      <Output>
+        <ErrorInfo>
+          <Message>System.InvalidOperationException : The entry point exited without ever building an IHost.</Message>
+          <StackTrace>   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+   at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+   at SgiForm.Tests.AuthTests.Login_ConCredencialesValidas_RetornaToken() in C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs:line 25&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="SgiForm.Tests.InspeccionesTests.GetAll_SinInspecciones_RetornaVacio" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="59445331-8d75-7e0f-9dd8-193d3eb4759c">
+      <Execution id="4cce8d2a-fa92-4878-aa55-fa0b1610f0fe" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.InspeccionesTests" name="GetAll_SinInspecciones_RetornaVacio" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.ServiciosTests.GetAll_ConBusquedaTexto_Filtra" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="5fc60887-2964-48cd-74a3-b75551cf1259">
+      <Execution id="91a2adc6-a1cd-4186-864c-d4e7734a689b" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.ServiciosTests" name="GetAll_ConBusquedaTexto_Filtra" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.AuthTests.Login_ConCredencialesValidas_RetornaToken" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="8e008fb1-4b5a-57a3-5a58-a01092136940">
+      <Execution id="0348b987-519b-45b2-bb69-eddd5033916e" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.AuthTests" name="Login_ConCredencialesValidas_RetornaToken" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.AuthTests.Login_ConCredencialesInvalidas_Retorna401" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="9bba3bf2-e601-7693-98bb-3ff2c65364ef">
+      <Execution id="c5bdfbca-0c2f-4334-be76-c577441fec3d" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.AuthTests" name="Login_ConCredencialesInvalidas_Retorna401" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.OperadoresTests.GetAll_RetornaOperadores" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="ef2567da-d121-0da1-6d53-3a316b88c608">
+      <Execution id="5bc92ab3-afdc-4403-a882-def25cb8b557" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.OperadoresTests" name="GetAll_RetornaOperadores" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.TiposInspeccionTests.Create_CreaTipoNuevo" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="cca82b3f-33cb-c794-0d52-f5881721ae00">
+      <Execution id="4575bba0-85c7-46c5-b700-77bb35c0bfbb" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.TiposInspeccionTests" name="Create_CreaTipoNuevo" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.DashboardTests.PorLocalidad_RetornaLocalidades" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="a99f7643-7994-1a0f-48e7-397840fd6d6f">
+      <Execution id="2996d0f0-0b75-487a-9bab-ef1b18fb427b" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.DashboardTests" name="PorLocalidad_RetornaLocalidades" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.FlujosTests.AgregarSeccion_AVersion_Publicada_Retorna404" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="ee1e4d43-03e8-1275-a462-414de4ab467c">
+      <Execution id="50d5e7ad-8b9f-4d43-a7ae-db24a9334863" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.FlujosTests" name="AgregarSeccion_AVersion_Publicada_Retorna404" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.ReportesTests.PorLocalidad_RetornaDatos" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="5832aedd-77c2-0ae4-a5ec-d2ff7e530454">
+      <Execution id="90004120-cbd3-4122-8021-1fa16e04c04e" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.ReportesTests" name="PorLocalidad_RetornaDatos" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.ServiciosTests.GetAll_ConFiltroLocalidad_Filtra" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="5b77ffea-9096-4b8d-5c09-4ef6b621ca56">
+      <Execution id="063afbcf-c53a-4cac-9d1b-564793e86785" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.ServiciosTests" name="GetAll_ConFiltroLocalidad_Filtra" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.ReportesTests.PorOperador_RetornaDatos" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="beabb9aa-3b8f-bf54-f0ac-2de86eb46091">
+      <Execution id="322e565f-06ea-4e49-aeae-fc5a483f4ec1" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.ReportesTests" name="PorOperador_RetornaDatos" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.FlowEngineTests.SnakeCaseEnumConverter_TodosLosEstados" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="24ea0cb3-b047-26e7-543e-66d9c2dbc586">
+      <Execution id="fced4d14-b884-4c84-970d-b432b32ccfef" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.FlowEngineTests" name="SnakeCaseEnumConverter_TodosLosEstados" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.AuthTests.LoginMovil_ConEmpresaInvalida_Retorna401" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="4e9421e7-dc16-6239-bd13-db4f2ca8d454">
+      <Execution id="a9899c63-eb3b-4a22-8dd5-d1f91571d3c0" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.AuthTests" name="LoginMovil_ConEmpresaInvalida_Retorna401" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.AsignacionesTests.Masiva_AsignaMultiples" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="025fe7cd-996c-c67a-05eb-ef5ab4afe95a">
+      <Execution id="3b384afe-abd4-4611-92fe-fb1faa3fe35a" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.AsignacionesTests" name="Masiva_AsignaMultiples" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.OperadoresTests.GetById_RetornaOperador" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="ad990ab6-b7ce-d3b5-ddd6-5b6f5381d8df">
+      <Execution id="15ef3d34-58dc-483d-b2f9-d74503639211" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.OperadoresTests" name="GetById_RetornaOperador" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.FlujosTests.GetAll_RetornaFlujos" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="5dd746d8-0370-db4e-4f28-096b5cd1497d">
+      <Execution id="4211f4d4-a2f2-4adb-abf4-5023074901ed" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.FlujosTests" name="GetAll_RetornaFlujos" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.OperadoresTests.Create_CodigoDuplicado_Retorna409" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="38456810-3bc4-b833-7c90-c7929b93a580">
+      <Execution id="5de444b5-e4b0-4340-8cf2-55f97d8b5320" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.OperadoresTests" name="Create_CodigoDuplicado_Retorna409" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.ReportesTests.Excel_GeneraArchivo" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="1179a13b-6a82-3513-47dc-b57c401ea9a1">
+      <Execution id="8b9397d3-dbf5-41a8-bebc-4fb981d4b861" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.ReportesTests" name="Excel_GeneraArchivo" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.UsuariosTests.GetAll_RetornaUsuarios" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="f83b92b6-c4d8-3310-7f11-bb0de3cdf9aa">
+      <Execution id="62d2ec12-824f-46b0-bf46-23c71a1ccbf5" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.UsuariosTests" name="GetAll_RetornaUsuarios" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.DashboardTests.PorOperador_RetornaOperadores" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="b6e960f0-b5ee-52c3-04b6-d55c8ace4fd3">
+      <Execution id="23d45c12-1e98-4885-8251-f0ac3ee192a4" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.DashboardTests" name="PorOperador_RetornaOperadores" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.FlowEngineTests.SnakeCaseEnumConverter_ParseDesdeSnakeCase" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="e1fe35bb-a806-249e-9b3b-e322a99776bd">
+      <Execution id="6c6959a2-e189-4aca-b6e5-8b26ba97c891" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.FlowEngineTests" name="SnakeCaseEnumConverter_ParseDesdeSnakeCase" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.FlujosTests.GetVersion_RetornaFlujoConSecciones" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="ca24b47d-8c5c-00fc-1b32-725c7ab8f536">
+      <Execution id="3c8f1feb-7626-4f15-a003-d2a0b3d325da" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.FlujosTests" name="GetVersion_RetornaFlujoConSecciones" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.DashboardTests.Resumen_RetornaKPIs" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="de0dfd62-3bc6-4511-0af8-b65e38b629a1">
+      <Execution id="8f7fe09a-057c-4bc9-92a9-1f565d9572c5" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.DashboardTests" name="Resumen_RetornaKPIs" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.AuthTests.LoginMovil_ConCredencialesValidas_RetornaToken" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="9e51df5f-6b66-9023-8483-c748c87d73da">
+      <Execution id="a6ee74e4-2451-4fe5-8de4-52c659461a4f" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.AuthTests" name="LoginMovil_ConCredencialesValidas_RetornaToken" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.UsuariosTests.GetRoles_RetornaRoles" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="b5caba75-da38-ed4b-80f1-bf9788d5f6a8">
+      <Execution id="980b56f8-5240-439d-9645-4837c8bf7184" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.UsuariosTests" name="GetRoles_RetornaRoles" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.TiposInspeccionTests.GetAll_RetornaTipos" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="e5b7b4ef-a95a-5fa0-81e8-985cba1b1e33">
+      <Execution id="c3d1dfdb-6c1b-42ed-98eb-565f5d95b627" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.TiposInspeccionTests" name="GetAll_RetornaTipos" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.AsignacionesTests.Create_AsignacionIndividual_Funciona" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="a7655d6b-177f-e49b-ea0b-5d5eea3f9aa6">
+      <Execution id="33880e5f-3e69-4ece-833a-37a98a40f33d" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.AsignacionesTests" name="Create_AsignacionIndividual_Funciona" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.ServiciosTests.GetAll_RetornaServicios" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="3bc90935-25fb-e51f-de90-1a3332cadefe">
+      <Execution id="5c4f83df-9d63-4ecd-ba87-67551997978a" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.ServiciosTests" name="GetAll_RetornaServicios" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.OperadoresTests.Create_CreaOperadorNuevo" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="b5b9ad3e-1135-715c-d7b6-ab83e9cbd90b">
+      <Execution id="d33b649f-cb78-47e9-b3d3-d10d988dc689" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.OperadoresTests" name="Create_CreaOperadorNuevo" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.ServiciosTests.GetAll_Paginacion_Funciona" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="8762ba86-e70b-0a25-66ec-2c64a0aef7c8">
+      <Execution id="289c12a0-299b-478d-873e-eff563b5c429" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.ServiciosTests" name="GetAll_Paginacion_Funciona" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.AsignacionesTests.CambiarEstado_Funciona" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="265e1b71-6747-20ae-341e-11d58ea28197">
+      <Execution id="a2161f49-ab36-4e5d-a59e-3ccbd3ad1045" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.AsignacionesTests" name="CambiarEstado_Funciona" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.AuthTests.Login_ConEmailInexistente_Retorna401" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="3d32fdcb-6e39-5d7d-6d9a-e337dba1777d">
+      <Execution id="cc473def-ddcf-4bf7-b209-7e902d81692d" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.AuthTests" name="Login_ConEmailInexistente_Retorna401" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.AuthTests.EndpointProtegido_SinToken_Retorna401" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="f283175d-f879-041a-8ea6-1cc7625a4bd4">
+      <Execution id="6d089127-dd4b-4f94-98a1-bfd26310b765" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.AuthTests" name="EndpointProtegido_SinToken_Retorna401" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.TiposInspeccionTests.Create_CodigoDuplicado_Retorna409" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="bf205d95-4ac6-413d-6a7a-bce5f69ee10e">
+      <Execution id="b92ac619-92e5-4ba1-b59b-677fa8369d48" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.TiposInspeccionTests" name="Create_CodigoDuplicado_Retorna409" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.FlujosTests.Create_CreaFlujoConVersionBorrador" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="91d05fbf-653e-acf8-9f3f-f4f120a87885">
+      <Execution id="ac6bd0ce-8d6d-4bb6-99e8-79da6bfa57e6" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.FlujosTests" name="Create_CreaFlujoConVersionBorrador" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.UsuariosTests.Create_EmailDuplicado_Retorna409" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="454ab5f9-c541-270d-b9dc-203784f1b3f7">
+      <Execution id="05a28d92-f6bc-45a2-8b67-3d4306497f12" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.UsuariosTests" name="Create_EmailDuplicado_Retorna409" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.FlujosTests.Publicar_VersionYaPublicada_Retorna400" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="cd3596cc-4185-dc86-2391-1dabd860af97">
+      <Execution id="9d0bc0a5-0666-4242-8246-917309f20284" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.FlujosTests" name="Publicar_VersionYaPublicada_Retorna400" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.UsuariosTests.Create_CreaUsuario" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="0c8d306a-4495-14ff-3d63-392d907cf61c">
+      <Execution id="2534b840-07fe-4a61-84ef-962e9e2d3e93" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.UsuariosTests" name="Create_CreaUsuario" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.FlowEngineTests.SnakeCaseEnumConverter_ConvierteCorrectamente" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="d379c3c5-dd01-3832-8a66-72dcb47f3925">
+      <Execution id="1c16f558-761d-4140-ba0e-e9d1523c562b" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.FlowEngineTests" name="SnakeCaseEnumConverter_ConvierteCorrectamente" />
+    </UnitTest>
+    <UnitTest name="SgiForm.Tests.OperadoresTests.Delete_SoftDelete_Funciona" storage="c:\users\hecto\trabajo\dev_ia\kobotoolbox\tests\sgiform.tests\bin\debug\net8.0\sgiform.tests.dll" id="aef672e6-4ab4-52e8-bd46-9ed2667dac58">
+      <Execution id="3c86860d-b69e-428a-89c7-1b9a09d91a2f" />
+      <TestMethod codeBase="C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\bin\Debug\net8.0\SgiForm.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SgiForm.Tests.OperadoresTests" name="Delete_SoftDelete_Funciona" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="3bc90935-25fb-e51f-de90-1a3332cadefe" executionId="5c4f83df-9d63-4ecd-ba87-67551997978a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ef2567da-d121-0da1-6d53-3a316b88c608" executionId="5bc92ab3-afdc-4403-a882-def25cb8b557" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d379c3c5-dd01-3832-8a66-72dcb47f3925" executionId="1c16f558-761d-4140-ba0e-e9d1523c562b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f83b92b6-c4d8-3310-7f11-bb0de3cdf9aa" executionId="62d2ec12-824f-46b0-bf46-23c71a1ccbf5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9e51df5f-6b66-9023-8483-c748c87d73da" executionId="a6ee74e4-2451-4fe5-8de4-52c659461a4f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5b77ffea-9096-4b8d-5c09-4ef6b621ca56" executionId="063afbcf-c53a-4cac-9d1b-564793e86785" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="beabb9aa-3b8f-bf54-f0ac-2de86eb46091" executionId="322e565f-06ea-4e49-aeae-fc5a483f4ec1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e1fe35bb-a806-249e-9b3b-e322a99776bd" executionId="6c6959a2-e189-4aca-b6e5-8b26ba97c891" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8762ba86-e70b-0a25-66ec-2c64a0aef7c8" executionId="289c12a0-299b-478d-873e-eff563b5c429" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f283175d-f879-041a-8ea6-1cc7625a4bd4" executionId="6d089127-dd4b-4f94-98a1-bfd26310b765" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5832aedd-77c2-0ae4-a5ec-d2ff7e530454" executionId="90004120-cbd3-4122-8021-1fa16e04c04e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1179a13b-6a82-3513-47dc-b57c401ea9a1" executionId="8b9397d3-dbf5-41a8-bebc-4fb981d4b861" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cca82b3f-33cb-c794-0d52-f5881721ae00" executionId="4575bba0-85c7-46c5-b700-77bb35c0bfbb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="de0dfd62-3bc6-4511-0af8-b65e38b629a1" executionId="8f7fe09a-057c-4bc9-92a9-1f565d9572c5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="025fe7cd-996c-c67a-05eb-ef5ab4afe95a" executionId="3b384afe-abd4-4611-92fe-fb1faa3fe35a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ca24b47d-8c5c-00fc-1b32-725c7ab8f536" executionId="3c8f1feb-7626-4f15-a003-d2a0b3d325da" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9bba3bf2-e601-7693-98bb-3ff2c65364ef" executionId="c5bdfbca-0c2f-4334-be76-c577441fec3d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="59445331-8d75-7e0f-9dd8-193d3eb4759c" executionId="4cce8d2a-fa92-4878-aa55-fa0b1610f0fe" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bf205d95-4ac6-413d-6a7a-bce5f69ee10e" executionId="b92ac619-92e5-4ba1-b59b-677fa8369d48" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5dd746d8-0370-db4e-4f28-096b5cd1497d" executionId="4211f4d4-a2f2-4adb-abf4-5023074901ed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e5b7b4ef-a95a-5fa0-81e8-985cba1b1e33" executionId="c3d1dfdb-6c1b-42ed-98eb-565f5d95b627" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="24ea0cb3-b047-26e7-543e-66d9c2dbc586" executionId="fced4d14-b884-4c84-970d-b432b32ccfef" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="454ab5f9-c541-270d-b9dc-203784f1b3f7" executionId="05a28d92-f6bc-45a2-8b67-3d4306497f12" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4e9421e7-dc16-6239-bd13-db4f2ca8d454" executionId="a9899c63-eb3b-4a22-8dd5-d1f91571d3c0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="91d05fbf-653e-acf8-9f3f-f4f120a87885" executionId="ac6bd0ce-8d6d-4bb6-99e8-79da6bfa57e6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b6e960f0-b5ee-52c3-04b6-d55c8ace4fd3" executionId="23d45c12-1e98-4885-8251-f0ac3ee192a4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0c8d306a-4495-14ff-3d63-392d907cf61c" executionId="2534b840-07fe-4a61-84ef-962e9e2d3e93" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="265e1b71-6747-20ae-341e-11d58ea28197" executionId="a2161f49-ab36-4e5d-a59e-3ccbd3ad1045" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b5b9ad3e-1135-715c-d7b6-ab83e9cbd90b" executionId="d33b649f-cb78-47e9-b3d3-d10d988dc689" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a99f7643-7994-1a0f-48e7-397840fd6d6f" executionId="2996d0f0-0b75-487a-9bab-ef1b18fb427b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a7655d6b-177f-e49b-ea0b-5d5eea3f9aa6" executionId="33880e5f-3e69-4ece-833a-37a98a40f33d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="aef672e6-4ab4-52e8-bd46-9ed2667dac58" executionId="3c86860d-b69e-428a-89c7-1b9a09d91a2f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ad990ab6-b7ce-d3b5-ddd6-5b6f5381d8df" executionId="15ef3d34-58dc-483d-b2f9-d74503639211" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ee1e4d43-03e8-1275-a462-414de4ab467c" executionId="50d5e7ad-8b9f-4d43-a7ae-db24a9334863" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5fc60887-2964-48cd-74a3-b75551cf1259" executionId="91a2adc6-a1cd-4186-864c-d4e7734a689b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="38456810-3bc4-b833-7c90-c7929b93a580" executionId="5de444b5-e4b0-4340-8cf2-55f97d8b5320" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cd3596cc-4185-dc86-2391-1dabd860af97" executionId="9d0bc0a5-0666-4242-8246-917309f20284" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b5caba75-da38-ed4b-80f1-bf9788d5f6a8" executionId="980b56f8-5240-439d-9645-4837c8bf7184" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3d32fdcb-6e39-5d7d-6d9a-e337dba1777d" executionId="cc473def-ddcf-4bf7-b209-7e902d81692d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8e008fb1-4b5a-57a3-5a58-a01092136940" executionId="0348b987-519b-45b2-bb69-eddd5033916e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Resultados sin formato de lista" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="Todos los resultados cargados" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="40" executed="40" passed="3" failed="37" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.23)&#xD;
+[xUnit.net 00:00:00.10]   Discovering: SgiForm.Tests&#xD;
+[xUnit.net 00:00:00.15]   Discovered:  SgiForm.Tests&#xD;
+[xUnit.net 00:00:00.15]   Starting:    SgiForm.Tests&#xD;
+[xUnit.net 00:00:00.77]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:00.78]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:00.78]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:00.78]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(529,0): at SgiForm.Tests.ReportesTests.Excel_GeneraArchivo()&#xD;
+[xUnit.net 00:00:00.78]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.78]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:00.78]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:00.78]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:00.78]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(416,0): at SgiForm.Tests.InspeccionesTests.GetAll_SinInspecciones_RetornaVacio()&#xD;
+[xUnit.net 00:00:00.78]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.78]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:00.78]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:00.78]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:00.78]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(444,0): at SgiForm.Tests.DashboardTests.PorOperador_RetornaOperadores()&#xD;
+[xUnit.net 00:00:00.78]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.78]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:00.78]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:00.78]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:00.78]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:00.78]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(261,0): at SgiForm.Tests.FlujosTests.Publicar_VersionYaPublicada_Retorna400()&#xD;
+[xUnit.net 00:00:00.78]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.79]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:00.79]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.79]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:00.79]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:00.79]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:00.79]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:00.79]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:00.79]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:00.79]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.79]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.79]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:00.79]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:00.79]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:00.79]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(473,0): at SgiForm.Tests.UsuariosTests.GetAll_RetornaUsuarios()&#xD;
+[xUnit.net 00:00:00.79]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.82]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:00.82]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:00.82]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:00.82]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(205,0): at SgiForm.Tests.TiposInspeccionTests.Create_CodigoDuplicado_Retorna409()&#xD;
+[xUnit.net 00:00:00.82]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.82]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:00.82]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:00.82]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:00.82]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(123,0): at SgiForm.Tests.OperadoresTests.Create_CreaOperadorNuevo()&#xD;
+[xUnit.net 00:00:00.82]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.82]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:00.82]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:00.82]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:00.82]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(361,0): at SgiForm.Tests.AsignacionesTests.Masiva_AsignaMultiples()&#xD;
+[xUnit.net 00:00:00.82]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.82]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:00.82]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:00.82]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:00.82]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(84,0): at SgiForm.Tests.AuthTests.EndpointProtegido_SinToken_Retorna401()&#xD;
+[xUnit.net 00:00:00.82]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.83]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:00.83]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:00.83]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:00.83]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(380,0): at SgiForm.Tests.AsignacionesTests.CambiarEstado_Funciona()&#xD;
+[xUnit.net 00:00:00.83]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.83]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:00.83]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:00.83]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:00.83]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(540,0): at SgiForm.Tests.ReportesTests.PorOperador_RetornaDatos()&#xD;
+[xUnit.net 00:00:00.83]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.83]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:00.83]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.83]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:00.84]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:00.84]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(181,0): at SgiForm.Tests.TiposInspeccionTests.GetAll_RetornaTipos()&#xD;
+[xUnit.net 00:00:00.84]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.84]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:00.84]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:00.84]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:00.84]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(434,0): at SgiForm.Tests.DashboardTests.Resumen_RetornaKPIs()&#xD;
+[xUnit.net 00:00:00.84]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.84]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:00.84]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:00.84]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:00.85]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:00.85]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(227,0): at SgiForm.Tests.FlujosTests.GetAll_RetornaFlujos()&#xD;
+[xUnit.net 00:00:00.85]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.86]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:00.86]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:00.86]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:00.86]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(112,0): at SgiForm.Tests.OperadoresTests.GetById_RetornaOperador()&#xD;
+[xUnit.net 00:00:00.86]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.86]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:00.86]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:00.86]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:00.86]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(341,0): at SgiForm.Tests.AsignacionesTests.Create_AsignacionIndividual_Funciona()&#xD;
+[xUnit.net 00:00:00.86]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.86]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:00.86]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:00.86]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:00.86]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(73,0): at SgiForm.Tests.AuthTests.LoginMovil_ConEmpresaInvalida_Retorna401()&#xD;
+[xUnit.net 00:00:00.86]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.10]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:03.10]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:03.10]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:03.10]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(492,0): at SgiForm.Tests.UsuariosTests.Create_CreaUsuario()&#xD;
+[xUnit.net 00:00:03.10]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.10]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:03.10]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:03.10]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:03.10]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(293,0): at SgiForm.Tests.ServiciosTests.GetAll_RetornaServicios()&#xD;
+[xUnit.net 00:00:03.10]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.10]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:03.10]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:03.10]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(39,0): at SgiForm.Tests.AuthTests.Login_ConCredencialesInvalidas_Retorna401()&#xD;
+[xUnit.net 00:00:03.10]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.10]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:03.10]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:03.10]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:03.10]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:03.10]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(549,0): at SgiForm.Tests.ReportesTests.PorLocalidad_RetornaDatos()&#xD;
+[xUnit.net 00:00:03.10]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.12]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:03.12]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.12]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:03.13]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:03.13]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(302,0): at SgiForm.Tests.ServiciosTests.GetAll_ConFiltroLocalidad_Filtra()&#xD;
+[xUnit.net 00:00:03.13]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.13]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:03.13]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:03.13]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:03.13]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(25,0): at SgiForm.Tests.AuthTests.Login_ConCredencialesValidas_RetornaToken()&#xD;
+[xUnit.net 00:00:03.13]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.16]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:03.16]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.16]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:03.16]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:03.16]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:03.16]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:03.16]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:03.16]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:03.16]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.16]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.16]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:03.16]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:03.16]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(59,0): at SgiForm.Tests.AuthTests.LoginMovil_ConCredencialesValidas_RetornaToken()&#xD;
+[xUnit.net 00:00:03.16]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.69]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:03.69]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.69]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:03.69]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:03.69]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:03.69]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:03.69]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:03.69]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:03.69]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.69]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.69]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:03.69]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:03.69]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:03.69]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(506,0): at SgiForm.Tests.UsuariosTests.Create_EmailDuplicado_Retorna409()&#xD;
+[xUnit.net 00:00:03.69]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.70]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:03.70]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.70]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:03.70]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:03.70]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:03.70]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:03.70]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:03.70]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:03.70]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.70]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.70]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:03.70]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:03.70]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:03.70]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(312,0): at SgiForm.Tests.ServiciosTests.GetAll_ConBusquedaTexto_Filtra()&#xD;
+[xUnit.net 00:00:03.70]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.73]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:03.73]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.73]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:03.73]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:03.73]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:03.73]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:03.73]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:03.73]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:03.73]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.73]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:03.73]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:03.73]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:03.73]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(49,0): at SgiForm.Tests.AuthTests.Login_ConEmailInexistente_Retorna401()&#xD;
+[xUnit.net 00:00:03.73]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.74]       System.Net.Http.HttpRequestException : Response status code does not indicate success: 401 (Unauthorized).&#xD;
+[xUnit.net 00:00:03.74]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.74]            at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()&#xD;
+[xUnit.net 00:00:03.74]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(182,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:03.74]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(191,0): at SgiForm.Tests.TiposInspeccionTests.Create_CreaTipoNuevo()&#xD;
+[xUnit.net 00:00:03.74]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.74]       System.Net.Http.HttpRequestException : Response status code does not indicate success: 401 (Unauthorized).&#xD;
+[xUnit.net 00:00:03.74]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.74]            at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()&#xD;
+[xUnit.net 00:00:03.74]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(182,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:03.74]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(247,0): at SgiForm.Tests.FlujosTests.Create_CreaFlujoConVersionBorrador()&#xD;
+[xUnit.net 00:00:03.74]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.74]       System.Net.Http.HttpRequestException : Response status code does not indicate success: 401 (Unauthorized).&#xD;
+[xUnit.net 00:00:03.74]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.74]            at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()&#xD;
+[xUnit.net 00:00:03.74]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(182,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:03.74]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(138,0): at SgiForm.Tests.OperadoresTests.Create_CodigoDuplicado_Retorna409()&#xD;
+[xUnit.net 00:00:03.74]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.75]       System.Net.Http.HttpRequestException : Response status code does not indicate success: 401 (Unauthorized).&#xD;
+[xUnit.net 00:00:03.75]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.75]            at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()&#xD;
+[xUnit.net 00:00:03.75]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(182,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:03.75]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(454,0): at SgiForm.Tests.DashboardTests.PorLocalidad_RetornaLocalidades()&#xD;
+[xUnit.net 00:00:03.75]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.75]       System.Net.Http.HttpRequestException : Response status code does not indicate success: 401 (Unauthorized).&#xD;
+[xUnit.net 00:00:03.75]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.75]            at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()&#xD;
+[xUnit.net 00:00:03.75]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(182,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:03.75]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(102,0): at SgiForm.Tests.OperadoresTests.GetAll_RetornaOperadores()&#xD;
+[xUnit.net 00:00:03.75]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.75]       System.Net.Http.HttpRequestException : Response status code does not indicate success: 401 (Unauthorized).&#xD;
+[xUnit.net 00:00:03.75]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.75]            at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()&#xD;
+[xUnit.net 00:00:03.75]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(182,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:03.75]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(272,0): at SgiForm.Tests.FlujosTests.AgregarSeccion_AVersion_Publicada_Retorna404()&#xD;
+[xUnit.net 00:00:03.75]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.76]       System.Net.Http.HttpRequestException : Response status code does not indicate success: 401 (Unauthorized).&#xD;
+[xUnit.net 00:00:03.76]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.76]            at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()&#xD;
+[xUnit.net 00:00:03.76]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(182,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:03.76]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(237,0): at SgiForm.Tests.FlujosTests.GetVersion_RetornaFlujoConSecciones()&#xD;
+[xUnit.net 00:00:03.76]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:03.76]       System.Net.Http.HttpRequestException : Response status code does not indicate success: 401 (Unauthorized).&#xD;
+[xUnit.net 00:00:03.76]       Stack Trace:&#xD;
+[xUnit.net 00:00:03.76]            at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()&#xD;
+[xUnit.net 00:00:03.76]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(182,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:03.76]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(151,0): at SgiForm.Tests.OperadoresTests.Delete_SoftDelete_Funciona()&#xD;
+[xUnit.net 00:00:03.76]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.11]       System.InvalidOperationException : The entry point exited without ever building an IHost.&#xD;
+[xUnit.net 00:00:04.11]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.11]            at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.CreateHost()&#xD;
+[xUnit.net 00:00:04.11]            at Microsoft.Extensions.Hosting.HostFactoryResolver.&lt;&gt;c__DisplayClass10_0.&lt;ResolveHostFactory&gt;b__0(String[] args)&#xD;
+[xUnit.net 00:00:04.11]            at Microsoft.AspNetCore.Mvc.Testing.DeferredHostBuilder.Build()&#xD;
+[xUnit.net 00:00:04.11]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateHost(IHostBuilder builder)&#xD;
+[xUnit.net 00:00:04.11]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.ConfigureHostBuilder(IHostBuilder hostBuilder)&#xD;
+[xUnit.net 00:00:04.11]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.EnsureServer()&#xD;
+[xUnit.net 00:00:04.11]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:04.11]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateDefaultClient(Uri baseAddress, DelegatingHandler[] handlers)&#xD;
+[xUnit.net 00:00:04.11]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient(WebApplicationFactoryClientOptions options)&#xD;
+[xUnit.net 00:00:04.11]            at Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory`1.CreateClient()&#xD;
+[xUnit.net 00:00:04.11]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(178,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:04.11]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(322,0): at SgiForm.Tests.ServiciosTests.GetAll_Paginacion_Funciona()&#xD;
+[xUnit.net 00:00:04.11]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.14]       System.Net.Http.HttpRequestException : Response status code does not indicate success: 401 (Unauthorized).&#xD;
+[xUnit.net 00:00:04.15]       Stack Trace:&#xD;
+[xUnit.net 00:00:04.15]            at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()&#xD;
+[xUnit.net 00:00:04.15]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\TestFixture.cs(182,0): at SgiForm.Tests.TestFixture.CreateAuthenticatedClientAsync()&#xD;
+[xUnit.net 00:00:04.15]         C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox\tests\SgiForm.Tests\ApiIntegrationTests.cs(482,0): at SgiForm.Tests.UsuariosTests.GetRoles_RetornaRoles()&#xD;
+[xUnit.net 00:00:04.15]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:04.15]   Finished:    SgiForm.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:02.4676055-03:00">
+        <Text>[xUnit.net 00:00:00.77]     SgiForm.Tests.ReportesTests.Excel_GeneraArchivo [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:02.4736388-03:00">
+        <Text>[xUnit.net 00:00:00.78]     SgiForm.Tests.InspeccionesTests.GetAll_SinInspecciones_RetornaVacio [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:02.4755783-03:00">
+        <Text>[xUnit.net 00:00:00.78]     SgiForm.Tests.DashboardTests.PorOperador_RetornaOperadores [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:02.4773987-03:00">
+        <Text>[xUnit.net 00:00:00.78]     SgiForm.Tests.FlujosTests.Publicar_VersionYaPublicada_Retorna400 [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:02.4827068-03:00">
+        <Text>[xUnit.net 00:00:00.79]     SgiForm.Tests.UsuariosTests.GetAll_RetornaUsuarios [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:02.5652878-03:00">
+        <Text>[xUnit.net 00:00:00.82]     SgiForm.Tests.TiposInspeccionTests.Create_CodigoDuplicado_Retorna409 [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:02.5653624-03:00">
+        <Text>[xUnit.net 00:00:00.82]     SgiForm.Tests.OperadoresTests.Create_CreaOperadorNuevo [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:02.5654260-03:00">
+        <Text>[xUnit.net 00:00:00.82]     SgiForm.Tests.AsignacionesTests.Masiva_AsignaMultiples [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:02.5654903-03:00">
+        <Text>[xUnit.net 00:00:00.82]     SgiForm.Tests.AuthTests.EndpointProtegido_SinToken_Retorna401 [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:02.5662019-03:00">
+        <Text>[xUnit.net 00:00:00.83]     SgiForm.Tests.AsignacionesTests.CambiarEstado_Funciona [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:02.5662731-03:00">
+        <Text>[xUnit.net 00:00:00.83]     SgiForm.Tests.ReportesTests.PorOperador_RetornaDatos [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:02.5663372-03:00">
+        <Text>[xUnit.net 00:00:00.83]     SgiForm.Tests.TiposInspeccionTests.GetAll_RetornaTipos [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:02.5664011-03:00">
+        <Text>[xUnit.net 00:00:00.84]     SgiForm.Tests.DashboardTests.Resumen_RetornaKPIs [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:02.5664662-03:00">
+        <Text>[xUnit.net 00:00:00.84]     SgiForm.Tests.FlujosTests.GetAll_RetornaFlujos [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:02.5686834-03:00">
+        <Text>[xUnit.net 00:00:00.86]     SgiForm.Tests.OperadoresTests.GetById_RetornaOperador [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:02.5687564-03:00">
+        <Text>[xUnit.net 00:00:00.86]     SgiForm.Tests.AsignacionesTests.Create_AsignacionIndividual_Funciona [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:02.5688201-03:00">
+        <Text>[xUnit.net 00:00:00.86]     SgiForm.Tests.AuthTests.LoginMovil_ConEmpresaInvalida_Retorna401 [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:04.7893499-03:00">
+        <Text>[xUnit.net 00:00:03.10]     SgiForm.Tests.UsuariosTests.Create_CreaUsuario [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:04.7917347-03:00">
+        <Text>[xUnit.net 00:00:03.10]     SgiForm.Tests.ServiciosTests.GetAll_RetornaServicios [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:04.7937413-03:00">
+        <Text>[xUnit.net 00:00:03.10]     SgiForm.Tests.AuthTests.Login_ConCredencialesInvalidas_Retorna401 [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:04.7959823-03:00">
+        <Text>[xUnit.net 00:00:03.10]     SgiForm.Tests.ReportesTests.PorLocalidad_RetornaDatos [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:04.8181944-03:00">
+        <Text>[xUnit.net 00:00:03.12]     SgiForm.Tests.ServiciosTests.GetAll_ConFiltroLocalidad_Filtra [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:04.8206575-03:00">
+        <Text>[xUnit.net 00:00:03.13]     SgiForm.Tests.AuthTests.Login_ConCredencialesValidas_RetornaToken [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:04.8550738-03:00">
+        <Text>[xUnit.net 00:00:03.16]     SgiForm.Tests.AuthTests.LoginMovil_ConCredencialesValidas_RetornaToken [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:05.3871809-03:00">
+        <Text>[xUnit.net 00:00:03.69]     SgiForm.Tests.UsuariosTests.Create_EmailDuplicado_Retorna409 [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:05.3903796-03:00">
+        <Text>[xUnit.net 00:00:03.70]     SgiForm.Tests.ServiciosTests.GetAll_ConBusquedaTexto_Filtra [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:05.4234005-03:00">
+        <Text>[xUnit.net 00:00:03.73]     SgiForm.Tests.AuthTests.Login_ConEmailInexistente_Retorna401 [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:05.4362570-03:00">
+        <Text>[xUnit.net 00:00:03.74]     SgiForm.Tests.TiposInspeccionTests.Create_CreaTipoNuevo [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:05.4373299-03:00">
+        <Text>[xUnit.net 00:00:03.74]     SgiForm.Tests.FlujosTests.Create_CreaFlujoConVersionBorrador [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:05.4379112-03:00">
+        <Text>[xUnit.net 00:00:03.74]     SgiForm.Tests.OperadoresTests.Create_CodigoDuplicado_Retorna409 [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:05.4386865-03:00">
+        <Text>[xUnit.net 00:00:03.75]     SgiForm.Tests.DashboardTests.PorLocalidad_RetornaLocalidades [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:05.4455642-03:00">
+        <Text>[xUnit.net 00:00:03.75]     SgiForm.Tests.OperadoresTests.GetAll_RetornaOperadores [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:05.4460732-03:00">
+        <Text>[xUnit.net 00:00:03.75]     SgiForm.Tests.FlujosTests.AgregarSeccion_AVersion_Publicada_Retorna404 [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:05.4521861-03:00">
+        <Text>[xUnit.net 00:00:03.76]     SgiForm.Tests.FlujosTests.GetVersion_RetornaFlujoConSecciones [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:05.4526564-03:00">
+        <Text>[xUnit.net 00:00:03.76]     SgiForm.Tests.OperadoresTests.Delete_SoftDelete_Funciona [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:05.8057414-03:00">
+        <Text>[xUnit.net 00:00:04.11]     SgiForm.Tests.ServiciosTests.GetAll_Paginacion_Funciona [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="LAPTOP-T48NVNQQ" outcome="Error" timestamp="2026-03-18T20:03:05.8384780-03:00">
+        <Text>[xUnit.net 00:00:04.14]     SgiForm.Tests.UsuariosTests.GetRoles_RetornaRoles [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

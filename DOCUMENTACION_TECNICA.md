@@ -1,13 +1,13 @@
 # SGI-FORM — Documentacion Tecnica Integral
 
 > **SGI-FORM** — Gestion inteligente de inspecciones en terreno.
-> Nombre tecnico interno: SanitasField | Version 1.0.0 | .NET 8 | PostgreSQL 17 | Blazor Server | .NET MAUI Android
+> Nombre tecnico interno: SgiForm | Version 1.0.0 | .NET 8 | PostgreSQL 17 | Blazor Server | .NET MAUI Android
 
 ---
 
 ## Tabla de contenidos
 
-1. [Que es SanitasField](#1-que-es-sanitasfield)
+1. [Que es SgiForm](#1-que-es-sgiform)
 2. [Problema que resuelve](#2-problema-que-resuelve)
 3. [Stack tecnologico](#3-stack-tecnologico)
 4. [Arquitectura general](#4-arquitectura-general)
@@ -33,7 +33,7 @@
 
 SGI-FORM (Sistema de Gestion de Inspecciones — Formularios) es una plataforma SaaS B2B que permite a empresas sanitarias ejecutar campanas masivas de inspeccion tecnica en terreno. El sistema gestiona el ciclo completo: desde la carga de servicios a inspeccionar, la configuracion de formularios dinamicos, la asignacion a operadores de campo, la ejecucion offline en dispositivos Android, hasta la revision de resultados y exportacion de reportes.
 
-> **Nota sobre nombres**: El branding comercial es **SGI-FORM**. Los namespaces C#, carpetas y solucion usan el nombre tecnico **SanitasField** por razones historicas. No se planea renombrar los namespaces.
+> **Nota sobre nombres**: El branding comercial es **SGI-FORM**. Los namespaces C#, carpetas y solucion usan el nombre tecnico **SgiForm** por razones historicas. No se planea renombrar los namespaces.
 
 ---
 
@@ -48,7 +48,7 @@ Las empresas sanitarias necesitan inspeccionar periodicamente miles de medidores
 - No habia control de calidad en tiempo real
 - Los reportes para la superintendencia requerian compilacion manual
 
-SanitasField reemplaza todo eso con una plataforma digital integrada.
+SgiForm reemplaza todo eso con una plataforma digital integrada.
 
 ---
 
@@ -156,31 +156,31 @@ sequenceDiagram
 ## 5. Estructura del repositorio
 
 ```
-SanitasField/
+SgiForm/
 |-- database/                          # Scripts SQL
 |   |-- 01_schema.sql                  # Schema completo (tablas, indices, triggers, vistas)
 |   |-- 02_seed.sql                    # Datos iniciales (empresa demo, flujo ejemplo)
 |   |-- demo_servicios.xlsx            # Excel de ejemplo con 50 servicios
 |
 |-- src/
-|   |-- SanitasField.Domain/          # Capa de dominio (entidades, enums)
-|   |-- SanitasField.Application/     # Capa de aplicacion (DTOs, interfaces)
-|   |-- SanitasField.Infrastructure/  # Capa de infraestructura (EF Core, servicios)
-|   |-- SanitasField.Api/             # API REST (controllers, Program.cs)
-|   |-- SanitasField.Web/             # Admin web Blazor Server
-|   |-- SanitasField.Mobile/          # App Android MAUI offline-first
+|   |-- SgiForm.Domain/          # Capa de dominio (entidades, enums)
+|   |-- SgiForm.Application/     # Capa de aplicacion (DTOs, interfaces)
+|   |-- SgiForm.Infrastructure/  # Capa de infraestructura (EF Core, servicios)
+|   |-- SgiForm.Api/             # API REST (controllers, Program.cs)
+|   |-- SgiForm.Web/             # Admin web Blazor Server
+|   |-- SgiForm.Mobile/          # App Android MAUI offline-first
 |
 |-- shared/
-|   |-- SanitasField.Contracts/       # DTOs compartidos entre API y consumidores
+|   |-- SgiForm.Contracts/       # DTOs compartidos entre API y consumidores
 |
 |-- tests/
-|   |-- SanitasField.Tests/           # Tests de integracion (40 tests)
+|   |-- SgiForm.Tests/           # Tests de integracion (40 tests)
 |
 |-- tools/
 |   |-- ExcelGen/                     # Utilidad para generar Excel de prueba
 |
 |-- global.json                        # Fija SDK a .NET 8.0.319
-|-- SanitasField.sln                   # Solucion Visual Studio
+|-- SgiForm.sln                   # Solucion Visual Studio
 |-- README.md                          # Documentacion rapida
 ```
 
@@ -192,14 +192,14 @@ SanitasField/
 
 ```mermaid
 graph BT
-    Domain["SanitasField.Domain<br/>(Entidades, Enums)"]
-    App["SanitasField.Application<br/>(DTOs, Interfaces)"]
-    Infra["SanitasField.Infrastructure<br/>(EF Core, Servicios)"]
-    API["SanitasField.Api<br/>(Controllers, Middleware)"]
-    Web["SanitasField.Web<br/>(Blazor Pages)"]
-    Contracts["SanitasField.Contracts<br/>(DTOs compartidos)"]
-    Mobile["SanitasField.Mobile<br/>(MAUI Android)"]
-    Tests["SanitasField.Tests<br/>(xUnit)"]
+    Domain["SgiForm.Domain<br/>(Entidades, Enums)"]
+    App["SgiForm.Application<br/>(DTOs, Interfaces)"]
+    Infra["SgiForm.Infrastructure<br/>(EF Core, Servicios)"]
+    API["SgiForm.Api<br/>(Controllers, Middleware)"]
+    Web["SgiForm.Web<br/>(Blazor Pages)"]
+    Contracts["SgiForm.Contracts<br/>(DTOs compartidos)"]
+    Mobile["SgiForm.Mobile<br/>(MAUI Android)"]
+    Tests["SgiForm.Tests<br/>(xUnit)"]
 
     App --> Domain
     App --> Contracts
@@ -215,7 +215,7 @@ graph BT
     Mobile -.->|"HTTP"| API
 ```
 
-### 6.1 Domain (`SanitasField.Domain`)
+### 6.1 Domain (`SgiForm.Domain`)
 
 Capa sin dependencias externas. Contiene:
 
@@ -227,13 +227,13 @@ Capa sin dependencias externas. Contiene:
 - **`Entities/Inspeccion.cs`**: Entidades de operacion: `ImportacionLote`, `ServicioInspeccion`, `AsignacionInspeccion`, `Inspeccion`, `InspeccionRespuesta`, `InspeccionFotografia`, `InspeccionHistorial`, `SincronizacionLog`, `Catalogo`, `Auditoria`.
 - **`Enums/DomainEnums.cs`**: 10 enums que definen estados, tipos de control, operadores logicos, acciones de reglas, prioridades.
 
-### 6.2 Application (`SanitasField.Application`)
+### 6.2 Application (`SgiForm.Application`)
 
 Capa preparada para casos de uso y DTOs. En la version actual esta mayoritariamente vacia (contiene `Class1.cs` placeholder). La logica de negocio esta directamente en los controllers de la API.
 
 > **Nota**: Esta capa existe como placeholder arquitectonico. En la evolucion del proyecto, los controllers deberian delegar a servicios de Application.
 
-### 6.3 Infrastructure (`SanitasField.Infrastructure`)
+### 6.3 Infrastructure (`SgiForm.Infrastructure`)
 
 Implementaciones concretas:
 
@@ -242,11 +242,11 @@ Implementaciones concretas:
 - **`Services/AuthService.cs`**: Autenticacion JWT para usuarios web y operadores moviles. Genera access tokens (60 min) y refresh tokens (30 dias). Implementa bloqueo por intentos fallidos.
 - **`Services/ExcelImportService.cs`**: Procesamiento de archivos Excel con ClosedXML. Valida columnas, tipos de datos, detecta duplicados, y registra errores por fila.
 
-### 6.4 Contracts (`SanitasField.Contracts`)
+### 6.4 Contracts (`SgiForm.Contracts`)
 
 Libreria compartida para DTOs entre la API y sus consumidores. En la version actual esta vacia (placeholder). Los DTOs se definen como records directamente en cada controller.
 
-### 6.5 API (`SanitasField.Api`)
+### 6.5 API (`SgiForm.Api`)
 
 12 controllers REST documentados con Swagger:
 
@@ -265,7 +265,7 @@ Libreria compartida para DTOs entre la API y sus consumidores. En la version act
 | `DashboardController` | `/api/v1/dashboard` | KPIs, avance por operador/localidad/ruta |
 | `ReportesController` | `/api/v1/reportes` | Exportacion Excel, reportes por operador/localidad |
 
-### 6.6 Web (`SanitasField.Web`)
+### 6.6 Web (`SgiForm.Web`)
 
 Blazor Server con render interactivo. 13 paginas + 2 componentes compartidos:
 
@@ -290,7 +290,7 @@ Blazor Server con render interactivo. 13 paginas + 2 componentes compartidos:
 - `AuthStateService.cs`: Maneja el estado de sesion JWT en memoria (scoped por circuito SignalR). Reemplaza `IHttpContextAccessor` que no funciona con Blazor interactivo.
 - `ApiClient.cs`: HttpClient tipado que inyecta automaticamente el JWT en cada request a la API.
 
-### 6.7 Mobile (`SanitasField.Mobile`)
+### 6.7 Mobile (`SgiForm.Mobile`)
 
 App .NET MAUI Android con arquitectura MVVM:
 
@@ -400,12 +400,12 @@ El schema completo esta en `database/01_schema.sql` (999 lineas). Usa el schema 
 El sistema usa un container Docker dedicado:
 
 ```
-Nombre:   sanitasfield_postgres
+Nombre:   sgiform_postgres
 Imagen:   postgres:17
 Puerto:   localhost:5434 -> 5432
-BD:       sanitasfield
-Usuario:  sanitasfield
-Password: SanitasField2024!
+BD:       sgiform
+Usuario:  sgiform
+Password: SgiForm2024!
 ```
 
 ---
@@ -798,7 +798,7 @@ flowchart LR
 ### Estructura
 
 ```
-tests/SanitasField.Tests/
+tests/SgiForm.Tests/
 |-- TestFixture.cs           # WebApplicationFactory con BD InMemory + seed
 |-- ApiIntegrationTests.cs   # 43 tests de integracion
 ```
@@ -835,7 +835,7 @@ tests/SanitasField.Tests/
 
 ```bash
 cd kobotoolbox
-dotnet test tests/SanitasField.Tests/SanitasField.Tests.csproj
+dotnet test tests/SgiForm.Tests/SgiForm.Tests.csproj
 ```
 
 ---
@@ -860,10 +860,10 @@ dotnet --version  # Debe mostrar 8.0.x (forzado por global.json)
 ### Paso 2: Levantar PostgreSQL
 
 ```bash
-docker run -d --name sanitasfield_postgres \
-  -e POSTGRES_USER=sanitasfield \
-  -e POSTGRES_PASSWORD=SanitasField2024! \
-  -e POSTGRES_DB=sanitasfield \
+docker run -d --name sgiform_postgres \
+  -e POSTGRES_USER=sgiform \
+  -e POSTGRES_PASSWORD=SgiForm2024! \
+  -e POSTGRES_DB=sgiform \
   -p 5434:5432 \
   --restart unless-stopped \
   postgres:17
@@ -872,14 +872,14 @@ docker run -d --name sanitasfield_postgres \
 ### Paso 3: Ejecutar schema y seed
 
 ```bash
-docker exec -i sanitasfield_postgres psql -U sanitasfield -d sanitasfield < database/01_schema.sql
-docker exec -i sanitasfield_postgres psql -U sanitasfield -d sanitasfield < database/02_seed.sql
+docker exec -i sgiform_postgres psql -U sgiform -d sgiform < database/01_schema.sql
+docker exec -i sgiform_postgres psql -U sgiform -d sgiform < database/02_seed.sql
 ```
 
 ### Paso 4: Iniciar API
 
 ```bash
-cd src/SanitasField.Api
+cd src/SgiForm.Api
 dotnet run
 # Swagger: http://localhost:5043
 ```
@@ -887,7 +887,7 @@ dotnet run
 ### Paso 5: Iniciar Web
 
 ```bash
-cd src/SanitasField.Web
+cd src/SgiForm.Web
 dotnet run --launch-profile http
 # Web: http://localhost:5054
 ```
@@ -902,7 +902,7 @@ Password: Admin@2024!
 ### Paso 7: Ejecutar tests
 
 ```bash
-dotnet test tests/SanitasField.Tests/SanitasField.Tests.csproj
+dotnet test tests/SgiForm.Tests/SgiForm.Tests.csproj
 # Resultado esperado: 43/43 passed
 ```
 
@@ -910,7 +910,7 @@ dotnet test tests/SanitasField.Tests/SanitasField.Tests.csproj
 
 ```bash
 dotnet workload install maui-android
-dotnet build src/SanitasField.Mobile/SanitasField.Mobile.csproj
+dotnet build src/SgiForm.Mobile/SgiForm.Mobile.csproj
 ```
 
 ---
@@ -963,8 +963,8 @@ dotnet build src/SanitasField.Mobile/SanitasField.Mobile.csproj
 
 | Item | Descripcion | Impacto | Prioridad |
 |---|---|---|---|
-| **Application vacia** | La capa `SanitasField.Application` tiene solo `Class1.cs`. La logica de negocio esta directamente en los controllers. | Acoplamiento controller-BD. Dificulta testing unitario. | Media |
-| **Contracts vacio** | `SanitasField.Contracts` tiene solo `Class1.cs`. Los DTOs se definen como records dentro de cada controller. | Duplicacion si la app movil necesita los mismos DTOs. | Media |
+| **Application vacia** | La capa `SgiForm.Application` tiene solo `Class1.cs`. La logica de negocio esta directamente en los controllers. | Acoplamiento controller-BD. Dificulta testing unitario. | Media |
+| **Contracts vacio** | `SgiForm.Contracts` tiene solo `Class1.cs`. Los DTOs se definen como records dentro de cada controller. | Duplicacion si la app movil necesita los mismos DTOs. | Media |
 | **Class1.cs residuales** | Los proyectos Domain, Application, Infrastructure y Contracts tienen `Class1.cs` del template. | Ruido en el codigo. | Baja |
 | **Credenciales en appsettings.json** | La connection string de PostgreSQL y la clave JWT estan en texto plano en el repositorio. | Riesgo de seguridad si el repo es publico. | Alta |
 | **Compresion de imagenes** | `InspeccionViewModel.ComprimirImagenAsync` solo copia el stream sin comprimir. El comentario dice "usar SkiaSharp en produccion". | Fotos grandes consumen ancho de banda. | Media |
@@ -1042,4 +1042,4 @@ dotnet build src/SanitasField.Mobile/SanitasField.Mobile.csproj
 
 ---
 
-*Documento actualizado el 19 de Marzo de 2026. Nombre comercial: SGI-FORM. Nombre tecnico: SanitasField.*
+*Documento actualizado el 19 de Marzo de 2026. Nombre comercial: SGI-FORM. Nombre tecnico: SgiForm.*

@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/shared/">
+    <Project Path="shared/SgiForm.Contracts/SgiForm.Contracts.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/SgiForm.Api/SgiForm.Api.csproj" />
+    <Project Path="src/SgiForm.Application/SgiForm.Application.csproj" />
+    <Project Path="src/SgiForm.Domain/SgiForm.Domain.csproj" />
+    <Project Path="src/SgiForm.Infrastructure/SgiForm.Infrastructure.csproj" />
+    <Project Path="src/SgiForm.Web/SgiForm.Web.csproj" />
+  </Folder>
+</Solution>

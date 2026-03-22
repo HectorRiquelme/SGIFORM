@@ -14,7 +14,7 @@ Actua como un arquitecto de software senior, experto en .NET 8, ASP.NET Core, Bl
 
 ## PROYECTO EXISTENTE
 
-Estoy trabajando en un proyecto llamado **SanitasField**, un sistema completo de inspecciones tecnicas en terreno para empresas sanitarias. El proyecto ya esta construido y funcional. Necesito que continues el desarrollo desde donde quedo.
+Estoy trabajando en un proyecto llamado **SgiForm**, un sistema completo de inspecciones tecnicas en terreno para empresas sanitarias. El proyecto ya esta construido y funcional. Necesito que continues el desarrollo desde donde quedo.
 
 ### Ubicacion del proyecto
 
@@ -22,7 +22,7 @@ Estoy trabajando en un proyecto llamado **SanitasField**, un sistema completo de
 C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox
 ```
 
-### Que es SanitasField
+### Que es SgiForm
 
 Plataforma SaaS B2B que permite a empresas sanitarias ejecutar campanas masivas de inspeccion de medidores de agua en terreno. Gestiona el ciclo completo: carga masiva de servicios desde Excel, configuracion de formularios dinamicos con logica condicional, asignacion a operadores, ejecucion offline en Android, sincronizacion, control de calidad y reportes.
 
@@ -31,7 +31,7 @@ Plataforma SaaS B2B que permite a empresas sanitarias ejecutar campanas masivas 
 - **.NET 8** (fijado en `global.json` a version 8.0.319)
 - **ASP.NET Core Web API** — Backend REST con JWT, Swagger, Serilog
 - **Entity Framework Core 8** — ORM contra PostgreSQL
-- **PostgreSQL 17** — BD principal, corre en Docker container `sanitasfield_postgres` puerto 5434
+- **PostgreSQL 17** — BD principal, corre en Docker container `sgiform_postgres` puerto 5434
 - **Blazor Server** — Admin web en puerto 5054
 - **NET MAUI Android** — App movil offline-first con SQLite
 - **ClosedXML** — Import/export Excel
@@ -41,16 +41,16 @@ Plataforma SaaS B2B que permite a empresas sanitarias ejecutar campanas masivas 
 ### Estructura de la solucion
 
 ```
-SanitasField.sln
+SgiForm.sln
 |
-|-- src/SanitasField.Domain/            Entidades (BaseEntity, Empresa, Usuario, Operador, Flujo*, Inspeccion*) + 10 Enums
-|-- src/SanitasField.Application/       Placeholder (Class1.cs) — logica esta en controllers
-|-- src/SanitasField.Infrastructure/    EF Core AppDbContext (654 lineas mapeo explicito), AuthService (JWT), ExcelImportService, SnakeCaseEnumConverter
-|-- src/SanitasField.Api/               12 Controllers REST + Program.cs (187 lineas)
-|-- src/SanitasField.Web/               Blazor Server: 13 paginas + 2 shared components + AuthStateService + ApiClient
-|-- src/SanitasField.Mobile/            MAUI Android: 3 ViewModels, 4 Views, FlowEngine, SyncService, AppDatabase (SQLite)
-|-- shared/SanitasField.Contracts/      Placeholder (Class1.cs)
-|-- tests/SanitasField.Tests/           40 tests integracion con WebApplicationFactory + InMemory DB
+|-- src/SgiForm.Domain/            Entidades (BaseEntity, Empresa, Usuario, Operador, Flujo*, Inspeccion*) + 10 Enums
+|-- src/SgiForm.Application/       Placeholder (Class1.cs) — logica esta en controllers
+|-- src/SgiForm.Infrastructure/    EF Core AppDbContext (654 lineas mapeo explicito), AuthService (JWT), ExcelImportService, SnakeCaseEnumConverter
+|-- src/SgiForm.Api/               12 Controllers REST + Program.cs (187 lineas)
+|-- src/SgiForm.Web/               Blazor Server: 13 paginas + 2 shared components + AuthStateService + ApiClient
+|-- src/SgiForm.Mobile/            MAUI Android: 3 ViewModels, 4 Views, FlowEngine, SyncService, AppDatabase (SQLite)
+|-- shared/SgiForm.Contracts/      Placeholder (Class1.cs)
+|-- tests/SgiForm.Tests/           40 tests integracion con WebApplicationFactory + InMemory DB
 |-- database/01_schema.sql              Schema PostgreSQL completo (885 lineas, schema sf.*)
 |-- database/02_seed.sql                Datos demo (601 lineas: empresa, roles, permisos, operadores, flujo con 6 secciones, 20 preguntas, 10 reglas)
 ```
@@ -82,7 +82,7 @@ LoginPage, InspeccionesListPage, InspeccionPage (formulario dinamico), Sincroniz
 
 ### Base de datos
 
-- Docker container: `sanitasfield_postgres` (postgres:17, puerto 5434, user: sanitasfield, pass: SanitasField2024!)
+- Docker container: `sgiform_postgres` (postgres:17, puerto 5434, user: sgiform, pass: SgiForm2024!)
 - Schema: `sf` con 21+ tablas
 - Datos demo cargados: 1 empresa, 4 roles, 40 permisos, 1 admin, 3 operadores, 5 tipos inspeccion, 1 flujo publicado (6 secciones, 20 preguntas, 10 reglas condicionales), 50 servicios importados, 50 asignaciones distribuidas en 3 operadores
 - Enums originales PostgreSQL convertidos a VARCHAR para compatibilidad EF Core
@@ -105,7 +105,7 @@ Operador 3: OP003 / sanitaria-demo / Admin@2024!
 40 tests de integracion, 100% passing. Usan `WebApplicationFactory<Program>` con EF Core InMemory. El `TestFixture` usa entorno `"Testing"` para saltarse Serilog y health checks de PostgreSQL. Cada test class es `IClassFixture<TestFixture>`.
 
 ```bash
-dotnet test tests/SanitasField.Tests/SanitasField.Tests.csproj
+dotnet test tests/SgiForm.Tests/SgiForm.Tests.csproj
 # Resultado: 40/40 passed, 0 failed
 ```
 
@@ -137,19 +137,19 @@ dotnet test tests/SanitasField.Tests/SanitasField.Tests.csproj
 
 ```bash
 # 1. Verificar Docker
-docker ps --filter name=sanitasfield_postgres
+docker ps --filter name=sgiform_postgres
 
 # 2. Si no esta corriendo:
-docker start sanitasfield_postgres
+docker start sgiform_postgres
 
 # 3. Iniciar API (puerto 5043)
-cd src/SanitasField.Api && dotnet run
+cd src/SgiForm.Api && dotnet run
 
 # 4. Iniciar Web (puerto 5054)
-cd src/SanitasField.Web && dotnet run --launch-profile http
+cd src/SgiForm.Web && dotnet run --launch-profile http
 
 # 5. Compilar app movil
-dotnet build src/SanitasField.Mobile/SanitasField.Mobile.csproj
+dotnet build src/SgiForm.Mobile/SgiForm.Mobile.csproj
 ```
 
 ### Documentacion existente
@@ -183,7 +183,7 @@ Estas son las tareas pendientes en orden de prioridad. Consulta con el usuario c
 
 ### Prioridad Media
 - Refactorizar: mover logica de controllers a capa Application
-- Definir DTOs en SanitasField.Contracts (compartir entre API y Mobile)
+- Definir DTOs en SgiForm.Contracts (compartir entre API y Mobile)
 - Implementar interfaces/repositorios en Domain
 - Eliminar archivos Class1.cs residuales
 - Agregar mas tests (importacion Excel end-to-end, sync protocol)

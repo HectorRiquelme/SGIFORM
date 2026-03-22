@@ -1,7 +1,7 @@
 #Requires -RunAsAdministrator
 <#
 .SYNOPSIS
-    Realiza rollback de SanitasField a un backup anterior.
+    Realiza rollback de SgiForm a un backup anterior.
 
 .DESCRIPTION
     Detiene los AppPools IIS, restaura los archivos publicados desde
@@ -24,7 +24,7 @@
     # Modo interactivo: lista backups y restaura el elegido
 
 .EXAMPLE
-    .\rollback.ps1 -BackupPath "C:\SanitasField\backups\20260322_143000"
+    .\rollback.ps1 -BackupPath "C:\SgiForm\backups\20260322_143000"
     # Rollback directo a un backup específico
 
 .EXAMPLE
@@ -34,8 +34,8 @@
 
 [CmdletBinding(SupportsShouldProcess)]
 param(
-    [string] $BackupRoot   = "C:\SanitasField\backups",
-    [string] $InstallRoot  = "C:\SanitasField",
+    [string] $BackupRoot   = "C:\SgiForm\backups",
+    [string] $InstallRoot  = "C:\SgiForm",
     [string] $BackupPath   = "",
     [switch] $SkipValidation
 )
@@ -50,7 +50,7 @@ function Err   { param([string]$t) Write-Host "  [ERRO] $t" -ForegroundColor Red
 function Title { param([string]$t) Write-Host "`n── $t ──" -ForegroundColor Magenta }
 
 Write-Host "`n╔══════════════════════════════════════════╗" -ForegroundColor Magenta
-Write-Host   "║      SanitasField — ROLLBACK             ║" -ForegroundColor Magenta
+Write-Host   "║      SgiForm — ROLLBACK             ║" -ForegroundColor Magenta
 Write-Host   "╚══════════════════════════════════════════╝`n" -ForegroundColor Magenta
 
 if ($WhatIfPreference) {
@@ -147,7 +147,7 @@ $iisAvailable = $null -ne (Get-Module WebAdministration)
 # ─── Detener AppPools ─────────────────────────────────────────────────────────
 Title "DETENIENDO SERVICIOS"
 
-$pools = @("SanitasField-API", "SanitasField-Web")
+$pools = @("SgiForm-API", "SgiForm-Web")
 $stoppedPools = @()
 
 foreach ($pool in $pools) {

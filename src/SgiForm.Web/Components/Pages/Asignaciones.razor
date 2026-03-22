@@ -1,0 +1,317 @@
+@page "/asignaciones"
+@layout SgiForm.Web.Components.Layout.MainLayout
+@inject ApiClient Api
+
+<PageTitle>Asignaciones — SGI-FORM</PageTitle>
+
+<div class="sf-page-header">
+    <div>
+        <h2>Asignaciones</h2>
+        <span class="sf-text-muted">Gestiona la asignación de servicios a operadores</span>
+    </div>
+    <button class="sf-btn sf-btn-primary" @onclick="AbrirMasiva">⚡ Asignación masiva</button>
+</div>
+
+<!-- Filtros -->
+<div class="sf-filter-bar">
+    <select class="sf-select sf-select-sm" @bind="filtros.Estado" @bind:after="Cargar">
+        <option value="">Todos los estados</option>
+        <option value="pendiente">Pendiente</option>
+        <option value="asignada">Asignada</option>
+        <option value="descargada">Descargada</option>
+        <option value="en_ejecucion">En ejecución</option>
+        <option value="finalizada">Finalizada</option>
+        <option value="sincronizada">Sincronizada</option>
+        <option value="observada">Observada</option>
+    </select>
+    <select class="sf-select sf-select-sm" @bind="filtros.OperadorId" @bind:after="Cargar">
+        <option value="">Todos los operadores</option>
+        @foreach (var op in operadores)
+        {
+            <option value="@op.Id">@op.NombreCompleto</option>
+        }
+    </select>
+    <input class="sf-input sf-input-sm" placeholder="Localidad" @bind="filtros.Localidad" />
+    <input class="sf-input sf-input-sm" placeholder="Ruta" @bind="filtros.Ruta" />
+    <button class="sf-btn sf-btn-secondary sf-btn-sm" @onclick="Cargar">Buscar</button>
+</div>
+
+@if (loading)
+{
+    <div class="sf-loading-center"><div class="sf-spinner"></div></div>
+}
+else
+{
+    <div class="sf-card">
+        <div class="sf-card-header">
+            <span class="sf-text-muted" style="font-size:13px">@total asignaciones</span>
+        </div>
+        <table class="sf-table">
+            <thead>
+                <tr>
+                    <th>ID Servicio</th>
+                    <th>Dirección</th>
+                    <th>Operador</th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                    <th>Prioridad</th>
+                    <th>Asignado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (items.Any())
+                {
+                    @foreach (var a in items)
+                    {
+                        <tr>
+                            <td><code style="font-size:12px">@a.Servicio?.IdServicio</code></td>
+                            <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;
+                                       white-space:nowrap" title="@a.Servicio?.Direccion">
+                                @(a.Servicio?.Direccion ?? "—")
+                                <div class="sf-text-muted sf-text-xs">@(a.Servicio?.Localidad)</div>
+                            </td>
+                            <td>
+                                <div style="font-size:13px">@a.Operador?.NombreCompleto</div>
+                                <div class="sf-text-muted sf-text-xs">@a.Operador?.CodigoOperador</div>
+                            </td>
+                            <td class="sf-text-xs">@a.TipoInspeccion?.Nombre</td>
+                            <td><span class="sf-badge @GetEstadoBadge(a.Estado)">@a.Estado</span></td>
+                            <td><span class="sf-badge @GetPrioridadBadge(a.Prioridad)">@a.Prioridad</span></td>
+                            <td class="sf-text-xs sf-text-muted">
+                                @(a.FechaAsignacion.ToLocalTime().ToString("dd/MM/yyyy"))
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="sf-text-center sf-text-muted" style="padding:32px">
+                            No hay asignaciones con estos filtros
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (total > filtros.PorPagina)
+    {
+        <div class="sf-pagination">
+            <button class="sf-btn sf-btn-secondary sf-btn-sm"
+                    disabled="@(filtros.Pagina <= 1)"
+                    @onclick="() => CambiarPagina(filtros.Pagina - 1)">← Anterior</button>
+            <span>Página @filtros.Pagina</span>
+            <button class="sf-btn sf-btn-secondary sf-btn-sm"
+                    disabled="@(filtros.Pagina * filtros.PorPagina >= total)"
+                    @onclick="() => CambiarPagina(filtros.Pagina + 1)">Siguiente →</button>
+        </div>
+    }
+}
+
+<!-- Modal asignación masiva -->
+@if (mostrarMasiva)
+{
+    <div class="sf-modal-overlay">
+        <div class="sf-modal">
+            <div class="sf-modal-header">
+                <h3>⚡ Asignación masiva</h3>
+                <button class="sf-btn-close" @onclick="() => mostrarMasiva = false">✕</button>
+            </div>
+            <div class="sf-modal-body">
+                @if (!string.IsNullOrEmpty(masivaError))
+                {
+                    <div class="sf-alert sf-alert-danger">@masivaError</div>
+                }
+                @if (!string.IsNullOrEmpty(masivaExito))
+                {
+                    <div class="sf-alert sf-alert-success">@masivaExito</div>
+                }
+                <p class="sf-text-muted" style="margin-bottom:16px;font-size:13px">
+                    Asigna masivamente todos los servicios sin asignar que coincidan con los filtros.
+                </p>
+                <div class="sf-form-grid">
+                    <div class="sf-form-group">
+                        <label>Operador *</label>
+                        <select class="sf-select" @bind="masivaForm.OperadorId">
+                            <option value="">— Selecciona —</option>
+                            @foreach (var op in operadores)
+                            {
+                                <option value="@op.Id">@op.NombreCompleto</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="sf-form-group">
+                        <label>Tipo de inspección *</label>
+                        <select class="sf-select" @bind="masivaForm.TipoInspeccionId">
+                            <option value="">— Selecciona —</option>
+                            @foreach (var t in tipos)
+                            {
+                                <option value="@t.Id">@t.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="sf-form-group">
+                        <label>Flujo publicado *</label>
+                        <select class="sf-select" @bind="masivaForm.FlujoVersionId">
+                            <option value="">— Selecciona —</option>
+                            @foreach (var fv in flujoVersiones)
+                            {
+                                <option value="@fv.Id">@fv.Nombre v@(fv.Version)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="sf-form-group">
+                        <label>Localidad (opcional)</label>
+                        <input class="sf-input" @bind="masivaForm.Localidad" placeholder="Filtrar por localidad" />
+                    </div>
+                    <div class="sf-form-group">
+                        <label>Ruta (opcional)</label>
+                        <input class="sf-input" @bind="masivaForm.Ruta" placeholder="Filtrar por ruta" />
+                    </div>
+                    <div class="sf-form-group">
+                        <label>Máximo a asignar</label>
+                        <input class="sf-input" type="number" @bind="masivaForm.LimiteMaximo" min="1" max="1000" />
+                    </div>
+                </div>
+            </div>
+            <div class="sf-modal-footer">
+                <button class="sf-btn sf-btn-secondary" @onclick="() => mostrarMasiva = false">Cancelar</button>
+                <button class="sf-btn sf-btn-primary" @onclick="EjecutarMasiva" disabled="@guardando">
+                    @(guardando ? "Procesando..." : "⚡ Ejecutar asignación")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool loading = true;
+    private bool mostrarMasiva = false;
+    private bool guardando = false;
+    private int total = 0;
+    private string? masivaError;
+    private string? masivaExito;
+    private List<AsignacionItem> items = new();
+    private List<OperadorRef> operadores = new();
+    private List<TipoRef> tipos = new();
+    private List<FlujoVersionRef> flujoVersiones = new();
+    private FiltrosModel filtros = new();
+    private MasivaForm masivaForm = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var ops = await Api.GetAsync<OperadoresResponse>("api/v1/operadores?porPagina=100");
+        operadores = ops?.Items ?? new();
+        var ts = await Api.GetAsync<List<TipoRef>>("api/v1/tipos-inspeccion");
+        tipos = ts ?? new();
+        var fls = await Api.GetAsync<List<FlujoItem>>("api/v1/flujos");
+        flujoVersiones = fls?
+            .SelectMany(f => f.Versiones?
+                .Where(v => v.Estado == "publicado")
+                .Select(v => new FlujoVersionRef(v.Id, f.Nombre ?? "", v.NumeroVersion))
+                ?? Enumerable.Empty<FlujoVersionRef>())
+            .ToList() ?? new();
+        await Cargar();
+    }
+
+    private async Task Cargar()
+    {
+        loading = true;
+        var q = $"api/v1/asignaciones?pagina={filtros.Pagina}&porPagina={filtros.PorPagina}";
+        if (!string.IsNullOrEmpty(filtros.Estado)) q += $"&estado={filtros.Estado}";
+        if (!string.IsNullOrEmpty(filtros.OperadorId)) q += $"&operadorId={filtros.OperadorId}";
+        if (!string.IsNullOrEmpty(filtros.Localidad)) q += $"&localidad={Uri.EscapeDataString(filtros.Localidad)}";
+        if (!string.IsNullOrEmpty(filtros.Ruta)) q += $"&ruta={Uri.EscapeDataString(filtros.Ruta)}";
+
+        var result = await Api.GetAsync<AsignacionesResponse>(q);
+        items = result?.Items ?? new();
+        total = result?.Total ?? 0;
+        loading = false;
+    }
+
+    private async Task CambiarPagina(int p) { filtros.Pagina = p; await Cargar(); }
+
+    private void AbrirMasiva() { masivaForm = new(); masivaError = null; masivaExito = null; mostrarMasiva = true; }
+
+    private async Task EjecutarMasiva()
+    {
+        if (string.IsNullOrEmpty(masivaForm.OperadorId) ||
+            string.IsNullOrEmpty(masivaForm.TipoInspeccionId) ||
+            string.IsNullOrEmpty(masivaForm.FlujoVersionId))
+        { masivaError = "Operador, tipo de inspección y flujo son obligatorios"; return; }
+
+        guardando = true;
+        masivaError = null;
+        var r = await Api.PostAsync<AsignacionMasivaResult>("api/v1/asignaciones/masiva", new
+        {
+            operador_id       = Guid.Parse(masivaForm.OperadorId),
+            tipo_inspeccion_id = Guid.Parse(masivaForm.TipoInspeccionId),
+            flujo_version_id  = Guid.Parse(masivaForm.FlujoVersionId),
+            localidad         = masivaForm.Localidad,
+            ruta              = masivaForm.Ruta,
+            limite_maximo     = masivaForm.LimiteMaximo
+        });
+
+        if (r.Success)
+        {
+            masivaExito = $"✅ Se crearon {r.Data?.Asignadas} asignaciones exitosamente";
+            await Cargar();
+        }
+        else masivaError = r.Error;
+        guardando = false;
+    }
+
+    private static string GetEstadoBadge(string? e) => e switch
+    {
+        "pendiente"    => "sf-badge-warning",
+        "asignada"     => "sf-badge-info",
+        "en_ejecucion" => "sf-badge-info",
+        "finalizada"   => "sf-badge-success",
+        "sincronizada" => "sf-badge-success",
+        "observada"    => "sf-badge-danger",
+        _ => "sf-badge-secondary"
+    };
+
+    private static string GetPrioridadBadge(string? p) => p switch
+    {
+        "alta"    => "sf-badge-danger",
+        "urgente" => "sf-badge-danger",
+        "normal"  => "sf-badge-secondary",
+        _ => "sf-badge-secondary"
+    };
+
+    // DTOs
+    private record AsignacionesResponse(int Total, List<AsignacionItem>? Items);
+    private record AsignacionItem(Guid Id, string? Estado, string? Prioridad,
+        DateTimeOffset FechaAsignacion, ServicioRef? Servicio,
+        OperadorRef? Operador, TipoRef? TipoInspeccion);
+    private record ServicioRef(Guid Id, string? IdServicio, string? Direccion, string? Localidad);
+    private record OperadorRef(Guid Id, string? NombreCompleto, string? CodigoOperador);
+    private record TipoRef(Guid Id, string? Nombre);
+    private record OperadoresResponse(int Total, List<OperadorRef>? Items);
+    private record FlujoItem(Guid Id, string? Nombre, List<VersionRef>? Versiones);
+    private record VersionRef(Guid Id, int NumeroVersion, string? Estado);
+    private record FlujoVersionRef(Guid Id, string Nombre, int Version);
+    private record AsignacionMasivaResult(int Asignadas);
+
+    private class FiltrosModel
+    {
+        public string? Estado { get; set; }
+        public string? OperadorId { get; set; }
+        public string? Localidad { get; set; }
+        public string? Ruta { get; set; }
+        public int Pagina { get; set; } = 1;
+        public int PorPagina { get; set; } = 25;
+    }
+
+    private class MasivaForm
+    {
+        public string? OperadorId { get; set; }
+        public string? TipoInspeccionId { get; set; }
+        public string? FlujoVersionId { get; set; }
+        public string? Localidad { get; set; }
+        public string? Ruta { get; set; }
+        public int LimiteMaximo { get; set; } = 200;
+    }
+}

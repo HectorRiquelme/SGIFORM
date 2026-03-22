@@ -1,6 +1,0 @@
-@SanitasField.Api_HostAddress = http://localhost:5043
-
-GET {{SanitasField.Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

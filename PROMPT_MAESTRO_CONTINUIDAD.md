@@ -10,15 +10,15 @@
 | Campo | Valor |
 |---|---|
 | **Nombre comercial** | SGI-FORM |
-| **Nombre tecnico** | SanitasField (namespaces, solucion, paquetes) |
+| **Nombre tecnico** | SgiForm (namespaces, solucion, paquetes) |
 | **Tagline** | Gestion inteligente de inspecciones en terreno |
 | **Tipo** | SaaS B2B multitenant |
 | **Dominio** | Empresas sanitarias — inspeccion de medidores de agua |
 | **Repositorio local** | `C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox` |
-| **Solucion** | `SanitasField.sln` |
+| **Solucion** | `SgiForm.sln` |
 | **SDK fijado** | .NET 8.0.319 (`global.json`) |
 
-**Nota sobre el nombre**: El branding visible al usuario es **SGI-FORM** (login, sidebar, manifest Android, PageTitles). Los namespaces C# siguen siendo `SanitasField.*` — renombrarlos no es prioritario y requeriria refactoring masivo sin valor funcional.
+**Nota sobre el nombre**: El branding visible al usuario es **SGI-FORM** (login, sidebar, manifest Android, PageTitles). Los namespaces C# siguen siendo `SgiForm.*` — renombrarlos no es prioritario y requeriria refactoring masivo sin valor funcional.
 
 ---
 
@@ -53,7 +53,7 @@ El sistema tiene 3 frontends: API REST, Web admin (Blazor Server), App movil (MA
 | SDK | .NET | 8.0.319 | Fijado en `global.json` |
 | API | ASP.NET Core Web API | 8.0 | Puerto 5043, escucha en 0.0.0.0 |
 | ORM | Entity Framework Core | 8.0 | Mapeo explicito (654 lineas en AppDbContext) |
-| BD principal | PostgreSQL | 17 | Docker container `sanitasfield_postgres`, puerto 5434 |
+| BD principal | PostgreSQL | 17 | Docker container `sgiform_postgres`, puerto 5434 |
 | Web admin | Blazor Server | 8.0 | Puerto 5054, render mode InteractiveServer |
 | App movil | .NET MAUI Android | 8.0 | Offline-first con SQLite |
 | BD movil | SQLite (sqlite-net-pcl) | 1.9.172 | 11 tablas locales |
@@ -101,22 +101,22 @@ Mobile (MAUI) ← independiente (consume API via HTTP)
 ## 5. Estructura del proyecto
 
 ```
-SanitasField.sln
+SgiForm.sln
 |
 |-- database/
 |   |-- 01_schema.sql              # 999 lineas, 25 tablas, 3 vistas, schema sf.*
 |   |-- 02_seed.sql                # 641 lineas, datos demo completos
 |
 |-- src/
-|   |-- SanitasField.Domain/       # Entidades (21), Enums (9), Interfaces/ (vacio)
-|   |-- SanitasField.Application/  # PLACEHOLDER — solo Class1.cs
-|   |-- SanitasField.Infrastructure/
+|   |-- SgiForm.Domain/       # Entidades (21), Enums (9), Interfaces/ (vacio)
+|   |-- SgiForm.Application/  # PLACEHOLDER — solo Class1.cs
+|   |-- SgiForm.Infrastructure/
 |   |   |-- Persistence/AppDbContext.cs        # 654 lineas mapeo explicito
 |   |   |-- Persistence/SnakeCaseEnumConverter.cs
 |   |   |-- Services/AuthService.cs            # JWT web + movil + refresh
 |   |   |-- Services/ExcelImportService.cs     # Procesamiento Excel
 |   |
-|   |-- SanitasField.Api/
+|   |-- SgiForm.Api/
 |   |   |-- Controllers/ (12)      # Auth, Operadores, Usuarios, TiposInspeccion,
 |   |   |                          # Flujo, Importacion, Servicios, Asignacion,
 |   |   |                          # Inspecciones, Sync, Dashboard, Reportes
@@ -124,7 +124,7 @@ SanitasField.sln
 |   |   |-- Properties/launchSettings.json  # http: 0.0.0.0:5043
 |   |   |-- Middleware/            # VACIO
 |   |
-|   |-- SanitasField.Web/
+|   |-- SgiForm.Web/
 |   |   |-- Components/App.razor   # @rendermode="InteractiveServer"
 |   |   |-- Components/Layout/MainLayout.razor  # Sidebar SGI-FORM + RedirectToLogin
 |   |   |-- Components/Layout/EmptyLayout.razor  # Para login (sin sidebar)
@@ -136,7 +136,7 @@ SanitasField.sln
 |   |   |-- Services/ApiClient.cs         # HttpClient tipado con BaseAddress
 |   |   |-- Program.cs                    # AddHttpClient<ApiClient> (SIN duplicado AddScoped)
 |   |
-|   |-- SanitasField.Mobile/
+|   |-- SgiForm.Mobile/
 |   |   |-- MauiProgram.cs         # DI: HttpClientHolder, AuthService, SyncService, FlowEngine
 |   |   |-- App.xaml               # 10 Value Converters registrados + 4 colores globales
 |   |   |-- App.xaml.cs            # CreateWindow con Loaded event async (sin deadlock)
@@ -158,10 +158,10 @@ SanitasField.sln
 |   |   |-- Platforms/Android/AndroidManifest.xml  # usesCleartextTraffic + label SGI-FORM
 |
 |-- shared/
-|   |-- SanitasField.Contracts/    # PLACEHOLDER — solo Class1.cs
+|   |-- SgiForm.Contracts/    # PLACEHOLDER — solo Class1.cs
 |
 |-- tests/
-|   |-- SanitasField.Tests/
+|   |-- SgiForm.Tests/
 |       |-- TestFixture.cs         # WebApplicationFactory + InMemory + seed
 |       |-- ApiIntegrationTests.cs # 43 tests (10 clases)
 |
@@ -266,7 +266,7 @@ Cada request contiene claim `empresa_id`. Todos los controllers filtran por `Emp
 | Movil Formulario | Parcial | Navega secciones pero solo muestra labels (sin controles de input) |
 | Tests | 43/43 passing | Incluye 3 tests nuevos de refresh token |
 | PostgreSQL | Funcional | Docker container, datos demo cargados |
-| Emulador Android | Configurado | AVD SanitasField_API34 (Pixel 6, API 34) |
+| Emulador Android | Configurado | AVD SgiForm_API34 (Pixel 6, API 34) |
 
 ### Que NO funciona / esta incompleto
 
@@ -318,7 +318,7 @@ Cada request contiene claim `empresa_id`. Todos los controllers filtran por `Emp
 
 ### De UI
 
-21. **Branding SGI-FORM** — nombre comercial en todos los puntos visibles, namespaces siguen como SanitasField
+21. **Branding SGI-FORM** — nombre comercial en todos los puntos visibles, namespaces siguen como SgiForm
 22. **CSS custom con prefijo `sf-`** — sin frameworks CSS, ~500 lineas en `app.css`
 23. **10 Value Converters** registrados en App.xaml — usados por todas las vistas XAML
 24. **usesCleartextTraffic=true** en AndroidManifest — necesario para desarrollo con HTTP
@@ -345,7 +345,7 @@ Cada request contiene claim `empresa_id`. Todos los controllers filtran por `Emp
 8. **Los tests deben seguir pasando**: ejecutar `dotnet test` despues de cada cambio
 9. **Schema SQL se maneja por scripts** (`database/01_schema.sql`), no por EF Core migrations
 10. **Convencion de nombres**: snake_case en PostgreSQL/JSON, PascalCase en C#, prefijo `sf-` en CSS
-11. **No renombrar namespaces** de SanitasField a SGI-FORM — refactoring masivo sin valor funcional
+11. **No renombrar namespaces** de SgiForm a SGI-FORM — refactoring masivo sin valor funcional
 
 ---
 
@@ -464,26 +464,26 @@ Cada request contiene claim `empresa_id`. Todos los controllers filtran por `Emp
 
 ```bash
 # 1. Docker PostgreSQL
-docker start sanitasfield_postgres
+docker start sgiform_postgres
 
 # 2. API (puerto 5043, todas las interfaces)
-cd src/SanitasField.Api && dotnet run --launch-profile http
+cd src/SgiForm.Api && dotnet run --launch-profile http
 
 # 3. Web (puerto 5054)
-cd src/SanitasField.Web && dotnet run --launch-profile http
+cd src/SgiForm.Web && dotnet run --launch-profile http
 
 # 4. App movil (requiere emulador corriendo)
 set ANDROID_HOME=C:\Program Files (x86)\Android\android-sdk
-dotnet build src/SanitasField.Mobile/SanitasField.Mobile.csproj -f net8.0-android -c Debug -t:Run
+dotnet build src/SgiForm.Mobile/SgiForm.Mobile.csproj -f net8.0-android -c Debug -t:Run
 
 # 5. Tests
-dotnet test tests/SanitasField.Tests/SanitasField.Tests.csproj
+dotnet test tests/SgiForm.Tests/SgiForm.Tests.csproj
 ```
 
 ### Emulador Android
 
-- AVD: `SanitasField_API34` (Pixel 6, API 34, Google APIs x86_64)
-- Iniciar: `"C:\Program Files (x86)\Android\android-sdk\emulator\emulator.exe" -avd SanitasField_API34`
+- AVD: `SgiForm_API34` (Pixel 6, API 34, Google APIs x86_64)
+- Iniciar: `"C:\Program Files (x86)\Android\android-sdk\emulator\emulator.exe" -avd SgiForm_API34`
 - URL API desde emulador: `http://10.0.2.2:5043`
 
 ---
@@ -496,7 +496,7 @@ dotnet test tests/SanitasField.Tests/SanitasField.Tests.csproj
 2. **No recrees archivos existentes** — edita los que ya existen
 3. **Ejecuta los tests** antes y despues de cada cambio significativo:
    ```bash
-   dotnet test tests/SanitasField.Tests/SanitasField.Tests.csproj
+   dotnet test tests/SgiForm.Tests/SgiForm.Tests.csproj
    ```
 4. **Detiene API/Web** antes de compilar (bloquean .dll)
 5. **Respeta las 11 restricciones** de la seccion 10
@@ -513,11 +513,11 @@ dotnet test tests/SanitasField.Tests/SanitasField.Tests.csproj
 
 ```bash
 # Tests backend
-dotnet test tests/SanitasField.Tests/SanitasField.Tests.csproj
+dotnet test tests/SgiForm.Tests/SgiForm.Tests.csproj
 # Resultado esperado: 43/43 passed
 
 # Compilar movil
-dotnet build src/SanitasField.Mobile/SanitasField.Mobile.csproj -f net8.0-android -c Debug
+dotnet build src/SgiForm.Mobile/SgiForm.Mobile.csproj -f net8.0-android -c Debug
 # Resultado esperado: 0 Errores
 
 # Login web (API debe estar corriendo)
@@ -542,7 +542,7 @@ curl -s http://localhost:5043/api/v1/auth/login-movil -X POST -H "Content-Type: 
 ```
 Actua como un arquitecto de software senior experto en .NET 8, ASP.NET Core, Blazor Server, .NET MAUI Android, PostgreSQL, Entity Framework Core, sistemas offline-first y motores de formularios dinamicos.
 
-Estoy trabajando en un proyecto llamado SGI-FORM (nombre tecnico: SanitasField). Es un sistema de inspecciones en terreno para empresas sanitarias. El proyecto esta construido y parcialmente funcional.
+Estoy trabajando en un proyecto llamado SGI-FORM (nombre tecnico: SgiForm). Es un sistema de inspecciones en terreno para empresas sanitarias. El proyecto esta construido y parcialmente funcional.
 
 UBICACION: C:\Users\hecto\TRABAJO\dev_ia\kobotoolbox
 
@@ -561,7 +561,7 @@ ESTADO ACTUAL:
 - API: 12 controllers, 43 tests passing, funcional
 - Web: 13 paginas Blazor con InteractiveServer, login funcional, navegacion funcional
 - Movil: Login funcional, lista vacia (sin asignaciones), formulario de inspeccion incompleto (solo labels, sin controles de input)
-- Branding: SGI-FORM en toda la UI, namespaces siguen como SanitasField
+- Branding: SGI-FORM en toda la UI, namespaces siguen como SgiForm
 
 PENDIENTE MAS URGENTE:
 1. Implementar controles de input en InspeccionPage.xaml (Entry, Picker, Switch, DatePicker segun TipoControl)

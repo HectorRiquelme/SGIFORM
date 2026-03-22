@@ -1,7 +1,7 @@
 #Requires -RunAsAdministrator
 <#
 .SYNOPSIS
-    Valida que el despliegue de SanitasField esté operativo.
+    Valida que el despliegue de SgiForm esté operativo.
     Ejecutar después de deploy-server.ps1 o ante cualquier duda sobre el estado.
 #>
 
@@ -10,8 +10,8 @@ param(
     [int]   $WebPort  = 80,
     [string]$PgHost   = "localhost",
     [int]   $PgPort   = 5432,
-    [string]$PgDb     = "sanitasfield",
-    [string]$PgUser   = "sanitasfield"
+    [string]$PgDb     = "sgiform",
+    [string]$PgUser   = "sgiform"
 )
 
 $ok    = 0
@@ -24,7 +24,7 @@ function Fail  { param([string]$t) Write-Host "  [FAIL] $t" -ForegroundColor Red
 function Title { param([string]$t) Write-Host "`n── $t ──" -ForegroundColor Cyan }
 
 Write-Host "`n╔══════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host   "║   SanitasField — Validación de Despliegue  ║" -ForegroundColor Cyan
+Write-Host   "║   SgiForm — Validación de Despliegue  ║" -ForegroundColor Cyan
 Write-Host   "╚══════════════════════════════════════════╝`n" -ForegroundColor Cyan
 
 # ─── Servicios del sistema ───────────────────────────────────────────────────
@@ -42,7 +42,7 @@ else { Fail "PostgreSQL 16 no está corriendo" }
 Title "APPLICATION POOLS"
 Import-Module WebAdministration -ErrorAction SilentlyContinue
 
-foreach ($pool in @("SanitasField-API", "SanitasField-Web")) {
+foreach ($pool in @("SgiForm-API", "SgiForm-Web")) {
     try {
         $state = (Get-WebAppPoolState -Name $pool -ErrorAction Stop).Value
         if ($state -eq "Started") { Pass "AppPool '$pool' = Started" }
@@ -55,7 +55,7 @@ foreach ($pool in @("SanitasField-API", "SanitasField-Web")) {
 # ─── Sitios IIS ──────────────────────────────────────────────────────────────
 Title "SITIOS IIS"
 
-foreach ($site in @("SanitasField-API", "SanitasField-Web")) {
+foreach ($site in @("SgiForm-API", "SgiForm-Web")) {
     $s = Get-Website -Name $site -ErrorAction SilentlyContinue
     if ($s -and $s.State -eq "Started") { Pass "Sitio '$site' = Started" }
     elseif ($s) { Fail "Sitio '$site' = $($s.State)" }
@@ -66,11 +66,11 @@ foreach ($site in @("SanitasField-API", "SanitasField-Web")) {
 Title "ARCHIVOS"
 
 $criticalFiles = @(
-    "C:\SanitasField\api\SanitasField.Api.exe",
-    "C:\SanitasField\api\web.config",
-    "C:\SanitasField\api\appsettings.json",
-    "C:\SanitasField\web\SanitasField.Web.exe",
-    "C:\SanitasField\web\web.config"
+    "C:\SgiForm\api\SgiForm.Api.exe",
+    "C:\SgiForm\api\web.config",
+    "C:\SgiForm\api\appsettings.json",
+    "C:\SgiForm\web\SgiForm.Web.exe",
+    "C:\SgiForm\web\web.config"
 )
 foreach ($f in $criticalFiles) {
     if (Test-Path $f) { Pass "Existe: $(Split-Path $f -Leaf)" }
@@ -78,7 +78,7 @@ foreach ($f in $criticalFiles) {
 }
 
 # Carpetas con escritura
-foreach ($dir in @("C:\SanitasField\uploads", "C:\SanitasField\logs")) {
+foreach ($dir in @("C:\SgiForm\uploads", "C:\SgiForm\logs")) {
     $testFile = "$dir\write_test_$([Guid]::NewGuid()).tmp"
     try {
         [IO.File]::WriteAllText($testFile, "test")
@@ -179,7 +179,7 @@ if (-not (Test-Path $pgBin)) {
 Title "VARIABLES DE ENTORNO (AppPool API)"
 
 try {
-    $pool = Get-Item "IIS:\AppPools\SanitasField-API" -ErrorAction Stop
+    $pool = Get-Item "IIS:\AppPools\SgiForm-API" -ErrorAction Stop
     $vars = $pool.environmentVariables | Select-Object name, value
     $required = @("ASPNETCORE_ENVIRONMENT", "ConnectionStrings__Default", "Jwt__Key", "Storage__UploadPath")
     foreach ($req in $required) {

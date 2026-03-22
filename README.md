@@ -1,4 +1,4 @@
-# SanitasField (SGI-FORM)
+# SgiForm (SGI-FORM)
 
 Sistema de inspecciones técnicas en terreno para empresas sanitarias. Permite a operadores de campo realizar inspecciones offline desde dispositivos Android y sincronizarlas con un servidor central con validación de flujos y gestión documental.
 
@@ -28,7 +28,7 @@ Sistema de inspecciones técnicas en terreno para empresas sanitarias. Permite a
 │                    SERVIDOR WINDOWS                      │
 │                                                         │
 │  ┌──────────────┐   ┌──────────────┐   ┌────────────┐  │
-│  │ SanitasField │   │ SanitasField │   │ PostgreSQL │  │
+│  │ SgiForm │   │ SgiForm │   │ PostgreSQL │  │
 │  │     Web      │   │     API      │   │     16     │  │
 │  │ (Blazor)     │   │  (ASP.NET 8) │   │ schema: sf │  │
 │  │  :80 (IIS)   │   │  :5043 (IIS) │   │  :5432     │  │
@@ -46,12 +46,12 @@ Sistema de inspecciones técnicas en terreno para empresas sanitarias. Permite a
 
 | Proyecto | Descripción |
 |----------|-------------|
-| `SanitasField.Domain` | Entidades, enums, interfaces de dominio |
-| `SanitasField.Application` | DTOs, contratos de servicios |
-| `SanitasField.Infrastructure` | EF Core, PostgreSQL, servicios (Auth, Excel, FlowValidator) |
-| `SanitasField.Api` | ASP.NET Core 8 Web API — endpoints REST |
-| `SanitasField.Web` | Blazor Server — panel de supervisores |
-| `SanitasField.Mobile` | .NET MAUI — app Android offline-first |
+| `SgiForm.Domain` | Entidades, enums, interfaces de dominio |
+| `SgiForm.Application` | DTOs, contratos de servicios |
+| `SgiForm.Infrastructure` | EF Core, PostgreSQL, servicios (Auth, Excel, FlowValidator) |
+| `SgiForm.Api` | ASP.NET Core 8 Web API — endpoints REST |
+| `SgiForm.Web` | Blazor Server — panel de supervisores |
+| `SgiForm.Mobile` | .NET MAUI — app Android offline-first |
 
 ### Stack Tecnológico
 
@@ -92,24 +92,24 @@ Sistema de inspecciones técnicas en terreno para empresas sanitarias. Permite a
 ```
 /
 ├── src/
-│   ├── SanitasField.Api/          # API REST principal
+│   ├── SgiForm.Api/          # API REST principal
 │   │   ├── Controllers/
 │   │   ├── appsettings.json
 │   │   ├── appsettings.Production.json  # template — ver Variables de Entorno
 │   │   └── Program.cs
-│   ├── SanitasField.Domain/       # Entidades y contratos
-│   ├── SanitasField.Infrastructure/
+│   ├── SgiForm.Domain/       # Entidades y contratos
+│   ├── SgiForm.Infrastructure/
 │   │   ├── Migrations/            # EF Core migrations
 │   │   ├── Persistence/AppDbContext.cs
 │   │   └── Services/
-│   ├── SanitasField.Web/          # Blazor Server
-│   └── SanitasField.Mobile/       # MAUI Android
+│   ├── SgiForm.Web/          # Blazor Server
+│   └── SgiForm.Mobile/       # MAUI Android
 ├── database/
 │   ├── 01_schema.sql              # DDL completo (schema sf)
 │   ├── 02_seed.sql                # Datos iniciales / demo
 │   └── 03_operador_refresh_token.sql  # Migración: tokens móviles
 ├── tests/
-│   └── SanitasField.Tests/        # Tests de integración xUnit
+│   └── SgiForm.Tests/        # Tests de integración xUnit
 ├── deploy/
 │   ├── DEPLOY_MANUAL.md           # Manual completo paso a paso
 │   ├── deploy-server.ps1          # Script automatizado de despliegue
@@ -125,19 +125,19 @@ Sistema de inspecciones técnicas en terreno para empresas sanitarias. Permite a
 ### Restaurar dependencias
 
 ```powershell
-dotnet restore SanitasField.sln
+dotnet restore SgiForm.sln
 ```
 
 ### Compilar solución completa
 
 ```powershell
-dotnet build SanitasField.sln -c Release
+dotnet build SgiForm.sln -c Release
 ```
 
 ### Ejecutar tests
 
 ```powershell
-dotnet test tests/SanitasField.Tests/SanitasField.Tests.csproj -v normal
+dotnet test tests/SgiForm.Tests/SgiForm.Tests.csproj -v normal
 ```
 
 Los tests usan base de datos InMemory (`ASPNETCORE_ENVIRONMENT=Testing`). No requieren PostgreSQL.
@@ -146,14 +146,14 @@ Los tests usan base de datos InMemory (`ASPNETCORE_ENVIRONMENT=Testing`). No req
 
 ```powershell
 # API
-dotnet publish src/SanitasField.Api/SanitasField.Api.csproj `
+dotnet publish src/SgiForm.Api/SgiForm.Api.csproj `
     -c Release -r win-x64 --self-contained false `
-    -o C:\SanitasField\api
+    -o C:\SgiForm\api
 
 # Web (Blazor)
-dotnet publish src/SanitasField.Web/SanitasField.Web.csproj `
+dotnet publish src/SgiForm.Web/SgiForm.Web.csproj `
     -c Release -r win-x64 --self-contained false `
-    -o C:\SanitasField\web
+    -o C:\SgiForm\web
 ```
 
 ---
@@ -186,9 +186,9 @@ Ver `deploy/DEPLOY_MANUAL.md` para instrucciones completas paso a paso.
 #### Estructura de carpetas en servidor
 
 ```
-C:\SanitasField\
-├── api\           # Publicación de SanitasField.Api
-├── web\           # Publicación de SanitasField.Web
+C:\SgiForm\
+├── api\           # Publicación de SgiForm.Api
+├── web\           # Publicación de SgiForm.Web
 ├── uploads\       # Fotos de inspecciones (NTFS: IIS_IUSRS ← Modify)
 ├── logs\          # Logs de Serilog (NTFS: IIS_IUSRS ← Modify)
 └── backups\       # Backups automáticos pre-despliegue
@@ -198,15 +198,15 @@ C:\SanitasField\
 
 | Pool | Pipeline | .NET CLR | Idle Timeout | Start Mode |
 |------|----------|----------|-------------|------------|
-| SanitasField-API | Integrated | No Managed Code | 0 min | AlwaysRunning |
-| SanitasField-Web | Integrated | No Managed Code | 0 min | AlwaysRunning |
+| SgiForm-API | Integrated | No Managed Code | 0 min | AlwaysRunning |
+| SgiForm-Web | Integrated | No Managed Code | 0 min | AlwaysRunning |
 
 #### Bindings IIS
 
 | Sitio | Puerto | AppPool |
 |-------|--------|---------|
-| SanitasField-API | 5043 | SanitasField-API |
-| SanitasField-Web | 80 | SanitasField-Web |
+| SgiForm-API | 5043 | SgiForm-API |
+| SgiForm-Web | 80 | SgiForm-Web |
 
 ---
 
@@ -233,21 +233,21 @@ $psql = "C:\PostgreSQL\16\bin\psql.exe"
 & $psql -U postgres -f "database\02_seed.sql"
 
 # 3. Migración: soporte refresh token operadores móviles
-& $psql -U sanitasfield -d sanitasfield -f "database\03_operador_refresh_token.sql"
+& $psql -U sgiform -d sgiform -f "database\03_operador_refresh_token.sql"
 ```
 
 ### Usuario de base de datos
 
-El script `01_schema.sql` crea el usuario `sanitasfield`. Cambiar la contraseña antes del primer despliegue:
+El script `01_schema.sql` crea el usuario `sgiform`. Cambiar la contraseña antes del primer despliegue:
 
 ```sql
-ALTER USER sanitasfield WITH PASSWORD 'nueva_password_segura';
+ALTER USER sgiform WITH PASSWORD 'nueva_password_segura';
 ```
 
 ### Cadena de conexión
 
 ```
-Host=localhost;Port=5432;Database=sanitasfield;Username=sanitasfield;Password=TU_PASSWORD
+Host=localhost;Port=5432;Database=sgiform;Username=sgiform;Password=TU_PASSWORD
 ```
 
 ---
@@ -257,16 +257,16 @@ Host=localhost;Port=5432;Database=sanitasfield;Username=sanitasfield;Password=TU
 **NUNCA** poner secretos en `appsettings.json` ni en el repositorio.
 Los secretos se configuran como **variables de entorno del AppPool IIS**.
 
-### Variables obligatorias — AppPool SanitasField-API
+### Variables obligatorias — AppPool SgiForm-API
 
 | Variable | Ejemplo | Descripción |
 |----------|---------|-------------|
 | `ASPNETCORE_ENVIRONMENT` | `Production` | Modo de ejecución |
-| `ConnectionStrings__Default` | `Host=localhost;Port=5432;Database=sanitasfield;...` | Cadena de conexión PostgreSQL |
+| `ConnectionStrings__Default` | `Host=localhost;Port=5432;Database=sgiform;...` | Cadena de conexión PostgreSQL |
 | `Jwt__Key` | `[64+ caracteres aleatorios]` | Clave HMAC-SHA256 para JWT |
 | `Jwt__Issuer` | `https://api.miempresa.cl` | Issuer del token |
-| `Jwt__Audience` | `SanitasField` | Audience del token |
-| `Storage__UploadPath` | `C:\SanitasField\uploads` | Ruta de fotos |
+| `Jwt__Audience` | `SgiForm` | Audience del token |
+| `Storage__UploadPath` | `C:\SgiForm\uploads` | Ruta de fotos |
 
 ### Variables opcionales — Rate Limiting
 
@@ -286,7 +286,7 @@ Los secretos se configuran como **variables de entorno del AppPool IIS**.
 
 ```powershell
 Import-Module WebAdministration
-$pool = Get-Item "IIS:\AppPools\SanitasField-API"
+$pool = Get-Item "IIS:\AppPools\SgiForm-API"
 $pool.environmentVariables.Add("Jwt__Key", "tu_clave_aqui")
 $pool | Set-Item
 ```
@@ -333,7 +333,7 @@ Verifica:
 Get-EventLog -LogName Application -Source "IIS AspNetCore Module*" -Newest 10
 
 # Ver logs de la aplicación
-Get-Content "C:\SanitasField\logs\api-*.log" -Tail 50
+Get-Content "C:\SgiForm\logs\api-*.log" -Tail 50
 ```
 
 **Causas comunes:**
@@ -345,8 +345,8 @@ Get-Content "C:\SanitasField\logs\api-*.log" -Tail 50
 
 ```powershell
 # Probar startup manualmente (muestra error en consola)
-cd C:\SanitasField\api
-.\SanitasField.Api.exe
+cd C:\SgiForm\api
+.\SgiForm.Api.exe
 ```
 
 ### PostgreSQL no conecta
@@ -356,7 +356,7 @@ cd C:\SanitasField\api
 Get-Service "postgresql-16"
 
 # Probar conexión directa
-& "C:\PostgreSQL\16\bin\psql.exe" -U sanitasfield -d sanitasfield -c "\conninfo"
+& "C:\PostgreSQL\16\bin\psql.exe" -U sgiform -d sgiform -c "\conninfo"
 ```
 
 ### AppPool se detiene solo (Rapid Fail Protection)
@@ -366,14 +366,14 @@ Get-Service "postgresql-16"
 Get-EventLog -LogName System -Source "Microsoft-Windows-WAS" -Newest 20
 
 # Reiniciar
-Restart-WebAppPool "SanitasField-API"
+Restart-WebAppPool "SgiForm-API"
 ```
 
 ### Permisos insuficientes en uploads/logs
 
 ```powershell
-icacls "C:\SanitasField\uploads" /grant "IIS_IUSRS:(OI)(CI)M"
-icacls "C:\SanitasField\logs"   /grant "IIS_IUSRS:(OI)(CI)M"
+icacls "C:\SgiForm\uploads" /grant "IIS_IUSRS:(OI)(CI)M"
+icacls "C:\SgiForm\logs"   /grant "IIS_IUSRS:(OI)(CI)M"
 ```
 
 ---
@@ -385,7 +385,7 @@ icacls "C:\SanitasField\logs"   /grant "IIS_IUSRS:(OI)(CI)M"
 .\deploy\rollback.ps1
 
 # Rollback a un backup específico
-.\deploy\rollback.ps1 -BackupPath "C:\SanitasField\backups\20260322_143000"
+.\deploy\rollback.ps1 -BackupPath "C:\SgiForm\backups\20260322_143000"
 ```
 
 El script detiene los AppPools, restaura archivos con `robocopy`, reinicia los pools y ejecuta validación automática.
@@ -406,7 +406,7 @@ DROP INDEX IF EXISTS sf.idx_rt_operador_id;
 ### Ejecutar todos los tests
 
 ```powershell
-dotnet test tests/SanitasField.Tests/ -v normal
+dotnet test tests/SgiForm.Tests/ -v normal
 ```
 
 **Resultado esperado: 46 tests, 0 failures.**
@@ -455,4 +455,4 @@ Los tests de integración usan `WebApplicationFactory<Program>` con base de dato
 
 ## Licencia
 
-Uso interno — SanitasField © 2026
+Uso interno — SgiForm © 2026

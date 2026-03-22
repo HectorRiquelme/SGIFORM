@@ -1,4 +1,4 @@
-# Manual de Despliegue — SanitasField v1.0
+# Manual de Despliegue — SgiForm v1.0
 ## Windows Server + IIS + PostgreSQL Nativo
 
 > **Nivel:** Producción real
@@ -34,7 +34,7 @@
 │  ┌─────────────────────┐   ┌─────────────────────────────┐  │
 │  │   IIS - Sitio Web   │   │     IIS - Sitio API         │  │
 │  │   Puerto 80/443     │   │     Puerto 5043             │  │
-│  │   SanitasField.Web  │   │     SanitasField.Api        │  │
+│  │   SgiForm.Web  │   │     SgiForm.Api        │  │
 │  │   (Blazor Server)   │   │     (ASP.NET Core REST)     │  │
 │  │   AppPool: Web      │   │     AppPool: API            │  │
 │  └─────────────────────┘   └─────────────────────────────┘  │
@@ -43,11 +43,11 @@
 │                      ▼                                        │
 │  ┌─────────────────────────────────────────────────────────┐  │
 │  │           PostgreSQL 16 (Servicio Windows)              │  │
-│  │           localhost:5432  Database: sanitasfield        │  │
-│  │           Schema: sf       User: sanitasfield           │  │
+│  │           localhost:5432  Database: sgiform        │  │
+│  │           Schema: sf       User: sgiform           │  │
 │  └─────────────────────────────────────────────────────────┘  │
 │                                                             │
-│  C:\SanitasField\                                           │
+│  C:\SgiForm\                                           │
 │    ├── api\          ← publicación API                      │
 │    ├── web\          ← publicación Web                      │
 │    ├── uploads\      ← fotos de inspección                  │
@@ -122,12 +122,12 @@ Enable-WindowsOptionalFeature -Online -FeatureName `
 ```powershell
 # Crear carpetas de la aplicación
 $dirs = @(
-    'C:\SanitasField\api',
-    'C:\SanitasField\web',
-    'C:\SanitasField\uploads',
-    'C:\SanitasField\logs',
-    'C:\SanitasField\backups',
-    'C:\SanitasField\scripts'
+    'C:\SgiForm\api',
+    'C:\SgiForm\web',
+    'C:\SgiForm\uploads',
+    'C:\SgiForm\logs',
+    'C:\SgiForm\backups',
+    'C:\SgiForm\scripts'
 )
 foreach ($d in $dirs) { New-Item -ItemType Directory -Path $d -Force }
 ```
@@ -137,9 +137,9 @@ foreach ($d in $dirs) { New-Item -ItemType Directory -Path $d -Force }
 ```powershell
 # Desde la máquina de origen (ajustar IP/ruta según entorno)
 # Ejemplo si ya tienes acceso RDP:
-Copy-Item ".\database\01_schema.sql"  "C:\SanitasField\scripts\"
-Copy-Item ".\database\02_seed.sql"    "C:\SanitasField\scripts\"
-Copy-Item ".\database\03_operador_refresh_token.sql" "C:\SanitasField\scripts\"
+Copy-Item ".\database\01_schema.sql"  "C:\SgiForm\scripts\"
+Copy-Item ".\database\02_seed.sql"    "C:\SgiForm\scripts\"
+Copy-Item ".\database\03_operador_refresh_token.sql" "C:\SgiForm\scripts\"
 ```
 
 ---
@@ -153,7 +153,7 @@ El **Hosting Bundle** instala el runtime de .NET 8 **y** el módulo ASP.NET Core
 ```powershell
 # Descargar Hosting Bundle .NET 8 LTS
 $url = "https://download.visualstudio.microsoft.com/download/pr/dotnet-hosting-8.0-win.exe"
-$destino = "C:\SanitasField\dotnet-hosting-8.0-win.exe"
+$destino = "C:\SgiForm\dotnet-hosting-8.0-win.exe"
 
 Write-Host "Descargando .NET 8 Hosting Bundle..."
 Invoke-WebRequest -Uri $url -OutFile $destino
@@ -192,7 +192,7 @@ Get-WebConfiguration -Filter "system.webServer/globalModules/add[@name='AspNetCo
 
 ```powershell
 $pgUrl = "https://get.enterprisedb.com/postgresql/postgresql-16.3-1-windows-x64.exe"
-$pgInstaller = "C:\SanitasField\postgresql-16.3-1-windows-x64.exe"
+$pgInstaller = "C:\SgiForm\postgresql-16.3-1-windows-x64.exe"
 Invoke-WebRequest -Uri $pgUrl -OutFile $pgInstaller
 ```
 
@@ -251,9 +251,9 @@ Get-Service -Name "postgresql-16" | Select-Object Name, Status, StartType
 $pgBin   = "C:\PostgreSQL\16\bin"
 $pgSa    = "postgres"
 $pgSaPwd = "SuperAdmin_PG_2024!"     # contraseña del superusuario postgres
-$appUser = "sanitasfield"
+$appUser = "sgiform"
 $appPwd  = "CAMBIAR_PASSWORD_APP"    # ← contraseña del usuario de aplicación
-$dbName  = "sanitasfield"
+$dbName  = "sgiform"
 
 # Exportar contraseña para que psql no la solicite interactivamente
 $env:PGPASSWORD = $pgSaPwd
@@ -283,19 +283,19 @@ $env:PGPASSWORD = $pgSaPwd
 # Script 01: Schema completo
 Write-Host "Ejecutando 01_schema.sql..."
 & "$pgBin\psql.exe" -U $pgSa -h localhost -d $dbName `
-    -f "C:\SanitasField\scripts\01_schema.sql"
+    -f "C:\SgiForm\scripts\01_schema.sql"
 if ($LASTEXITCODE -ne 0) { throw "ERROR en 01_schema.sql" }
 
 # Script 02: Datos semilla
 Write-Host "Ejecutando 02_seed.sql..."
 & "$pgBin\psql.exe" -U $pgSa -h localhost -d $dbName `
-    -f "C:\SanitasField\scripts\02_seed.sql"
+    -f "C:\SgiForm\scripts\02_seed.sql"
 if ($LASTEXITCODE -ne 0) { throw "ERROR en 02_seed.sql" }
 
 # Script 03: Migración refresh token operadores
 Write-Host "Ejecutando 03_operador_refresh_token.sql..."
 & "$pgBin\psql.exe" -U $pgSa -h localhost -d $dbName `
-    -f "C:\SanitasField\scripts\03_operador_refresh_token.sql"
+    -f "C:\SgiForm\scripts\03_operador_refresh_token.sql"
 if ($LASTEXITCODE -ne 0) { throw "ERROR en 03_operador_refresh_token.sql" }
 
 Write-Host "Scripts SQL ejecutados correctamente."
@@ -306,7 +306,7 @@ Remove-Item Env:\PGPASSWORD  # Limpiar contraseña de entorno
 
 ```powershell
 $env:PGPASSWORD = $pgSaPwd
-& "$pgBin\psql.exe" -U $pgSa -h localhost -d sanitasfield -c `
+& "$pgBin\psql.exe" -U $pgSa -h localhost -d sgiform -c `
     "SELECT table_name FROM information_schema.tables WHERE table_schema = 'sf' ORDER BY table_name;"
 ```
 
@@ -318,7 +318,7 @@ Editar `C:\PostgreSQL\16\data\pg_hba.conf` para asegurar acceso local:
 
 ```
 # Agregar o verificar que esta línea exista:
-host    sanitasfield    sanitasfield    127.0.0.1/32    scram-sha-256
+host    sgiform    sgiform    127.0.0.1/32    scram-sha-256
 ```
 
 Recargar configuración:
@@ -335,27 +335,27 @@ Recargar configuración:
 
 ```powershell
 # Posicionarse en la raíz del repositorio
-cd C:\repos\SanitasField
+cd C:\repos\SgiForm
 
 # Restaurar dependencias
-dotnet restore SanitasField.sln
+dotnet restore SgiForm.sln
 
 # Build en modo Release
-dotnet build SanitasField.sln -c Release --no-restore
+dotnet build SgiForm.sln -c Release --no-restore
 
 # Ejecutar tests antes de publicar (obligatorio)
-dotnet test tests/SanitasField.Tests/SanitasField.Tests.csproj -c Release --no-build
+dotnet test tests/SgiForm.Tests/SgiForm.Tests.csproj -c Release --no-build
 if ($LASTEXITCODE -ne 0) { throw "Tests fallaron. No se publicará." }
 
 # Publicar API
-dotnet publish src/SanitasField.Api/SanitasField.Api.csproj `
+dotnet publish src/SgiForm.Api/SgiForm.Api.csproj `
     -c Release `
     -o "C:\publish\api" `
     --no-build `
     -p:EnvironmentName=Production
 
 # Publicar Web
-dotnet publish src/SanitasField.Web/SanitasField.Web.csproj `
+dotnet publish src/SgiForm.Web/SgiForm.Web.csproj `
     -c Release `
     -o "C:\publish\web" `
     --no-build `
@@ -366,12 +366,12 @@ dotnet publish src/SanitasField.Web/SanitasField.Web.csproj `
 
 ```powershell
 # Opción A: Si se construye en el mismo servidor
-robocopy "C:\publish\api" "C:\SanitasField\api" /MIR /R:3 /W:5
-robocopy "C:\publish\web" "C:\SanitasField\web" /MIR /R:3 /W:5
+robocopy "C:\publish\api" "C:\SgiForm\api" /MIR /R:3 /W:5
+robocopy "C:\publish\web" "C:\SgiForm\web" /MIR /R:3 /W:5
 
 # Opción B: Desde máquina de origen via red (ajustar UNC path)
-robocopy "C:\publish\api" "\\SERVIDOR\C$\SanitasField\api" /MIR /R:3 /W:5
-robocopy "C:\publish\web" "\\SERVIDOR\C$\SanitasField\web" /MIR /R:3 /W:5
+robocopy "C:\publish\api" "\\SERVIDOR\C$\SgiForm\api" /MIR /R:3 /W:5
+robocopy "C:\publish\web" "\\SERVIDOR\C$\SgiForm\web" /MIR /R:3 /W:5
 ```
 
 ### 7.3 Verificar web.config generado
@@ -379,8 +379,8 @@ robocopy "C:\publish\web" "\\SERVIDOR\C$\SanitasField\web" /MIR /R:3 /W:5
 El `dotnet publish` genera automáticamente `web.config` para IIS con el módulo ANCM. Verificar que existe:
 
 ```powershell
-Test-Path "C:\SanitasField\api\web.config"  # Debe ser True
-Test-Path "C:\SanitasField\web\web.config"  # Debe ser True
+Test-Path "C:\SgiForm\api\web.config"  # Debe ser True
+Test-Path "C:\SgiForm\web\web.config"  # Debe ser True
 ```
 
 ---
@@ -393,18 +393,18 @@ Test-Path "C:\SanitasField\web\web.config"  # Debe ser True
 Import-Module WebAdministration
 
 # AppPool para la API
-New-WebAppPool -Name "SanitasField-API"
-Set-ItemProperty "IIS:\AppPools\SanitasField-API" managedRuntimeVersion ""
-Set-ItemProperty "IIS:\AppPools\SanitasField-API" startMode "AlwaysRunning"
-Set-ItemProperty "IIS:\AppPools\SanitasField-API" processModel.idleTimeout "00:00:00"
-Set-ItemProperty "IIS:\AppPools\SanitasField-API" recycling.periodicRestart.time "00:00:00"
+New-WebAppPool -Name "SgiForm-API"
+Set-ItemProperty "IIS:\AppPools\SgiForm-API" managedRuntimeVersion ""
+Set-ItemProperty "IIS:\AppPools\SgiForm-API" startMode "AlwaysRunning"
+Set-ItemProperty "IIS:\AppPools\SgiForm-API" processModel.idleTimeout "00:00:00"
+Set-ItemProperty "IIS:\AppPools\SgiForm-API" recycling.periodicRestart.time "00:00:00"
 
 # AppPool para la Web (Blazor)
-New-WebAppPool -Name "SanitasField-Web"
-Set-ItemProperty "IIS:\AppPools\SanitasField-Web" managedRuntimeVersion ""
-Set-ItemProperty "IIS:\AppPools\SanitasField-Web" startMode "AlwaysRunning"
-Set-ItemProperty "IIS:\AppPools\SanitasField-Web" processModel.idleTimeout "00:00:00"
-Set-ItemProperty "IIS:\AppPools\SanitasField-Web" recycling.periodicRestart.time "00:00:00"
+New-WebAppPool -Name "SgiForm-Web"
+Set-ItemProperty "IIS:\AppPools\SgiForm-Web" managedRuntimeVersion ""
+Set-ItemProperty "IIS:\AppPools\SgiForm-Web" startMode "AlwaysRunning"
+Set-ItemProperty "IIS:\AppPools\SgiForm-Web" processModel.idleTimeout "00:00:00"
+Set-ItemProperty "IIS:\AppPools\SgiForm-Web" recycling.periodicRestart.time "00:00:00"
 ```
 
 > **Crítico:** `managedRuntimeVersion = ""` significa **No Managed Code**. Esto es OBLIGATORIO para ASP.NET Core.
@@ -413,16 +413,16 @@ Set-ItemProperty "IIS:\AppPools\SanitasField-Web" recycling.periodicRestart.time
 
 ```powershell
 # Sitio API — Puerto 5043
-New-Website -Name "SanitasField-API" `
-    -PhysicalPath "C:\SanitasField\api" `
-    -ApplicationPool "SanitasField-API" `
+New-Website -Name "SgiForm-API" `
+    -PhysicalPath "C:\SgiForm\api" `
+    -ApplicationPool "SgiForm-API" `
     -Port 5043 `
     -Force
 
 # Sitio Web (Blazor) — Puerto 80
-New-Website -Name "SanitasField-Web" `
-    -PhysicalPath "C:\SanitasField\web" `
-    -ApplicationPool "SanitasField-Web" `
+New-Website -Name "SgiForm-Web" `
+    -PhysicalPath "C:\SgiForm\web" `
+    -ApplicationPool "SgiForm-Web" `
     -Port 80 `
     -Force
 ```
@@ -431,23 +431,23 @@ New-Website -Name "SanitasField-Web" `
 
 ```powershell
 # La identidad del AppPool necesita acceso a sus carpetas
-$acl = Get-Acl "C:\SanitasField\api"
+$acl = Get-Acl "C:\SgiForm\api"
 $rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
-    "IIS AppPool\SanitasField-API", "ReadAndExecute", "ContainerInherit,ObjectInherit", "None", "Allow")
+    "IIS AppPool\SgiForm-API", "ReadAndExecute", "ContainerInherit,ObjectInherit", "None", "Allow")
 $acl.SetAccessRule($rule)
-Set-Acl "C:\SanitasField\api" $acl
+Set-Acl "C:\SgiForm\api" $acl
 
-$acl = Get-Acl "C:\SanitasField\web"
+$acl = Get-Acl "C:\SgiForm\web"
 $rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
-    "IIS AppPool\SanitasField-Web", "ReadAndExecute", "ContainerInherit,ObjectInherit", "None", "Allow")
+    "IIS AppPool\SgiForm-Web", "ReadAndExecute", "ContainerInherit,ObjectInherit", "None", "Allow")
 $acl.SetAccessRule($rule)
-Set-Acl "C:\SanitasField\web" $acl
+Set-Acl "C:\SgiForm\web" $acl
 
 # Uploads y logs necesitan escritura para la API
-foreach ($carpeta in @("C:\SanitasField\uploads", "C:\SanitasField\logs")) {
+foreach ($carpeta in @("C:\SgiForm\uploads", "C:\SgiForm\logs")) {
     $acl = Get-Acl $carpeta
     $rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
-        "IIS AppPool\SanitasField-API", "Modify", "ContainerInherit,ObjectInherit", "None", "Allow")
+        "IIS AppPool\SgiForm-API", "Modify", "ContainerInherit,ObjectInherit", "None", "Allow")
     $acl.SetAccessRule($rule)
     Set-Acl $carpeta $acl
 }
@@ -458,10 +458,10 @@ Write-Host "Permisos configurados."
 ### 8.4 Iniciar sitios
 
 ```powershell
-Start-WebSite -Name "SanitasField-API"
-Start-WebSite -Name "SanitasField-Web"
-Start-WebAppPool -Name "SanitasField-API"
-Start-WebAppPool -Name "SanitasField-Web"
+Start-WebSite -Name "SgiForm-API"
+Start-WebSite -Name "SgiForm-Web"
+Start-WebAppPool -Name "SgiForm-API"
+Start-WebAppPool -Name "SgiForm-Web"
 ```
 
 ---
@@ -491,29 +491,29 @@ function Set-AppPoolEnv {
     $pool | Set-Item
 }
 
-# ─── Variables para SanitasField-API ────────────────────────────────────────
+# ─── Variables para SgiForm-API ────────────────────────────────────────
 
 # Entorno .NET
-Set-AppPoolEnv "SanitasField-API" "ASPNETCORE_ENVIRONMENT" "Production"
+Set-AppPoolEnv "SgiForm-API" "ASPNETCORE_ENVIRONMENT" "Production"
 
 # Connection string completo (REEMPLAZAR valores reales)
-Set-AppPoolEnv "SanitasField-API" "ConnectionStrings__Default" `
-    "Host=localhost;Port=5432;Database=sanitasfield;Username=sanitasfield;Password=TU_PASSWORD_AQUI;Search Path=sf,public"
+Set-AppPoolEnv "SgiForm-API" "ConnectionStrings__Default" `
+    "Host=localhost;Port=5432;Database=sgiform;Username=sgiform;Password=TU_PASSWORD_AQUI;Search Path=sf,public"
 
 # JWT — USAR UNA CLAVE ALEATORIA DE 64+ CARACTERES
-Set-AppPoolEnv "SanitasField-API" "Jwt__Key" `
+Set-AppPoolEnv "SgiForm-API" "Jwt__Key" `
     "GENERAR_CLAVE_ALEATORIA_MINIMO_64_CARACTERES_AQUI_UNICA_POR_ENTORNO"
-Set-AppPoolEnv "SanitasField-API" "Jwt__Issuer" "SanitasField"
-Set-AppPoolEnv "SanitasField-API" "Jwt__Audience" "SanitasField"
-Set-AppPoolEnv "SanitasField-API" "Jwt__ExpirationMinutes" "60"
+Set-AppPoolEnv "SgiForm-API" "Jwt__Issuer" "SgiForm"
+Set-AppPoolEnv "SgiForm-API" "Jwt__Audience" "SgiForm"
+Set-AppPoolEnv "SgiForm-API" "Jwt__ExpirationMinutes" "60"
 
 # Storage
-Set-AppPoolEnv "SanitasField-API" "Storage__UploadPath" "C:\SanitasField\uploads"
-Set-AppPoolEnv "SanitasField-API" "Storage__MaxPhotoMb" "10"
+Set-AppPoolEnv "SgiForm-API" "Storage__UploadPath" "C:\SgiForm\uploads"
+Set-AppPoolEnv "SgiForm-API" "Storage__MaxPhotoMb" "10"
 
-# ─── Variables para SanitasField-Web ────────────────────────────────────────
-Set-AppPoolEnv "SanitasField-Web" "ASPNETCORE_ENVIRONMENT" "Production"
-Set-AppPoolEnv "SanitasField-Web" "ApiBaseUrl" "http://localhost:5043"
+# ─── Variables para SgiForm-Web ────────────────────────────────────────
+Set-AppPoolEnv "SgiForm-Web" "ASPNETCORE_ENVIRONMENT" "Production"
+Set-AppPoolEnv "SgiForm-Web" "ApiBaseUrl" "http://localhost:5043"
 ```
 
 ### 9.3 Generar JWT Key segura
@@ -525,14 +525,14 @@ $bytes = New-Object byte[] 64
 $key = [Convert]::ToBase64String($bytes)
 Write-Host "JWT Key generada:"
 Write-Host $key
-# Copiar este valor y usarlo en Set-AppPoolEnv "SanitasField-API" "Jwt__Key"
+# Copiar este valor y usarlo en Set-AppPoolEnv "SgiForm-API" "Jwt__Key"
 ```
 
 ### 9.4 Verificar variables configuradas
 
 ```powershell
 # Ver variables del AppPool API
-(Get-Item "IIS:\AppPools\SanitasField-API").environmentVariables |
+(Get-Item "IIS:\AppPools\SgiForm-API").environmentVariables |
     Select-Object name, @{N='value';E={
         if ($_.name -match "Password|Key|Secret") {"***OCULTO***"} else {$_.value}
     }} |
@@ -545,14 +545,14 @@ Write-Host $key
 
 ```
 C:\
-├── SanitasField\
-│   ├── api\                    ← Publicación de SanitasField.Api
-│   │   ├── SanitasField.Api.exe
+├── SgiForm\
+│   ├── api\                    ← Publicación de SgiForm.Api
+│   │   ├── SgiForm.Api.exe
 │   │   ├── web.config          ← Generado por dotnet publish (ANCM)
 │   │   ├── appsettings.json    ← Valores base (sin secretos)
 │   │   └── appsettings.Production.json ← Overrides no sensibles
-│   ├── web\                    ← Publicación de SanitasField.Web
-│   │   ├── SanitasField.Web.exe
+│   ├── web\                    ← Publicación de SgiForm.Web
+│   │   ├── SgiForm.Web.exe
 │   │   ├── web.config
 │   │   └── appsettings.json
 │   ├── uploads\                ← Fotos de inspección (escritura API)
@@ -584,7 +584,7 @@ Get-Service W3SVC | Select-Object Name, Status
 
 # AppPools activos
 Get-ChildItem "IIS:\AppPools" |
-    Where-Object { $_.Name -match "SanitasField" } |
+    Where-Object { $_.Name -match "SgiForm" } |
     Select-Object Name, State
 ```
 
@@ -628,7 +628,7 @@ try {
 
 ```powershell
 $env:PGPASSWORD = "TU_PASSWORD_APP"
-& "C:\PostgreSQL\16\bin\psql.exe" -U sanitasfield -h localhost -d sanitasfield -c `
+& "C:\PostgreSQL\16\bin\psql.exe" -U sgiform -h localhost -d sgiform -c `
     "SELECT COUNT(*) as tablas FROM information_schema.tables WHERE table_schema = 'sf';"
 Remove-Item Env:\PGPASSWORD
 ```
@@ -646,7 +646,7 @@ Remove-Item Env:\PGPASSWORD
 Get-WebConfiguration "system.webServer/globalModules/add[@name='AspNetCoreModuleV2']"
 
 # Si no aparece, reinstalar Hosting Bundle:
-Start-Process "C:\SanitasField\dotnet-hosting-8.0-win.exe" `
+Start-Process "C:\SgiForm\dotnet-hosting-8.0-win.exe" `
     -ArgumentList "/quiet /norestart" -Wait
 net stop was /y && net start w3svc
 ```
@@ -655,7 +655,7 @@ net stop was /y && net start w3svc
 ```powershell
 Get-Content "C:\Windows\System32\LogFiles\HTTPERR\httperr*.log" -Tail 20
 # También revisar:
-Get-Content "C:\SanitasField\logs\sanitasfield-$(Get-Date -f yyyyMMdd).log" -Tail 50
+Get-Content "C:\SgiForm\logs\sgiform-$(Get-Date -f yyyyMMdd).log" -Tail 50
 ```
 
 ### 12.2 HTTP 502.5 — ANCM Out-Of-Process Startup Failure
@@ -664,9 +664,9 @@ Get-Content "C:\SanitasField\logs\sanitasfield-$(Get-Date -f yyyyMMdd).log" -Tai
 
 ```powershell
 # Probar ejecutar la app directamente (sin IIS) para ver el error real
-cd "C:\SanitasField\api"
+cd "C:\SgiForm\api"
 $env:ASPNETCORE_ENVIRONMENT = "Production"
-.\SanitasField.Api.exe
+.\SgiForm.Api.exe
 # El error aparecerá en la consola
 ```
 
@@ -686,28 +686,28 @@ netstat -ano | findstr ":5432"
 
 # Test de login con credenciales de app
 $env:PGPASSWORD = "TU_PASSWORD_APP"
-& "C:\PostgreSQL\16\bin\psql.exe" -U sanitasfield -h 127.0.0.1 -d sanitasfield -c "\conninfo"
+& "C:\PostgreSQL\16\bin\psql.exe" -U sgiform -h 127.0.0.1 -d sgiform -c "\conninfo"
 Remove-Item Env:\PGPASSWORD
 
 # Si falla: verificar pg_hba.conf
 notepad "C:\PostgreSQL\16\data\pg_hba.conf"
 ```
 
-### 12.4 Error "password authentication failed for user sanitasfield"
+### 12.4 Error "password authentication failed for user sgiform"
 
 ```powershell
 # Resetear contraseña del usuario de aplicación
 $env:PGPASSWORD = "SuperAdmin_PG_2024!"
 & "C:\PostgreSQL\16\bin\psql.exe" -U postgres -h localhost -c `
-    "ALTER USER sanitasfield WITH PASSWORD 'NUEVA_PASSWORD';"
+    "ALTER USER sgiform WITH PASSWORD 'NUEVA_PASSWORD';"
 Remove-Item Env:\PGPASSWORD
 
 # Actualizar la variable de entorno del AppPool
-Set-AppPoolEnv "SanitasField-API" "ConnectionStrings__Default" `
-    "Host=localhost;Port=5432;Database=sanitasfield;Username=sanitasfield;Password=NUEVA_PASSWORD;Search Path=sf,public"
+Set-AppPoolEnv "SgiForm-API" "ConnectionStrings__Default" `
+    "Host=localhost;Port=5432;Database=sgiform;Username=sgiform;Password=NUEVA_PASSWORD;Search Path=sf,public"
 
 # Reiniciar AppPool
-Restart-WebAppPool "SanitasField-API"
+Restart-WebAppPool "SgiForm-API"
 ```
 
 ### 12.5 AppPool se detiene inmediatamente
@@ -718,9 +718,9 @@ Get-EventLog -LogName Application -Source "IIS*","ASP*","W3SVC*" -Newest 20 |
     Format-Table TimeGenerated, EntryType, Message -Wrap
 
 # Habilitar stdout logging temporalmente (solo para diagnóstico)
-# Editar C:\SanitasField\api\web.config y cambiar:
+# Editar C:\SgiForm\api\web.config y cambiar:
 # stdoutLogEnabled="false" → stdoutLogEnabled="true"
-# Los logs aparecerán en C:\SanitasField\api\logs\
+# Los logs aparecerán en C:\SgiForm\api\logs\
 ```
 
 ### 12.6 Error en scripts SQL
@@ -728,9 +728,9 @@ Get-EventLog -LogName Application -Source "IIS*","ASP*","W3SVC*" -Newest 20 |
 ```powershell
 # Re-ejecutar un script con output detallado
 $env:PGPASSWORD = "SuperAdmin_PG_2024!"
-& "C:\PostgreSQL\16\bin\psql.exe" -U postgres -h localhost -d sanitasfield `
-    -v ON_ERROR_STOP=1 -f "C:\SanitasField\scripts\01_schema.sql" 2>&1 |
-    Tee-Object -FilePath "C:\SanitasField\logs\sql_error.log"
+& "C:\PostgreSQL\16\bin\psql.exe" -U postgres -h localhost -d sgiform `
+    -v ON_ERROR_STOP=1 -f "C:\SgiForm\scripts\01_schema.sql" 2>&1 |
+    Tee-Object -FilePath "C:\SgiForm\logs\sql_error.log"
 Remove-Item Env:\PGPASSWORD
 ```
 
@@ -742,17 +742,17 @@ Remove-Item Env:\PGPASSWORD
 
 ```powershell
 # Detener AppPools
-Stop-WebAppPool "SanitasField-API"
-Stop-WebAppPool "SanitasField-Web"
+Stop-WebAppPool "SgiForm-API"
+Stop-WebAppPool "SgiForm-Web"
 
-# Restaurar backup anterior (debe existir en C:\SanitasField\backups\)
+# Restaurar backup anterior (debe existir en C:\SgiForm\backups\)
 $fechaBackup = "20240101_120000"  # Ajustar a fecha del último backup bueno
-robocopy "C:\SanitasField\backups\api_$fechaBackup" "C:\SanitasField\api" /MIR
-robocopy "C:\SanitasField\backups\web_$fechaBackup" "C:\SanitasField\web" /MIR
+robocopy "C:\SgiForm\backups\api_$fechaBackup" "C:\SgiForm\api" /MIR
+robocopy "C:\SgiForm\backups\web_$fechaBackup" "C:\SgiForm\web" /MIR
 
 # Reiniciar
-Start-WebAppPool "SanitasField-API"
-Start-WebAppPool "SanitasField-Web"
+Start-WebAppPool "SgiForm-API"
+Start-WebAppPool "SgiForm-Web"
 ```
 
 ### 13.2 Backup previo a despliegue (hacer siempre antes)
@@ -761,19 +761,19 @@ Start-WebAppPool "SanitasField-Web"
 $fecha = Get-Date -Format "yyyyMMdd_HHmmss"
 
 # Backup de aplicación
-if (Test-Path "C:\SanitasField\api") {
-    Copy-Item "C:\SanitasField\api" "C:\SanitasField\backups\api_$fecha" -Recurse
+if (Test-Path "C:\SgiForm\api") {
+    Copy-Item "C:\SgiForm\api" "C:\SgiForm\backups\api_$fecha" -Recurse
 }
-if (Test-Path "C:\SanitasField\web") {
-    Copy-Item "C:\SanitasField\web" "C:\SanitasField\backups\web_$fecha" -Recurse
+if (Test-Path "C:\SgiForm\web") {
+    Copy-Item "C:\SgiForm\web" "C:\SgiForm\backups\web_$fecha" -Recurse
 }
 
 # Backup de base de datos
 $env:PGPASSWORD = "SuperAdmin_PG_2024!"
 & "C:\PostgreSQL\16\bin\pg_dump.exe" -U postgres -h localhost `
-    -Fc sanitasfield > "C:\SanitasField\backups\db_$fecha.dump"
+    -Fc sgiform > "C:\SgiForm\backups\db_$fecha.dump"
 Remove-Item Env:\PGPASSWORD
-Write-Host "Backup completo en: C:\SanitasField\backups\*_$fecha"
+Write-Host "Backup completo en: C:\SgiForm\backups\*_$fecha"
 ```
 
 ### 13.3 Rollback de base de datos
@@ -785,11 +785,11 @@ $env:PGPASSWORD = "SuperAdmin_PG_2024!"
 
 # Desconectar usuarios activos
 & "C:\PostgreSQL\16\bin\psql.exe" -U postgres -h localhost -c `
-    "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='sanitasfield' AND pid <> pg_backend_pid();"
+    "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='sgiform' AND pid <> pg_backend_pid();"
 
 # Restaurar
 & "C:\PostgreSQL\16\bin\pg_restore.exe" -U postgres -h localhost `
-    -d sanitasfield -c "C:\SanitasField\backups\db_$fechaBackup.dump"
+    -d sgiform -c "C:\SgiForm\backups\db_$fechaBackup.dump"
 Remove-Item Env:\PGPASSWORD
 Write-Host "Base de datos restaurada al backup $fechaBackup"
 ```
