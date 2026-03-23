@@ -1,308 +1,172 @@
-#Requires -RunAsAdministrator
 <#
 .SYNOPSIS
-    Realiza rollback de SgiForm a un backup anterior.
+    Rollback del despliegue de SGI-FORM en IIS.
 
 .DESCRIPTION
-    Detiene los AppPools IIS, restaura los archivos publicados desde
-    un directorio de backup y reinicia los servicios. Luego ejecuta
-    validate-deployment.ps1 para confirmar el estado del sistema.
+    Permite revertir el despliegue de SgiFormApi y SgiFormWeb a un backup previo,
+    o eliminar completamente los sitios y AppPools de IIS.
 
 .PARAMETER BackupPath
-    Ruta al directorio de backup específico a restaurar.
-    Si se omite, el script lista los backups disponibles y permite
-    elegir interactivamente el más reciente.
+    Ruta base de los backups. Por defecto: C:\SgiForm\backup
 
-.PARAMETER SkipValidation
-    Omitir la ejecución de validate-deployment.ps1 al finalizar.
-
-.PARAMETER WhatIf
-    Simular el rollback sin realizar cambios reales.
+.PARAMETER Mode
+    Modo de rollback:
+    - "restore" : Restaura desde backup (default)
+    - "remove"  : Elimina sitios y AppPools completamente
 
 .EXAMPLE
     .\rollback.ps1
-    # Modo interactivo: lista backups y restaura el elegido
-
-.EXAMPLE
-    .\rollback.ps1 -BackupPath "C:\SgiForm\backups\20260322_143000"
-    # Rollback directo a un backup específico
-
-.EXAMPLE
-    .\rollback.ps1 -WhatIf
-    # Simular sin ejecutar cambios
+    .\rollback.ps1 -Mode remove
+    .\rollback.ps1 -BackupPath "D:\backups\sgiform"
 #>
-
 [CmdletBinding(SupportsShouldProcess)]
 param(
-    [string] $BackupRoot   = "C:\SgiForm\backups",
-    [string] $InstallRoot  = "C:\SgiForm",
-    [string] $BackupPath   = "",
-    [switch] $SkipValidation
+    [string]$BackupPath = "C:\SgiForm\backup",
+    [ValidateSet("restore","remove")]
+    [string]$Mode = "restore"
 )
 
 $ErrorActionPreference = "Stop"
+Import-Module WebAdministration -ErrorAction SilentlyContinue
 
-# ─── Funciones de salida ─────────────────────────────────────────────────────
-function Info  { param([string]$t) Write-Host "  [INFO] $t" -ForegroundColor Cyan }
-function Ok    { param([string]$t) Write-Host "  [ OK ] $t" -ForegroundColor Green }
-function Warn  { param([string]$t) Write-Host "  [WARN] $t" -ForegroundColor Yellow }
-function Err   { param([string]$t) Write-Host "  [ERRO] $t" -ForegroundColor Red }
-function Title { param([string]$t) Write-Host "`n── $t ──" -ForegroundColor Magenta }
+function Write-Step { param($msg) Write-Host "`n[$([datetime]::Now.ToString('HH:mm:ss'))] $msg" -ForegroundColor Cyan }
+function Write-OK   { param($msg) Write-Host "  OK: $msg" -ForegroundColor Green }
+function Write-Warn { param($msg) Write-Host "  WARN: $msg" -ForegroundColor Yellow }
+function Write-Fail { param($msg) Write-Host "  FAIL: $msg" -ForegroundColor Red }
 
-Write-Host "`n╔══════════════════════════════════════════╗" -ForegroundColor Magenta
-Write-Host   "║      SgiForm — ROLLBACK             ║" -ForegroundColor Magenta
-Write-Host   "╚══════════════════════════════════════════╝`n" -ForegroundColor Magenta
-
-if ($WhatIfPreference) {
-    Write-Host "  [MODO SIMULACION] Ningún cambio será aplicado.`n" -ForegroundColor Yellow
-}
-
-# ─── Verificar directorio de backups ─────────────────────────────────────────
-Title "SELECCIÓN DE BACKUP"
-
-if (-not (Test-Path $BackupRoot)) {
-    Err "Directorio de backups no encontrado: $BackupRoot"
-    Err "No hay backups disponibles para restaurar."
+# ── Verificar admin ────────────────────────────────────────────────────────
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Fail "Ejecutar como Administrador."
     exit 1
 }
 
-# ─── Seleccionar backup ───────────────────────────────────────────────────────
-if ([string]::IsNullOrWhiteSpace($BackupPath)) {
+Write-Host "========================================" -ForegroundColor Magenta
+Write-Host "   SGI-FORM ROLLBACK — Modo: $Mode" -ForegroundColor Magenta
+Write-Host "========================================" -ForegroundColor Magenta
 
-    # Listar backups disponibles ordenados por fecha (más reciente primero)
-    $backups = Get-ChildItem -Path $BackupRoot -Directory |
-               Where-Object { $_.Name -match '^\d{8}_\d{6}$' } |
-               Sort-Object Name -Descending
+if ($Mode -eq "remove") {
+    # ── Modo eliminar ──────────────────────────────────────────────────────
+    Write-Step "Eliminando sitios IIS y AppPools..."
+    $confirm = Read-Host "¿Eliminar COMPLETAMENTE SgiFormApi y SgiFormWeb? (s/N)"
+    if ($confirm -ne "s") { Write-Warn "Cancelado."; exit 0 }
 
-    if ($backups.Count -eq 0) {
-        Err "No se encontraron backups en: $BackupRoot"
-        Err "Los backups tienen el formato: YYYYMMDD_HHMMSS"
-        exit 1
+    foreach ($site in @("SgiFormApi","SgiFormWeb")) {
+        if (Get-Website -Name $site -ErrorAction SilentlyContinue) {
+            Stop-Website -Name $site -ErrorAction SilentlyContinue
+            Remove-Website -Name $site
+            Write-OK "Sitio $site eliminado."
+        } else {
+            Write-Warn "Sitio $site no existe."
+        }
     }
-
-    Write-Host "  Backups disponibles:" -ForegroundColor White
-    $i = 0
-    foreach ($b in $backups) {
-        $marker = if ($i -eq 0) { " (más reciente)" } else { "" }
-        Write-Host "  [$i] $($b.Name)$marker" -ForegroundColor $(if ($i -eq 0) {"Green"} else {"Gray"})
-        $i++
+    foreach ($pool in @("SgiFormApi","SgiFormWeb")) {
+        if (Test-Path "IIS:\AppPools\$pool") {
+            Stop-WebAppPool -Name $pool -ErrorAction SilentlyContinue
+            Remove-WebAppPool -Name $pool
+            Write-OK "AppPool $pool eliminado."
+        } else {
+            Write-Warn "AppPool $pool no existe."
+        }
     }
-
-    Write-Host ""
-    $choice = Read-Host "  Seleccionar backup [0 = más reciente, Enter = cancelar]"
-
-    if ([string]::IsNullOrWhiteSpace($choice)) {
-        Warn "Rollback cancelado por el usuario."
-        exit 0
-    }
-
-    $idx = [int]$choice
-    if ($idx -lt 0 -or $idx -ge $backups.Count) {
-        Err "Opción inválida: $choice"
-        exit 1
-    }
-
-    $BackupPath = $backups[$idx].FullName
-
-} else {
-    # Verificar que el backup especificado existe
-    if (-not (Test-Path $BackupPath)) {
-        Err "Backup no encontrado: $BackupPath"
-        exit 1
-    }
-}
-
-# Verificar que el backup contiene los subdirectorios esperados
-$backupApi = Join-Path $BackupPath "api"
-$backupWeb = Join-Path $BackupPath "web"
-
-$hasApi = Test-Path $backupApi
-$hasWeb = Test-Path $backupWeb
-
-if (-not $hasApi -and -not $hasWeb) {
-    Err "El backup seleccionado no contiene carpetas 'api' ni 'web': $BackupPath"
-    exit 1
-}
-
-Write-Host ""
-Ok "Backup seleccionado: $BackupPath"
-if ($hasApi) { Info "  - Contiene: api\" }
-if ($hasWeb)  { Info "  - Contiene: web\" }
-
-# ─── Confirmación ────────────────────────────────────────────────────────────
-Write-Host ""
-Write-Host "  ADVERTENCIA: Esta operación reemplazará los archivos de producción." -ForegroundColor Yellow
-Write-Host "  Backup a restaurar: $BackupPath" -ForegroundColor Yellow
-Write-Host ""
-$confirm = Read-Host "  Confirmar rollback (s/N)"
-if ($confirm -notmatch '^[sS]$') {
-    Warn "Rollback cancelado por el usuario."
+    Write-Host "`nEliminación completada." -ForegroundColor Green
     exit 0
 }
 
-# ─── Cargar módulo IIS ────────────────────────────────────────────────────────
-Import-Module WebAdministration -ErrorAction SilentlyContinue
-$iisAvailable = $null -ne (Get-Module WebAdministration)
+# ── Modo restore ───────────────────────────────────────────────────────────
+Write-Step "Buscando backups disponibles en $BackupPath..."
 
-# ─── Detener AppPools ─────────────────────────────────────────────────────────
-Title "DETENIENDO SERVICIOS"
-
-$pools = @("SgiForm-API", "SgiForm-Web")
-$stoppedPools = @()
-
-foreach ($pool in $pools) {
-    try {
-        if ($iisAvailable) {
-            $state = (Get-WebAppPoolState -Name $pool -ErrorAction SilentlyContinue)?.Value
-            if ($state -eq "Started") {
-                if ($PSCmdlet.ShouldProcess("AppPool $pool", "Stop")) {
-                    Stop-WebAppPool -Name $pool
-                    # Esperar hasta 15 segundos a que se detenga
-                    $waited = 0
-                    while ((Get-WebAppPoolState -Name $pool).Value -ne "Stopped" -and $waited -lt 15) {
-                        Start-Sleep -Seconds 1
-                        $waited++
-                    }
-                }
-                $stoppedPools += $pool
-                Ok "AppPool '$pool' detenido"
-            } else {
-                Info "AppPool '$pool' ya estaba $state"
-            }
-        }
-    } catch {
-        Warn "No se pudo detener AppPool '$pool': $($_.Exception.Message)"
-    }
+if (-not (Test-Path $BackupPath)) {
+    Write-Fail "No existe la carpeta de backup: $BackupPath"
+    Write-Warn "Para crear un backup antes del deploy use deploy-server.ps1."
+    exit 1
 }
 
-# ─── Backup del estado actual (antes de restaurar) ───────────────────────────
-Title "BACKUP PRE-ROLLBACK"
-
-$preRollbackStamp = Get-Date -Format "yyyyMMdd_HHmmss"
-$preRollbackPath  = Join-Path $BackupRoot "pre_rollback_$preRollbackStamp"
-
-if ($hasApi -and (Test-Path "$InstallRoot\api")) {
-    if ($PSCmdlet.ShouldProcess("$InstallRoot\api", "Backup pre-rollback")) {
-        $null = New-Item -ItemType Directory -Path "$preRollbackPath\api" -Force
-        robocopy "$InstallRoot\api" "$preRollbackPath\api" /MIR /NJH /NJS /NFL /NDL /NC /NS /XD logs uploads | Out-Null
-        Ok "Estado actual de api\ guardado en: $preRollbackPath\api\"
-    }
+$backups = Get-ChildItem $BackupPath -Directory | Sort-Object Name -Descending
+if ($backups.Count -eq 0) {
+    Write-Fail "No hay backups en $BackupPath"
+    exit 1
 }
 
-if ($hasWeb -and (Test-Path "$InstallRoot\web")) {
-    if ($PSCmdlet.ShouldProcess("$InstallRoot\web", "Backup pre-rollback")) {
-        $null = New-Item -ItemType Directory -Path "$preRollbackPath\web" -Force
-        robocopy "$InstallRoot\web" "$preRollbackPath\web" /MIR /NJH /NJS /NFL /NDL /NC /NS | Out-Null
-        Ok "Estado actual de web\ guardado en: $preRollbackPath\web\"
-    }
+Write-Host "`nBackups disponibles:" -ForegroundColor Yellow
+for ($i = 0; $i -lt [Math]::Min($backups.Count, 10); $i++) {
+    Write-Host "  [$i] $($backups[$i].Name)"
 }
 
-# ─── Restaurar archivos ──────────────────────────────────────────────────────
-Title "RESTAURANDO ARCHIVOS"
+$sel = Read-Host "`nSelecciona número de backup (Enter = más reciente [0])"
+if ([string]::IsNullOrWhiteSpace($sel)) { $sel = "0" }
+$selectedBackup = $backups[[int]$sel]
+Write-Host "Seleccionado: $($selectedBackup.FullName)" -ForegroundColor Cyan
 
-if ($hasApi) {
-    $dest = "$InstallRoot\api"
-    if ($PSCmdlet.ShouldProcess("$dest", "Restaurar desde $backupApi")) {
-        $null = New-Item -ItemType Directory -Path $dest -Force
-        $rc = robocopy $backupApi $dest /MIR /NJH /NJS /NFL /NDL /NC /NS
-        # robocopy: exit codes 0-7 son exitosos
-        if ($LASTEXITCODE -le 7) {
-            Ok "API restaurada desde: $backupApi"
-        } else {
-            Err "Error en robocopy al restaurar API (exit: $LASTEXITCODE)"
-        }
-    }
+$apiBackup = Join-Path $selectedBackup.FullName "api"
+$webBackup = Join-Path $selectedBackup.FullName "web"
+
+if (-not (Test-Path $apiBackup) -and -not (Test-Path $webBackup)) {
+    Write-Fail "El backup seleccionado no contiene carpetas 'api' o 'web'."
+    exit 1
 }
 
-if ($hasWeb) {
-    $dest = "$InstallRoot\web"
-    if ($PSCmdlet.ShouldProcess("$dest", "Restaurar desde $backupWeb")) {
-        $null = New-Item -ItemType Directory -Path $dest -Force
-        $rc = robocopy $backupWeb $dest /MIR /NJH /NJS /NFL /NDL /NC /NS
-        if ($LASTEXITCODE -le 7) {
-            Ok "Web restaurada desde: $backupWeb"
-        } else {
-            Err "Error en robocopy al restaurar Web (exit: $LASTEXITCODE)"
-        }
+# ── Detener sitios ─────────────────────────────────────────────────────────
+Write-Step "Deteniendo sitios IIS..."
+foreach ($site in @("SgiFormApi","SgiFormWeb")) {
+    if (Get-Website -Name $site -ErrorAction SilentlyContinue) {
+        Stop-Website -Name $site -ErrorAction SilentlyContinue
+        Stop-WebAppPool -Name $site -ErrorAction SilentlyContinue
+        Write-OK "$site detenido."
     }
 }
+Start-Sleep -Seconds 3
 
-# ─── Permisos ─────────────────────────────────────────────────────────────────
-Title "PERMISOS"
-
-foreach ($dir in @("$InstallRoot\uploads", "$InstallRoot\logs")) {
-    if (Test-Path $dir) {
-        if ($PSCmdlet.ShouldProcess($dir, "icacls IIS_IUSRS Modify")) {
-            icacls $dir /grant "IIS_IUSRS:(OI)(CI)M" /T /Q 2>&1 | Out-Null
-            Ok "Permisos restaurados en: $dir"
-        }
-    }
-}
-
-# ─── Reiniciar AppPools ──────────────────────────────────────────────────────
-Title "REINICIANDO SERVICIOS"
-
-foreach ($pool in $stoppedPools) {
-    try {
-        if ($iisAvailable) {
-            if ($PSCmdlet.ShouldProcess("AppPool $pool", "Start")) {
-                Start-WebAppPool -Name $pool
-                Start-Sleep -Seconds 3
-                $state = (Get-WebAppPoolState -Name $pool).Value
-                if ($state -eq "Started") {
-                    Ok "AppPool '$pool' iniciado"
-                } else {
-                    Warn "AppPool '$pool' en estado: $state"
-                }
-            }
-        }
-    } catch {
-        Err "No se pudo iniciar AppPool '$pool': $($_.Exception.Message)"
-    }
-}
-
-# Si no detuvimos ningún pool (porque ya estaban detenidos), intentar iniciarlos todos
-if ($stoppedPools.Count -eq 0 -and $iisAvailable) {
-    foreach ($pool in $pools) {
-        try {
-            $state = (Get-WebAppPoolState -Name $pool -ErrorAction SilentlyContinue)?.Value
-            if ($state -ne "Started") {
-                if ($PSCmdlet.ShouldProcess("AppPool $pool", "Start")) {
-                    Start-WebAppPool -Name $pool
-                    Ok "AppPool '$pool' iniciado"
-                }
-            }
-        } catch { }
-    }
-}
-
-# ─── Resumen y validación ─────────────────────────────────────────────────────
-Write-Host ""
-Write-Host "══════════════════════════════════════════" -ForegroundColor Magenta
-Write-Host "  ROLLBACK COMPLETADO" -ForegroundColor Magenta
-Write-Host "══════════════════════════════════════════" -ForegroundColor Magenta
-Write-Host "  Backup restaurado : $BackupPath" -ForegroundColor White
-Write-Host "  Backup pre-rollback: $preRollbackPath" -ForegroundColor Gray
-Write-Host ""
-
-if (-not $SkipValidation -and -not $WhatIfPreference) {
-    $validateScript = Join-Path $PSScriptRoot "validate-deployment.ps1"
-    if (Test-Path $validateScript) {
-        Write-Host "  Ejecutando validación post-rollback..." -ForegroundColor Cyan
-        Write-Host ""
-        Start-Sleep -Seconds 5   # Dar tiempo a que IIS levante los procesos
-        & $validateScript
-    } else {
-        Warn "validate-deployment.ps1 no encontrado en: $PSScriptRoot"
-        Warn "Ejecutar manualmente para confirmar el estado del sistema."
-    }
+# ── Restaurar API ──────────────────────────────────────────────────────────
+if (Test-Path $apiBackup) {
+    Write-Step "Restaurando API desde backup..."
+    robocopy $apiBackup "C:\SgiForm\publish\api" /MIR /NFL /NDL /NJH /NJS | Out-Null
+    Write-OK "API restaurada desde $apiBackup"
 } else {
-    Write-Host "  Validación omitida. Ejecutar manualmente:" -ForegroundColor Yellow
-    Write-Host "  .\deploy\validate-deployment.ps1" -ForegroundColor Gray
+    Write-Warn "No hay backup de API en el backup seleccionado."
 }
 
-Write-Host ""
-Write-Host "  NOTA: Si la base de datos requiere rollback, ejecutar manualmente:" -ForegroundColor Yellow
-Write-Host "  ALTER TABLE sf.refresh_token DROP COLUMN IF EXISTS operador_id;" -ForegroundColor Gray
-Write-Host "  ALTER TABLE sf.refresh_token ALTER COLUMN usuario_id SET NOT NULL;" -ForegroundColor Gray
-Write-Host ""
+# ── Restaurar Web ──────────────────────────────────────────────────────────
+if (Test-Path $webBackup) {
+    Write-Step "Restaurando Web desde backup..."
+    robocopy $webBackup "C:\SgiForm\publish\web" /MIR /NFL /NDL /NJH /NJS | Out-Null
+    Write-OK "Web restaurada desde $webBackup"
+} else {
+    Write-Warn "No hay backup de Web en el backup seleccionado."
+}
+
+# ── Iniciar sitios ─────────────────────────────────────────────────────────
+Write-Step "Iniciando sitios IIS..."
+foreach ($site in @("SgiFormApi","SgiFormWeb")) {
+    if (Get-Website -Name $site -ErrorAction SilentlyContinue) {
+        Start-WebAppPool -Name $site -ErrorAction SilentlyContinue
+        Start-Website -Name $site -ErrorAction SilentlyContinue
+        Start-Sleep -Seconds 2
+        $state = (Get-WebAppPoolState -Name $site -ErrorAction SilentlyContinue).Value
+        Write-OK "$site iniciado — AppPool: $state"
+    }
+}
+
+# ── Validación post-rollback ───────────────────────────────────────────────
+Write-Step "Validando post-rollback..."
+Start-Sleep -Seconds 5
+
+try {
+    $apiResponse = Invoke-WebRequest -Uri "http://localhost:5001/api/v1/auth/login" `
+        -Method POST -ContentType "application/json" `
+        -Body '{"email":"admin@sanitaria-demo.cl","password":"Admin@2024!"}' `
+        -UseBasicParsing -TimeoutSec 10
+    Write-OK "API respondiendo: HTTP $($apiResponse.StatusCode)"
+} catch {
+    Write-Warn "API no responde correctamente: $($_.Exception.Message)"
+}
+
+try {
+    $webResponse = Invoke-WebRequest -Uri "http://localhost:8080" -UseBasicParsing -TimeoutSec 10
+    Write-OK "Web respondiendo: HTTP $($webResponse.StatusCode)"
+} catch {
+    Write-Warn "Web no responde correctamente: $($_.Exception.Message)"
+}
+
+Write-Host "`n======================================" -ForegroundColor Magenta
+Write-Host "   ROLLBACK COMPLETADO" -ForegroundColor Magenta
+Write-Host "======================================" -ForegroundColor Magenta

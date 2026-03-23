@@ -5,59 +5,47 @@
 
 ---
 
-## Estado del sistema — 2026-03-22 (última actualización)
+## Estado del sistema — 2026-03-23 (última actualización)
 
 | Check | Estado |
 |-------|--------|
-| Build `dotnet build SgiForm.sln -c Release` | ✅ 0 errores, 0 advertencias |
-| Tests `dotnet test tests/SgiForm.Tests/` | ✅ 46/46 passed |
-| Naming SgiForm en todo el repo | ✅ 0 ocurrencias de "SanitasField" |
-| GitHub Actions workflows | ✅ Código correcto — ⚠️ falta configurar secrets y runner |
-| Documentación de despliegue | ✅ Scripts y manual completos |
-| Archivos de contexto persistente | ✅ CLAUDE.md, AGENTS.md, PROJECT_CONTEXT.md, NEXT_STEPS.md |
+| Build `dotnet build SgiForm.sln -c Release` | OK 0 errores, 0 advertencias |
+| Tests `dotnet test tests/SgiForm.Tests/` | OK 46/46 passed |
+| Naming SgiForm en todo el repo | OK 0 ocurrencias de SanitasField |
+| GitHub Actions workflows | OK en código — pendiente configurar secrets y runner |
+| Documentación de despliegue | OK Scripts y manual completos |
+| Archivos de contexto persistente | OK CLAUDE.md, AGENTS.md, PROJECT_CONTEXT.md, NEXT_STEPS.md |
+| README.md en raíz | OK Reescrito con arquitectura, build, IIS, PostgreSQL, troubleshooting |
+| deploy/rollback.ps1 | OK Script simplificado con modos restore y remove |
+| Fix ip_origen schema (tipo inet → text) | OK Documentado en README Troubleshooting y scripts SQL |
 
 ---
 
-## Lo que se hizo en esta sesión (2026-03-22)
+## Lo que se hizo en esta sesión (2026-03-23)
 
-### ✅ 1. Renombramiento masivo SanitasField → SgiForm
-- **Qué**: 180 archivos modificados/renombrados. Zero ocurrencias de "SanitasField" en el código.
-- **Archivos afectados**:
-  - 8 directorios: `src/SanitasField.*` → `src/SgiForm.*`, `tests/SanitasField.Tests` → `tests/SgiForm.Tests`
-  - `SanitasField.sln` → `SgiForm.sln` / `SgiForm.slnx`
-  - Todos los `.cs`, `.csproj`, `.razor`, `.json`, `.sql`, `.ps1`, `.md`, `.yml`
-  - Connection strings: `sanitasfield` → `sgiform`
-  - AppPool IIS: `SanitasField-*` → `SgiForm-*`
-  - Rutas servidor: `C:\SanitasField\` → `C:\SgiForm\`
-- **Resultado**: Build 0 errores, 46/46 tests tras el rename.
-- **Commit**: `ed7d51a`
+### 1. Despliegue completo en servidor Windows Server 2019
 
-### ✅ 2. Documentación DevOps completa (previa al rename, ya actualizada)
-- **Qué**: Documentación oficial de despliegue en Windows Server + IIS + PostgreSQL nativo.
-- **Archivos creados**:
-  - `deploy/DEPLOY_MANUAL.md` — 13 secciones, comandos exactos paso a paso
-  - `deploy/deploy-server.ps1` — automatización de 11 pasos (backup, build, IIS, vars, SQL, validación)
-  - `deploy/validate-deployment.ps1` — 26 checks PASS/WARN/FAIL
-  - `deploy/rollback.ps1` — rollback interactivo o a timestamp específico
-  - `README.md` — reescrito con arquitectura, build, deploy, variables, validación, troubleshooting, rollback
-  - `src/SgiForm.Api/appsettings.Production.json` — template de producción sin secretos reales
-- **Commit**: `c8fbde0`
+Se ejecutó el primer despliegue real del sistema en el servidor de producción. Problemas encontrados y resueltos:
 
-### ✅ 3. Sistema de contexto persistente
-- **Qué**: 4 archivos creados para mantener contexto entre sesiones de trabajo con Claude Code.
-- **Archivos creados**:
-  - `CLAUDE.md` — stack, convenciones, entidades, endpoints, rate limiting, tests, comandos
-  - `AGENTS.md` — reglas para agentes de IA, flujo de trabajo, archivos críticos, qué NO hacer
-  - `PROJECT_CONTEXT.md` — historial de 6 fases, estado por módulo, deuda técnica, entorno dev vs prod
-  - `NEXT_STEPS.md` — este archivo
-- **Commit**: `05dc347`
+- **HTTP 400 Bad Request (Invalid Hostname)**: `AllowedHosts` en `appsettings.Production.json` no incluía el hostname del servidor. Fix: cambiar a `"AllowedHosts": "*"`.
+- **HTTP 500 - columna ip_origen es de tipo inet**: El schema SQL definía `ip_origen` como `INET` pero EF Core envía `text`. Fix SQL aplicado:
+  ```sql
+  ALTER TABLE sf.refresh_token ALTER COLUMN ip_origen TYPE text USING ip_origen::text;
+  ALTER TABLE sf.sincronizacion_log ALTER COLUMN ip_origen TYPE text USING ip_origen::text;
+  ```
+- **AppPool names**: Los nombres usados en producción fueron `SgiFormApi` y `SgiFormWeb` (sin guión), en puertos 5001 y 8080.
+- Variables de entorno configuradas via `appcmd.exe` en los AppPools de IIS.
+- Scripts SQL `01_schema.sql`, `02_seed.sql`, `03_operador_refresh_token.sql` ejecutados correctamente.
 
-### ✅ 4. Verificación de GitHub Actions post-renombramiento
-- **Resultado**: Los workflows YA están correctos. Referencian `SgiForm.sln`, `SgiForm.Api.csproj`, `SgiForm.Web.csproj`, `SgiForm.Tests` correctamente.
-- **Pero**: Tienen dependencias no configuradas (ver pendientes #1 y #2 abajo).
-- **Archivos revisados**:
-  - `.github/workflows/deploy-iis.yml` — OK en código
-  - `.github/workflows/publish-apk.yml` — OK en código
+### 2. README.md reescrito
+
+- **Archivo**: `README.md` en raíz del repo.
+- **Qué cambió**: Reescrito completamente con arquitectura actualizada (puertos 5001/8080, Windows Server 2019), comandos de deploy IIS con `appcmd.exe`, sección de troubleshooting con los problemas reales encontrados en producción (ip_origen, AllowedHosts, binding de puertos), credenciales del seed.
+
+### 3. deploy/rollback.ps1 reescrito
+
+- **Archivo**: `deploy/rollback.ps1`
+- **Qué cambió**: Reescrito con interfaz simplificada. Dos modos: `restore` (lista backups disponibles, permite seleccionar) y `remove` (elimina sitios y AppPools completamente). Validación post-rollback integrada.
 
 ---
 
@@ -71,10 +59,10 @@
 
 | Secret | Valor esperado | Ejemplo |
 |--------|---------------|---------|
-| `IIS_WEB_PATH` | Ruta física del sitio Web en el servidor | `C:\SgiForm\web` |
-| `IIS_API_PATH` | Ruta física del sitio API en el servidor | `C:\SgiForm\api` |
-| `IIS_WEB_APPPOOL` | Nombre del AppPool Web | `SgiForm-Web` |
-| `IIS_API_APPPOOL` | Nombre del AppPool API | `SgiForm-API` |
+| `IIS_WEB_PATH` | Ruta física del sitio Web en el servidor | `C:\SgiForm\publish\web` |
+| `IIS_API_PATH` | Ruta física del sitio API en el servidor | `C:\SgiForm\publish\api` |
+| `IIS_WEB_APPPOOL` | Nombre del AppPool Web | `SgiFormWeb` |
+| `IIS_API_APPPOOL` | Nombre del AppPool API | `SgiFormApi` |
 
 **Cómo configurar**:
 1. Ir a `Settings → Secrets and variables → Actions → New repository secret`
@@ -84,132 +72,95 @@
 
 ### 2. Registrar un self-hosted runner en el servidor de producción
 
-**Problema**: Ambos workflows usan runners `self-hosted` (no `ubuntu-latest`). Sin un runner registrado en el servidor, los workflows quedan en cola indefinidamente.
+**Problema**: Ambos workflows usan runners `self-hosted`. Sin un runner registrado en el servidor, los workflows quedan en cola indefinidamente.
 
 - `deploy-iis.yml` requiere labels: `[self-hosted, windows, iis]`
 - `publish-apk.yml` requiere labels: `[self-hosted, windows, android]`
 
 **Cómo registrar el runner** (ejecutar en el servidor de producción):
 ```powershell
-# 1. Descargar runner desde GitHub
-# Ir a: Settings → Actions → Runners → New self-hosted runner
-# Seguir las instrucciones de GitHub (generan un token único)
-
-# 2. Ejecutar en el servidor (ejemplo, el token lo genera GitHub):
 mkdir C:\actions-runner; cd C:\actions-runner
-Invoke-WebRequest -Uri https://github.com/actions/runner/releases/download/v2.x.x/actions-runner-win-x64-2.x.x.zip -OutFile runner.zip
-Expand-Archive runner.zip -DestinationPath .
+# Ir a: Settings → Actions → Runners → New self-hosted runner
+# Seguir instrucciones de GitHub (generan token único)
 .\config.cmd --url https://github.com/HectorRiquelme/SGIFORM --token TOKEN_GENERADO_POR_GITHUB --labels "self-hosted,windows,iis,android"
 .\svc.cmd install
 .\svc.cmd start
 ```
 
-**Dependencia**: El servidor de producción debe estar levantado y accesible antes de esto.
-
 ---
 
-### 3. Primer despliegue real en el servidor de producción
-
-**Problema**: Los scripts están listos pero nunca se han ejecutado en el servidor real.
-
-**Prerequisitos antes de ejecutar**:
-- [ ] Servidor Windows con acceso RDP/VPN
-- [ ] Credenciales de producción definidas (password BD, JWT key de producción)
-- [ ] URL/dominio real del sistema (para configurar CORS y Jwt__Issuer)
-
-**Pasos exactos** (en el servidor, PowerShell como Admin):
-```powershell
-# 1. Clonar o copiar el repo
-git clone https://github.com/HectorRiquelme/SGIFORM.git C:\repos\sgiform
-# o via robocopy desde máquina de desarrollo
-
-# 2. Copiar scripts SQL
-Copy-Item C:\repos\sgiform\database\* C:\SgiForm\scripts\
-
-# 3. Ejecutar despliegue completo (primera vez, con SQL)
-Set-ExecutionPolicy RemoteSigned -Scope Process
-C:\repos\sgiform\deploy\deploy-server.ps1 `
-    -SourceRepoPath "C:\repos\sgiform" `
-    -RunSqlScripts:$true
-
-# 4. Validar
-C:\repos\sgiform\deploy\validate-deployment.ps1
-# Resultado esperado: PASS: 26, WARN: 0, FAIL: 0
-```
-
----
-
-### 4. Configurar CORS para la URL real de producción
+### 3. Configurar CORS para la URL real de producción
 
 **Archivo**: `src/SgiForm.Api/appsettings.Production.json` o variable de entorno del AppPool.
 
-**Problema**: `appsettings.json` tiene origenes de desarrollo (`localhost:5200`, `localhost:7200`). En producción la app móvil y el web necesitan la URL real.
+**Problema**: `appsettings.json` tiene origenes de desarrollo. En producción la app móvil y el web necesitan la URL real.
 
 **Solución** (en el servidor, después del deploy):
 ```powershell
-# Reemplazar con la URL real del sistema web
-Set-AppPoolEnv "SgiForm-API" "Cors__AllowedOrigins__0" "https://tudominio.cl"
-Set-AppPoolEnv "SgiForm-API" "Cors__AllowedOrigins__1" "http://IP_DEL_SERVIDOR"
-Restart-WebAppPool "SgiForm-API"
+$appcmd = "$env:windir\system32\inetsrv\appcmd.exe"
+& $appcmd set apppool "SgiFormApi" /+"environmentVariables.[name='Cors__AllowedOrigins__0',value='https://tudominio.cl']"
+& $appcmd set apppool "SgiFormApi" /+"environmentVariables.[name='Cors__AllowedOrigins__1',value='http://IP_DEL_SERVIDOR']"
+iisreset /restart
 ```
 
 ---
 
 ## Pendientes — MEDIA (mejoran calidad)
 
+### 4. Aplicar fix ip_origen al schema SQL base
+
+**Archivo**: `database/01_schema.sql`
+
+**Problema**: El schema define `ip_origen` como tipo `INET` en `sf.refresh_token` y `sf.sincronizacion_log`. EF Core envía estos campos como `text`, causando error 500 en producción.
+
+**Fix permanente** (editar el schema para que nuevas instalaciones no tengan el problema):
+```sql
+-- En 01_schema.sql, cambiar:
+-- ip_origen INET
+-- Por:
+-- ip_origen TEXT
+```
+
+Este fix se aplicó manualmente en el servidor de producción via ALTER TABLE, pero el archivo fuente no ha sido actualizado aún.
+
+---
+
 ### 5. Actualizar CHANGELOG.md
 
 **Archivo**: `CHANGELOG.md` en raíz del repo.
 
-**Problema**: Solo tiene la entrada `[1.0.0] - 2026-03-19`. No refleja nada de lo hecho en las fases 2-6.
-
 **Qué agregar**:
 ```markdown
-## [1.1.0] - 2026-03-22
+## [1.1.0] - 2026-03-23
 
 ### Added
-- Rate limiting nativo ASP.NET Core 8 (políticas: auth 10/min, api 120/min, sync 30/min)
-- Refresh tokens revocables para operadores móviles (columna operador_id en refresh_token)
-- FlowValidatorService: validación server-side de campos obligatorios, fotos mínimas y completitud
-- Scripts de despliegue: deploy-server.ps1, validate-deployment.ps1, rollback.ps1
-- Manual de despliegue completo: deploy/DEPLOY_MANUAL.md (13 secciones)
-- appsettings.Production.json: template sin secretos
-- Archivos de contexto persistente: CLAUDE.md, AGENTS.md, PROJECT_CONTEXT.md, NEXT_STEPS.md
+- README.md reescrito con arquitectura IIS real (puertos 5001/8080)
+- deploy/rollback.ps1 con modos restore y remove
+- Troubleshooting documentado para problemas reales de producción
 
 ### Fixed
-- SyncController: Enum.TryParse reemplaza Enum.Parse (evitaba crash con estados inválidos)
-- TiposInspeccion.razor, Operadores.razor: nullable warnings corregidos con ?? ""
-- Health check: removido ::1 de RequireHost (causaba InvalidOperationException)
-- Microsoft.IdentityModel.Tokens: versión actualizada a 8.4.0 para eliminar NU1603
+- ip_origen: ALTER TABLE para cambiar tipo INET → TEXT en refresh_token y sincronizacion_log
+- AllowedHosts: configurar * en producción para evitar 400 Bad Request
 
 ### Changed
-- Renombramiento completo SanitasField → SgiForm en 180 archivos
-- Login móvil: emite JWT 24h + refresh token 30d revocable (antes: JWT 7d sin refresh)
-- Health check /health restringido a localhost y 127.0.0.1
-- Swagger desactivado explícitamente en Production (solo IsDevelopment)
-- Password mínimo 6 caracteres en creación de operadores
-
-### Security
-- JWT key generada con RandomNumberGenerator.Fill (64 bytes)
-- Secretos de producción exclusivamente en variables de entorno del AppPool IIS
+- AppPool names: SgiFormApi y SgiFormWeb (sin guión, coherente con scripts)
+- Puertos IIS: API en 5001, Web en 8080
 ```
 
 ---
 
 ### 6. Ampliar cobertura de tests de integración
 
-**Archivo**: `tests/SgiForm.Tests/ApiIntegrationTests.cs` (agregar nuevas clases).
-
 **Estado actual**: 46 tests. Módulos sin tests:
 
-| Módulo | Controller | Cobertura actual | Qué falta testear |
-|--------|-----------|-----------------|-------------------|
-| Flujos | `FlujoController` | 0% | Crear flujo, agregar sección/pregunta, publicar versión |
-| Importación | `ImportacionController` | 0% | Upload Excel multipart, preview, confirmar lote |
-| Asignaciones | `AsignacionController` | 0% | Asignación individual, masiva, cambio de estado |
-| Inspecciones | `InspeccionesController` | 0% | Aprobar, observar, rechazar |
-| Dashboard | `DashboardController` | 0% | KPIs con datos semilla existentes |
-| Reportes | `ReportesController` | 0% | Generación Excel sin excepción |
+| Módulo | Controller | Cobertura actual |
+|--------|-----------|-----------------|
+| Flujos | `FlujoController` | 0% |
+| Importación | `ImportacionController` | 0% |
+| Asignaciones | `AsignacionController` | 0% |
+| Inspecciones | `InspeccionesController` | 0% |
+| Dashboard | `DashboardController` | 0% |
+| Reportes | `ReportesController` | 0% |
 
 **Objetivo**: 46 → ~90 tests.
 
@@ -219,21 +170,9 @@ Restart-WebAppPool "SgiForm-API"
 
 **Archivos**: `src/SgiForm.Web/Services/ApiClient.cs` + `src/SgiForm.Web/Services/AuthStateService.cs`
 
-**Problema**: El JWT de Blazor expira a los 60 minutos. El usuario ve una pantalla rota o errores 401 sin aviso.
+**Problema**: El JWT de Blazor expira a los 60 minutos. El usuario ve errores 401 sin aviso.
 
-**Qué implementar**:
-- `ApiClient.cs`: interceptar HTTP 401, llamar `POST /api/v1/auth/refresh` automáticamente, reintentar el request original
-- `AuthStateService.cs`: guardar el `refresh_token` recibido en el login, actualizarlo en cada renovación
-
----
-
-### 8. Mover lógica de negocio a capa Application
-
-**Archivos**: `src/SgiForm.Application/` (actualmente con `Class1.cs` placeholder)
-
-**Problema**: Los controllers de la API tienen lógica de negocio mezclada con HTTP handling. Esto dificulta los tests unitarios y viola SRP.
-
-**Priorizar por**: `AuthController` (más complejo), `SyncController` (validación + sync + fotos).
+**Qué implementar**: Interceptar HTTP 401, llamar `POST /api/v1/auth/refresh` automáticamente, reintentar el request original.
 
 ---
 
@@ -241,11 +180,11 @@ Restart-WebAppPool "SgiForm-API"
 
 | # | Tarea | Archivo(s) afectados |
 |---|-------|---------------------|
-| 9 | Caché IMemoryCache para KPIs (TTL 5 min) | `DashboardController.cs` |
-| 10 | Paginación cursor-based para tablas grandes | `ServiciosController.cs`, `InspeccionesController.cs` |
-| 11 | Mapa Leaflet.js en panel web para coordenadas GPS | `Inspecciones.razor`, nuevo componente |
-| 12 | Notificaciones push FCM a operadores móviles | `SgiForm.Mobile` + nuevo servicio API |
-| 13 | MFA/TOTP para usuarios admin | `AuthController.cs`, `AuthService.cs` |
+| 8 | Caché IMemoryCache para KPIs (TTL 5 min) | `DashboardController.cs` |
+| 9 | Paginación cursor-based para tablas grandes | `ServiciosController.cs`, `InspeccionesController.cs` |
+| 10 | Mapa Leaflet.js en panel web para coordenadas GPS | `Inspecciones.razor`, nuevo componente |
+| 11 | Notificaciones push FCM a operadores móviles | `SgiForm.Mobile` + nuevo servicio API |
+| 12 | MFA/TOTP para usuarios admin | `AuthController.cs`, `AuthService.cs` |
 
 ---
 
@@ -254,7 +193,6 @@ Restart-WebAppPool "SgiForm-API"
 | Decisión | Opciones | Recomendación |
 |----------|---------|---------------|
 | ¿HTTPS en producción? | SSL binding IIS / Cloudflare / nginx | Cloudflare o nginx delante de IIS es lo más simple |
-| ¿CQRS en Application layer? | Sí / No | Solo si el equipo crece; no urgente |
 | ¿EF Core Migrations vs scripts SQL? | Mantener scripts | Mantener scripts SQL — dan más control y son auditables |
 | ¿Versionar API v2? | Solo cuando haya breaking changes | Mantener v1 |
 
@@ -267,26 +205,27 @@ Restart-WebAppPool "SgiForm-API"
 | 2026-03-19 | `dde9a9e` | Creación inicial del proyecto completo |
 | 2026-03-22 | `b4b48cb` | QA pre-producción: fix bugs, nullable warnings, package versions |
 | 2026-03-22 | `5692c10` | Rate limiting nativo ASP.NET Core 8 (3 políticas) |
-| 2026-03-22 | `8995ae6` | Producción: refresh token revocable móvil, FlowValidator, health check seguro, password mínimo |
+| 2026-03-22 | `8995ae6` | Producción: refresh token revocable móvil, FlowValidator, health check seguro |
 | 2026-03-22 | `c8fbde0` | DevOps: DEPLOY_MANUAL.md, deploy-server.ps1, validate-deployment.ps1, rollback.ps1, README.md |
 | 2026-03-22 | `ed7d51a` | Renombramiento SanitasField → SgiForm (180 archivos, build OK, 46/46 tests) |
 | 2026-03-22 | `05dc347` | Contexto persistente: CLAUDE.md, AGENTS.md, PROJECT_CONTEXT.md, NEXT_STEPS.md |
-| 2026-03-22 | *(este)* | NEXT_STEPS.md actualizado con detalle completo de sesión y siguientes pasos exactos |
+| 2026-03-22 | `e68a79f` | NEXT_STEPS.md actualizado con detalle completo de sesión y pendientes exactos |
+| 2026-03-23 | *(este)* | Deploy producción completo, fix ip_origen, README y rollback.ps1 reescritos |
 
 ---
 
 ## Siguiente paso exacto recomendado
 
-> **Configurar secrets en GitHub + registrar el runner self-hosted**
+> **Corregir `database/01_schema.sql` para cambiar ip_origen de INET a TEXT**
 
-Es el paso con menor esfuerzo y mayor impacto inmediato: desbloquea el CI/CD automático que ya existe y está codificado correctamente.
+Es el cambio más pequeño con mayor impacto: evita que futuras instalaciones limpias fallen con el mismo error 500 que se encontró en producción.
 
 **Acción concreta**:
-1. Ir a `https://github.com/HectorRiquelme/SGIFORM/settings/secrets/actions`
-2. Crear los 4 secrets: `IIS_WEB_PATH`, `IIS_API_PATH`, `IIS_WEB_APPPOOL`, `IIS_API_APPPOOL`
-3. En el servidor Windows: registrar el runner self-hosted con labels `self-hosted,windows,iis,android`
-4. Hacer un push cualquiera y disparar `deploy-iis.yml` manualmente desde Actions
+1. Abrir `database/01_schema.sql`
+2. Buscar las definiciones de `ip_origen INET` en `sf.refresh_token` y `sf.sincronizacion_log`
+3. Cambiar a `ip_origen TEXT`
+4. Commit y push
 
-Si el servidor aún no existe o no está disponible, el siguiente paso alternativo es:
+Si el schema ya está corregido, el siguiente paso es:
 
-> **Actualizar CHANGELOG.md** (`NEXT_STEPS.md #5`) — puramente documental, 10 minutos, sin riesgo.
+> **Configurar secrets en GitHub + registrar el runner self-hosted** (ver pendiente #1 y #2 arriba)
