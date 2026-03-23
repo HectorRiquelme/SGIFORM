@@ -44,6 +44,177 @@ Sistema de Gestión de Inspecciones con formularios dinámicos, app móvil offli
 - Git
 - 4 GB RAM mínimo, 20 GB disco libre
 
+## Pasos completos para el deploy (desde cero)
+
+> Ejecutar todo como **Administrador** en PowerShell en el servidor Windows.
+
+### PASO 1 — Verificar prerrequisitos
+
+```powershell
+# IIS
+Get-Service W3SVC | Select-Object Status
+# .NET 8
+dotnet --version
+# ANCM v2
+Get-WebConfiguration "system.webServer/globalModules/add[@name='AspNetCoreModuleV2']"
+# Git
+git --version
+```
+
+### PASO 2 — Instalar Git (si no existe)
+
+```powershell
+Invoke-WebRequest -Uri "https://github.com/git-for-windows/git/releases/download/v2.47.1.windows.2/Git-2.47.1.2-64-bit.exe" -OutFile "C:\git-installer.exe" -UseBasicParsing
+Start-Process "C:\git-installer.exe" -ArgumentList "/VERYSILENT /NORESTART" -Wait
+$env:Path += ";C:\Program Files\Git\cmd"
+```
+
+### PASO 3 — Instalar PostgreSQL 16
+
+```powershell
+# Descargar
+Invoke-WebRequest -Uri "https://get.enterprisedb.com/postgresql/postgresql-16.4-1-windows-x64.exe" -OutFile "C:\pg-installer.exe" -UseBasicParsing
+
+# Instalar (reemplazar PASSWORD por la contraseña del superusuario postgres)
+$pgInstallArgs = @(
+    "--mode", "unattended",
+    "--superpassword", "PASSWORD_POSTGRES",
+    "--servicename", "postgresql-16",
+    "--datadir", "C:\PostgreSQL\16\data",
+    "--prefix", "C:\PostgreSQL\16",
+    "--serverport", "5432"
+)
+Start-Process "C:\pg-installer.exe" -ArgumentList $pgInstallArgs -Wait
+$env:Path += ";C:\Program Files\PostgreSQL\16\bin"
+```
+
+### PASO 4 — Crear base de datos y usuario
+
+```powershell
+$env:PGPASSWORD = "PASSWORD_POSTGRES"
+$psql = "C:\Program Files\PostgreSQL\16\bin\psql.exe"
+
+& $psql -U postgres -c "CREATE ROLE sgiform LOGIN PASSWORD 'PASSWORD_BD';"
+& $psql -U postgres -c "CREATE DATABASE sgiform OWNER sgiform ENCODING 'UTF8';"
+```
+
+### PASO 5 — Clonar repositorio y ejecutar scripts SQL
+
+```powershell
+New-Item -ItemType Directory -Path "C:\SgiForm" -Force
+Set-Location "C:\SgiForm"
+git clone https://github.com/HectorRiquelme/SGIFORM.git app
+
+$env:PGPASSWORD = "PASSWORD_BD"
+& $psql -U sgiform -d sgiform -f "C:\SgiForm\app\database\01_schema.sql"
+& $psql -U sgiform -d sgiform -f "C:\SgiForm\app\database\02_seed.sql"
+& $psql -U sgiform -d sgiform -f "C:\SgiForm\app\database\03_operador_refresh_token.sql"
+
+# Verificar: debe mostrar 25 tablas
+& $psql -U sgiform -d sgiform -c "\dt sf.*"
+```
+
+### PASO 6 — Publicar aplicaciones
+
+```powershell
+New-Item -ItemType Directory -Path "C:\SgiForm\publish\api" -Force | Out-Null
+New-Item -ItemType Directory -Path "C:\SgiForm\publish\web" -Force | Out-Null
+New-Item -ItemType Directory -Path "C:\SgiForm\logs\api"   -Force | Out-Null
+New-Item -ItemType Directory -Path "C:\SgiForm\logs\web"   -Force | Out-Null
+
+dotnet publish "C:\SgiForm\app\src\SgiForm.Api\SgiForm.Api.csproj" `
+    -c Release -r win-x64 --self-contained false -o "C:\SgiForm\publish\api"
+
+dotnet publish "C:\SgiForm\app\src\SgiForm.Web\SgiForm.Web.csproj" `
+    -c Release -r win-x64 --self-contained false -o "C:\SgiForm\publish\web"
+```
+
+### PASO 7 — Generar JWT Secret
+
+```powershell
+$rng = [System.Security.Cryptography.RNGCryptoServiceProvider]::new()
+$bytes = New-Object byte[] 64
+$rng.GetBytes($bytes)
+$jwtSecret = [Convert]::ToBase64String($bytes)
+Write-Host "JWT: $jwtSecret"
+# Guardar este valor — lo necesitas en el paso siguiente
+```
+
+### PASO 8 — Configurar IIS
+
+```powershell
+Import-Module WebAdministration
+
+# AppPools
+foreach ($pool in @("SgiFormApi","SgiFormWeb")) {
+    New-WebAppPool -Name $pool
+    Set-ItemProperty "IIS:\AppPools\$pool" managedRuntimeVersion ""
+    Set-ItemProperty "IIS:\AppPools\$pool" startMode "AlwaysRunning"
+    Set-ItemProperty "IIS:\AppPools\$pool" processModel.idleTimeout "00:00:00"
+}
+
+# Sitios
+New-Website -Name "SgiFormApi" -PhysicalPath "C:\SgiForm\publish\api" -ApplicationPool "SgiFormApi" -Port 5001 -Force
+New-Website -Name "SgiFormWeb" -PhysicalPath "C:\SgiForm\publish\web" -ApplicationPool "SgiFormWeb" -Port 8080 -Force
+```
+
+### PASO 9 — Variables de entorno en AppPool
+
+```powershell
+$appcmd = "$env:windir\system32\inetsrv\appcmd.exe"
+$connStr = "Host=localhost;Port=5432;Database=sgiform;Username=sgiform;Password=PASSWORD_BD;Search Path=sf,public"
+
+# API
+& $appcmd set apppool "SgiFormApi" /+"environmentVariables.[name='ASPNETCORE_ENVIRONMENT',value='Production']"
+& $appcmd set apppool "SgiFormApi" /+"environmentVariables.[name='ConnectionStrings__Default',value='$connStr']"
+& $appcmd set apppool "SgiFormApi" /+"environmentVariables.[name='Jwt__Key',value='$jwtSecret']"
+& $appcmd set apppool "SgiFormApi" /+"environmentVariables.[name='Jwt__Issuer',value='SgiFormApi']"
+& $appcmd set apppool "SgiFormApi" /+"environmentVariables.[name='Jwt__Audience',value='SgiFormClients']"
+
+# Web
+& $appcmd set apppool "SgiFormWeb" /+"environmentVariables.[name='ASPNETCORE_ENVIRONMENT',value='Production']"
+& $appcmd set apppool "SgiFormWeb" /+"environmentVariables.[name='ApiSettings__BaseUrl',value='http://localhost:5001']"
+```
+
+### PASO 10 — Permisos de carpetas
+
+```powershell
+foreach ($pool in @("SgiFormApi","SgiFormWeb")) {
+    $path = "C:\SgiForm\publish\$($pool.Replace('SgiForm','').ToLower())"
+    $acl = Get-Acl "C:\SgiForm\publish\api"
+    $rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
+        "IIS AppPool\$pool","FullControl","ContainerInherit,ObjectInherit","None","Allow")
+    $acl.SetAccessRule($rule)
+    Set-Acl "C:\SgiForm\publish\api" $acl
+}
+# Logs
+$acl = Get-Acl "C:\SgiForm\logs"
+foreach ($pool in @("SgiFormApi","SgiFormWeb")) {
+    $rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
+        "IIS AppPool\$pool","FullControl","ContainerInherit,ObjectInherit","None","Allow")
+    $acl.SetAccessRule($rule)
+}
+Set-Acl "C:\SgiForm\logs" $acl
+```
+
+### PASO 11 — Reiniciar IIS y validar
+
+```powershell
+iisreset /restart
+Start-Sleep -Seconds 8
+
+# Test API
+$r = Invoke-RestMethod "http://localhost:5001/api/v1/auth/login" `
+    -Method POST -ContentType "application/json" `
+    -Body '{"email":"admin@sanitaria-demo.cl","password":"Admin@2024!"}'
+Write-Host "API OK: $($r.nombre)" -ForegroundColor Green
+
+# Test Web
+Write-Host "Web: HTTP $((Invoke-WebRequest 'http://localhost:8080' -UseBasicParsing).StatusCode)" -ForegroundColor Green
+```
+
+---
+
 ## Build
 
 ```powershell
