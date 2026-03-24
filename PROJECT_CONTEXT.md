@@ -74,14 +74,14 @@ SgiForm es una plataforma B2B para inspecciones técnicas en terreno de empresas
 - `README.md` — reescrito con documentación oficial completa
 - `src/SgiForm.Api/appsettings.Production.json` — template de producción
 
-### Fase 6 — Renombramiento SanitasField → SgiForm
+### Fase 6 — Renombramiento SgiForm → SgiForm
 - **Alcance**: 180 archivos modificados/renombrados
-- Directorios `src/SanitasField.*` → `src/SgiForm.*`
-- `tests/SanitasField.Tests` → `tests/SgiForm.Tests`
-- `shared/SanitasField.Contracts` → `shared/SgiForm.Contracts`
-- `SanitasField.sln` → `SgiForm.sln`
+- Directorios `src/SgiForm.*` → `src/SgiForm.*`
+- `tests/SgiForm.Tests` → `tests/SgiForm.Tests`
+- `shared/SgiForm.Contracts` → `shared/SgiForm.Contracts`
+- `SgiForm.sln` → `SgiForm.sln`
 - Namespaces C#, connection strings, AppPool names, rutas del servidor
-- Build: 0 errores. Tests: 46/46. Zero ocurrencias de "SanitasField" en código.
+- Build: 0 errores. Tests: 46/46. Zero ocurrencias de "SgiForm" en código.
 
 ---
 
@@ -157,15 +157,22 @@ docker run -d --name sgiform_postgres -p 5434:5432 \
 - JWT Key dev: `SgiForm_JWT_SecretKey_2024!@#$_MustBe32CharsMin` (en `appsettings.json`)
 - Admin web: `admin@empresa.cl` (seed en `02_seed.sql`)
 
-### Producción (Windows Server)
+### Producción (Windows Server 2019 — estado real 2026-03-24)
 
 | Componente | Tecnología | Detalle |
 |------------|-----------|---------|
-| PostgreSQL | **Nativo Windows** | Servicio `postgresql-16`, puerto `5432` |
-| API REST | IIS + ANCM v2 | AppPool `SgiForm-API`, puerto `5043` |
-| Web Blazor | IIS + ANCM v2 | AppPool `SgiForm-Web`, puerto `80` |
+| PostgreSQL | **Nativo Windows** | Servicio `postgresql-x64-16`, puerto `5432` |
+| API REST | IIS + ANCM v2 | AppPool `SgiFormApi`, puerto **5001** |
+| Web Blazor | IIS + ANCM v2 | AppPool `SgiFormWeb`, puerto **8080** |
 | Secretos | Variables de entorno AppPool | Nunca en archivos |
-| Archivos | `C:\SgiForm\{api,web,uploads,logs,backups}` | |
+| Archivos | `C:\SgiForm\publish\{api,web}` | |
+| Logs | `C:\SgiForm\logs\sgiform-YYYYMMDD.log` | Serilog rolling daily |
+| Admin seed | `admin@sanitaria-demo.cl` | empresa_slug: `sanitaria-demo` |
+
+**Fixes aplicados manualmente en producción** (ya incorporados en `01_schema.sql`):
+- `sf.refresh_token.ip_origen`: `INET` → `TEXT` (EF Core enviaba text, PostgreSQL rechazaba con 42804)
+- `sf.sincronizacion_log.ip_origen`: `INET` → `TEXT` (mismo motivo)
+- `appsettings.Production.json`: `AllowedHosts` → `"*"` (antes bloqueaba con HTTP 400 Invalid Hostname)
 
 **Regla**: En producción **NO se usa Docker**. PostgreSQL corre como servicio Windows nativo.
 
@@ -186,7 +193,7 @@ docker run -d --name sgiform_postgres -p 5434:5432 \
 
 | Commit | Descripción |
 |--------|-------------|
-| `ed7d51a` | refactor: renombrar SanitasField → SgiForm en todo el proyecto |
+| `ed7d51a` | refactor: renombrar SgiForm → SgiForm en todo el proyecto |
 | `c8fbde0` | feat(deploy): agregar documentación y scripts de despliegue completos |
 | `8995ae6` | feat(prod): implementar todos los requisitos de producción |
 | `5692c10` | feat(security): implementar rate limiting nativo ASP.NET Core 8 |

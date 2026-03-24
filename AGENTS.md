@@ -15,7 +15,7 @@
 
 ## Reglas absolutas (no negociables)
 
-1. **Naming**: Los namespaces son `SgiForm.*`. El nombre comercial es `SGI-FORM`. NO usar `SanitasField` en ningún archivo nuevo. La migración de nombres ya fue completada.
+1. **Naming**: Los namespaces son `SgiForm.*`. El nombre comercial es `SGI-FORM`. NO usar `SgiForm` en ningún archivo nuevo. La migración de nombres ya fue completada.
 2. **Secretos**: NUNCA escribir contraseñas, JWT keys, connection strings con credenciales reales en código o archivos del repositorio. Los secretos van en variables de entorno del AppPool IIS en producción.
 3. **Tests antes de desplegar**: Si se modifica código, correr `dotnet test tests/SgiForm.Tests/` y confirmar 46/46 antes de proponer deploy.
 4. **Multitenant**: Todo query a la BD debe filtrar por `empresa_id`. No omitir este filtro bajo ninguna circunstancia.

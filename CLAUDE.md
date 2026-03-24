@@ -16,7 +16,7 @@
 | **Versión actual** | 1.0.0 |
 | **SDK** | .NET 8.0.319 (fijado en `global.json`) |
 
-> **Regla crítica de naming**: El branding comercial es **SGI-FORM**. Los namespaces, carpetas y solución usan `SgiForm`. La conversión SanitasField → SgiForm ya fue completada en todos los archivos. No renombrar nuevamente.
+> **Regla crítica de naming**: El branding comercial es **SGI-FORM**. Los namespaces, carpetas y solución usan `SgiForm`. La conversión SgiForm → SgiForm ya fue completada en todos los archivos. No renombrar nuevamente.
 
 ---
 
@@ -26,7 +26,7 @@
 |---|---|---|
 | API REST | ASP.NET Core Web API | 8.0 |
 | ORM | Entity Framework Core + Npgsql | 8.0 |
-| Base de datos | PostgreSQL | 16 (producción) / 17 (desarrollo Docker) |
+| Base de datos | PostgreSQL | 16 (producción, servicio `postgresql-x64-16`) / 17 (desarrollo Docker) |
 | Frontend admin | Blazor Server | 8.0 |
 | App móvil | .NET MAUI Android | 8.0 |
 | BD móvil | SQLite (sqlite-net-pcl 1.9.172) | — |
@@ -194,3 +194,20 @@ dotnet test tests/SgiForm.Tests/ -v normal
 .\deploy\deploy-server.ps1 -ApiPublishPath "C:\publish\api" -WebPublishPath "C:\publish\web"
 .\deploy\validate-deployment.ps1
 ```
+
+## Producción — estado real (2026-03-24)
+
+| Componente | Detalle |
+|---|---|
+| Servidor | Windows Server 2019 (10.0.17763) |
+| PostgreSQL | Servicio `postgresql-x64-16` — puerto 5432 |
+| API IIS | AppPool `SgiFormApi` — puerto **5001** |
+| Web IIS | AppPool `SgiFormWeb` — puerto **8080** |
+| Archivos | `C:\SgiForm\publish\{api,web}` |
+| Logs | `C:\SgiForm\logs\sgiform-YYYYMMDD.log` (Serilog) |
+| Admin seed | `admin@sanitaria-demo.cl` — empresa slug: `sanitaria-demo` |
+| Login móvil | Requiere `empresa_slug` en el body (`sanitaria-demo`) |
+
+**Fix aplicado en producción** (no requería recompilación):
+- `ip_origen` en `sf.refresh_token` y `sf.sincronizacion_log` cambiado de `INET` a `TEXT` via ALTER TABLE
+- `AllowedHosts` en `appsettings.Production.json` cambiado a `"*"` (configurar al dominio real cuando se tenga)

@@ -5,7 +5,7 @@
 
 ---
 
-## Estado del sistema — 2026-03-23 (última actualización)
+## Estado del sistema — 2026-03-24 (última actualización)
 
 | Check | Estado |
 |-------|--------|
@@ -210,22 +210,48 @@ Este fix se aplicó manualmente en el servidor de producción via ALTER TABLE, p
 | 2026-03-22 | `ed7d51a` | Renombramiento SanitasField → SgiForm (180 archivos, build OK, 46/46 tests) |
 | 2026-03-22 | `05dc347` | Contexto persistente: CLAUDE.md, AGENTS.md, PROJECT_CONTEXT.md, NEXT_STEPS.md |
 | 2026-03-22 | `e68a79f` | NEXT_STEPS.md actualizado con detalle completo de sesión y pendientes exactos |
-| 2026-03-23 | *(este)* | Deploy producción completo, fix ip_origen, README y rollback.ps1 reescritos |
+| 2026-03-23 | `fe0b21a` | Deploy producción completo, fix ip_origen, README y rollback.ps1 reescritos |
+| 2026-03-24 | *(pendiente commit)* | Deploy real ejecutado en servidor, validado login web+móvil, fix ip_origen aplicado en BD, schema SQL corregido |
+
+---
+
+## Lo que se hizo en sesión 2026-03-24
+
+### Deploy real en servidor Windows Server 2019
+
+Se ejecutó el despliegue completo interactivo, paso a paso. Hallazgos relevantes para futuras instalaciones:
+
+- **PostgreSQL ya existía** como servicio `postgresql-x64-16` (instalación previa). El instalador que bajamos no fue necesario. La contraseña del superusuario `postgres` era `postgres`.
+- **Puertos ocupados**: Puerto 5000 y 5001 estaban en uso por http.sys. La API quedó en **puerto 5001**.
+- **`AllowedHosts`** en `appsettings.Production.json` estaba configurado como `"DOMINIO_PRODUCCION.cl"` — bloqueaba todos los requests con HTTP 400. Fix: cambiar a `"*"`.
+- **`ip_origen INET`**: EF Core envía el campo como `text`, PostgreSQL rechaza con error 42804. Fix aplicado en BD y en `database/01_schema.sql`.
+- **Hash BCrypt del seed**: El hash del `02_seed.sql` era un placeholder que no correspondía a ninguna contraseña conocida. Se regeneró con `BCrypt.Net.BCrypt.HashPassword("Admin@2024!")` usando una DLL del publish.
+- **Login móvil**: Requiere campo `empresa_slug` en el body (valor: `sanitaria-demo`).
+
+### Estado final del servidor
+
+| Check | Estado |
+|-------|--------|
+| API login web | ✅ `admin@sanitaria-demo.cl / Admin@2024!` |
+| API login móvil | ✅ `OP001 / Admin@2024! / sanitaria-demo` |
+| Web Blazor HTTP | ✅ 200 en `http://[IP]:8080` |
+| PostgreSQL 25 tablas | ✅ schema `sf` completo |
+| AppPools IIS | ✅ SgiFormApi:5001 + SgiFormWeb:8080 |
 
 ---
 
 ## Siguiente paso exacto recomendado
 
-> **Corregir `database/01_schema.sql` para cambiar ip_origen de INET a TEXT**
+> **Commitear y hacer push del fix de `database/01_schema.sql`** (`ip_origen INET → TEXT`)
 
-Es el cambio más pequeño con mayor impacto: evita que futuras instalaciones limpias fallen con el mismo error 500 que se encontró en producción.
+El archivo ya tiene el cambio aplicado localmente pero NO está commiteado. Es el único cambio pendiente de código.
 
-**Acción concreta**:
-1. Abrir `database/01_schema.sql`
-2. Buscar las definiciones de `ip_origen INET` en `sf.refresh_token` y `sf.sincronizacion_log`
-3. Cambiar a `ip_origen TEXT`
-4. Commit y push
+```powershell
+git add database/01_schema.sql AGENTS.md CLAUDE.md PROJECT_CONTEXT.md NEXT_STEPS.md
+git commit -m "fix(schema): cambiar ip_origen de INET a TEXT en refresh_token y sincronizacion_log"
+git push
+```
 
-Si el schema ya está corregido, el siguiente paso es:
+El siguiente paso después de eso es:
 
 > **Configurar secrets en GitHub + registrar el runner self-hosted** (ver pendiente #1 y #2 arriba)

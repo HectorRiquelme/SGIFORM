@@ -227,7 +227,7 @@ CREATE TABLE sf.refresh_token (
     token       VARCHAR(500) NOT NULL,
     expira_en   TIMESTAMPTZ NOT NULL,
     revocado    BOOLEAN     NOT NULL DEFAULT false,
-    ip_origen   INET,
+    ip_origen   TEXT,
     user_agent  TEXT,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
 
@@ -734,7 +734,7 @@ CREATE TABLE sf.sincronizacion_log (
     duracion_ms             INTEGER,
     exitoso                 BOOLEAN     NOT NULL DEFAULT true,
     errores_json            JSONB,
-    ip_origen               INET,
+    ip_origen               TEXT,
     created_at              TIMESTAMPTZ NOT NULL DEFAULT now(),
 
     CONSTRAINT pk_sync_log PRIMARY KEY (id),
