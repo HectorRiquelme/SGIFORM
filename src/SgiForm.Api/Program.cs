@@ -185,6 +185,13 @@ try
 
     var app = builder.Build();
 
+    // ─── PathBase (sub-path deployment, ej: /sgiformapi) ─────────────────────
+    // Configurar en appsettings.Production.json → "PathBase": "/sgiformapi"
+    // Necesario cuando la API corre bajo una sub-ruta en IIS (aplicación virtual)
+    var pathBase = builder.Configuration["PathBase"] ?? "";
+    if (!string.IsNullOrEmpty(pathBase))
+        app.UsePathBase(pathBase);
+
     // ─── Middleware pipeline ──────────────────────────────────────────────────
     if (app.Environment.EnvironmentName != "Testing")
         app.UseSerilogRequestLogging();
@@ -194,8 +201,9 @@ try
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "SgiForm API v1");
-            c.RoutePrefix = string.Empty; // Swagger en raíz
+            // Ruta relativa para que funcione bajo cualquier PathBase
+            c.SwaggerEndpoint("v1/swagger.json", "SgiForm API v1");
+            c.RoutePrefix = "swagger";
         });
     }
 

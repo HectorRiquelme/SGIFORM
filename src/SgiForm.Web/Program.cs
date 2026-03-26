@@ -25,6 +25,13 @@ builder.Services.AddHttpClient<ApiClient>(c =>
 
 var app = builder.Build();
 
+// ─── PathBase (sub-path deployment, ej: /sgiform) ────────────────────────────
+// Configurar en appsettings.Production.json → "PathBase": "/sgiform"
+// Debe ir ANTES de cualquier otro middleware
+var pathBase = builder.Configuration["PathBase"] ?? "";
+if (!string.IsNullOrEmpty(pathBase))
+    app.UsePathBase(pathBase);
+
 // ─── Middleware ───────────────────────────────────────────────────────────────
 if (!app.Environment.IsDevelopment())
 {
