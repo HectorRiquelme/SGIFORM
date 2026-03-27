@@ -71,8 +71,9 @@
     protected override void OnInitialized()
     {
         // Si ya está autenticado, redirigir al dashboard
+        // Nav.BaseUri incluye el PathBase (ej: /sgiform/) evitando redirigir a la raíz del dominio
         if (Auth.EsAutenticado)
-            Nav.NavigateTo("/", forceLoad: false);
+            Nav.NavigateTo(Nav.BaseUri, forceLoad: false);
     }
 
     private async Task HandleLogin()
@@ -84,7 +85,7 @@
 
         if (result.Success)
         {
-            Nav.NavigateTo("/", forceLoad: false);
+            Nav.NavigateTo(Nav.BaseUri, forceLoad: false);
         }
         else
         {
