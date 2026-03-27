@@ -5,7 +5,9 @@
     {
         if (firstRender)
         {
-            Nav.NavigateTo("/login", forceLoad: true);
+            // Nav.BaseUri incluye el PathBase (ej: /sgiform/)
+            // "/login" sin BaseUri ignoraría el PathBase y iría a la raíz del dominio
+            Nav.NavigateTo(Nav.BaseUri + "login", forceLoad: true);
         }
     }
 }

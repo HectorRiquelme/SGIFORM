@@ -154,7 +154,7 @@
     private void Logout()
     {
         Auth.ClearSession();
-        Nav.NavigateTo("/login", forceLoad: true);
+        Nav.NavigateTo(Nav.BaseUri + "login", forceLoad: true);
     }
 
     public void Dispose()
