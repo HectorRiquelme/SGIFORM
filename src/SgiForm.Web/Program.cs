@@ -40,7 +40,10 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseAntiforgery();
-app.UseStaticFiles();
+// ─── Static assets (.NET 10) ─────────────────────────────────────────────────
+// MapStaticAssets reemplaza UseStaticFiles en .NET 9+ para Blazor:
+// sirve wwwroot + archivos de framework (_framework/blazor.web.js, etc.)
+app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
