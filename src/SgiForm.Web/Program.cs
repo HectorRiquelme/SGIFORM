@@ -16,10 +16,15 @@ builder.Services.AddSingleton<ReleaseNotesService>();
 // AddHttpClient<ApiClient> registra ApiClient como Scoped automáticamente
 // con un HttpClient configurado con BaseAddress. NO agregar AddScoped<ApiClient>()
 // adicional porque sobreescribiría el registro y perdería el BaseAddress.
+// TrimEnd('/') + "/" garantiza que BaseAddress siempre tenga trailing slash.
+// Sin trailing slash, HttpClient resuelve "api/v1/auth/login" relativo al
+// directorio padre, descartando el último segmento (ej: /sgiformapi).
+// RFC 3986: "http://host/sgiformapi" + "api/v1" → "http://host/api/v1" (MAL)
+//           "http://host/sgiformapi/" + "api/v1" → "http://host/sgiformapi/api/v1" (BIEN)
 var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5043";
 builder.Services.AddHttpClient<ApiClient>(c =>
 {
-    c.BaseAddress = new Uri(apiBaseUrl);
+    c.BaseAddress = new Uri(apiBaseUrl.TrimEnd('/') + "/");
     c.Timeout = TimeSpan.FromSeconds(30);
 });
 
