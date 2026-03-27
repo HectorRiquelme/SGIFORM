@@ -197,6 +197,8 @@ dotnet test tests/SgiForm.Tests/ -v normal
 
 ## Producción — estado real (2026-03-24)
 
+### Servidor 1 (servidor original)
+
 | Componente | Detalle |
 |---|---|
 | Servidor | Windows Server 2019 (10.0.17763) |
@@ -211,3 +213,36 @@ dotnet test tests/SgiForm.Tests/ -v normal
 **Fix aplicado en producción** (no requería recompilación):
 - `ip_origen` en `sf.refresh_token` y `sf.sincronizacion_log` cambiado de `INET` a `TEXT` via ALTER TABLE
 - `AllowedHosts` en `appsettings.Production.json` cambiado a `"*"` (configurar al dominio real cuando se tenga)
+
+---
+
+### Servidor 2 (apps.solucionescloud.cl) — estado real (2026-03-27)
+
+| Componente | Detalle |
+|---|---|
+| Servidor | Windows Server 2025, IP `10.10.100.22` |
+| Dominio | `apps.solucionescloud.cl` |
+| PostgreSQL | Servicio `postgresql-x64-18` — puerto 5432 |
+| .NET runtime | SDK 10.0.201 — app targeting .NET 8, corre vía `rollForward: latestMajor` en `global.json` |
+| IIS | Default Web Site con virtual applications |
+| Web IIS | `/sgiform` → `C:\Aplicaciones\sgiform\publish\web` — AppPool: `SgiFormWeb` |
+| API IIS | `/sgiformapi` → `C:\Aplicaciones\sgiform\publish\api` — AppPool: `SgiFormApi` |
+| Código fuente | `C:\Aplicaciones\sgiform\src` |
+| URL Web | https://apps.solucionescloud.cl/sgiform/login |
+| URL API | https://apps.solucionescloud.cl/sgiformapi/api/v1/... |
+| Admin seed | `admin@sanitaria-demo.cl` — empresa slug: `sanitaria-demo` |
+| Login móvil | Requiere `empresa_slug` en el body (`sanitaria-demo`) |
+
+**Configuración específica del Servidor 2:**
+
+- **PathBase**: ambos `Program.cs` leen la clave `"PathBase"` de configuración y llaman a `UsePathBase(...)`:
+  - API: `"PathBase": "/sgiformapi"` en `appsettings.Production.json`
+  - Web: `"PathBase": "/sgiform"` en `appsettings.Production.json`
+- **ApiBaseUrl** en `appsettings.Production.json` de Web:
+  - Valor externo: `https://apps.solucionescloud.cl/sgiformapi`
+  - Valor interno (si existe hosts entry): `http://localhost/sgiformapi`
+- **Hosts entry** requerida en el servidor para que Web pueda llamar a la API internamente:
+  `127.0.0.1 apps.solucionescloud.cl` (agregar en `C:\Windows\System32\drivers\etc\hosts`)
+- **W3SVC**: StartupType `Automatic` — si está detenido, iniciar manualmente con `Start-Service W3SVC`
+- **global.json**: `rollForward: latestMajor` — permite al SDK 10 compilar y ejecutar proyectos targeting .NET 8
+- **AllowedHosts** en `appsettings.Production.json`: `"*"`

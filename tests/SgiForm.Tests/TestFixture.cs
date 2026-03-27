@@ -42,10 +42,14 @@ public class TestFixture : WebApplicationFactory<Program>
 
         builder.ConfigureServices(services =>
         {
-            // Quitar el DbContext real de PostgreSQL
-            var descriptor = services.SingleOrDefault(d =>
-                d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-            if (descriptor != null) services.Remove(descriptor);
+            // Quitar TODOS los servicios relacionados a DbContext (EF Core 9+ registra más descriptores)
+            var dbDescriptors = services
+                .Where(d =>
+                    d.ServiceType == typeof(DbContextOptions<AppDbContext>) ||
+                    d.ServiceType.FullName?.Contains("IDbContextOptionsConfiguration") == true ||
+                    d.ServiceType == typeof(AppDbContext))
+                .ToList();
+            foreach (var d in dbDescriptors) services.Remove(d);
 
             // Quitar health checks de PostgreSQL (no hay BD real en tests)
             var healthDescriptors = services
@@ -54,7 +58,7 @@ public class TestFixture : WebApplicationFactory<Program>
             foreach (var hd in healthDescriptors) services.Remove(hd);
             services.AddHealthChecks(); // health checks vacíos
 
-            // Reemplazar con InMemory (nombre fijo para compartir entre scopes)
+            // Reemplazar con InMemory (nombre único para aislar cada fixture)
             var dbName = "SgiFormTests_" + Guid.NewGuid();
             services.AddDbContext<AppDbContext>(options =>
                 options.UseInMemoryDatabase(dbName));
