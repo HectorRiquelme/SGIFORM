@@ -1,6 +1,7 @@
 @inherits LayoutComponentBase
 @inject AuthStateService Auth
 @inject NavigationManager Nav
+@inject IConfiguration Config
 @implements IDisposable
 
 @if (!Auth.EsAutenticado)
@@ -154,7 +155,8 @@
     private void Logout()
     {
         Auth.ClearSession();
-        Nav.NavigateTo(Nav.BaseUri + "login", forceLoad: true);
+        var pb = (Config["PathBase"] ?? "").TrimEnd('/');
+        Nav.NavigateTo(pb + "/login", forceLoad: true);
     }
 
     public void Dispose()

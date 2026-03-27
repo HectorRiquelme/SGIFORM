@@ -3,6 +3,7 @@
 @inject ApiClient Api
 @inject AuthStateService Auth
 @inject NavigationManager Nav
+@inject IConfiguration Config
 
 <PageTitle>Iniciar sesi&#243;n — SGI-FORM</PageTitle>
 
@@ -68,12 +69,21 @@
     private string? errorMsg;
     private bool loading = false;
 
+    // Construye la URL raíz respetando el PathBase configurado.
+    // Ejemplo: PathBase="/sgiform" → "/sgiform/"
+    // Sin PathBase (dev local) → "/"
+    // NavigateTo con ruta que empieza en "/" se resuelve desde la raíz del host,
+    // por eso incluimos el PathBase explícito en la ruta.
+    private string RootUrl()
+    {
+        var pb = (Config["PathBase"] ?? "").TrimEnd('/');
+        return pb + "/";
+    }
+
     protected override void OnInitialized()
     {
-        // Si ya está autenticado, redirigir al dashboard
-        // Nav.BaseUri incluye el PathBase (ej: /sgiform/) evitando redirigir a la raíz del dominio
         if (Auth.EsAutenticado)
-            Nav.NavigateTo(Nav.BaseUri, forceLoad: false);
+            Nav.NavigateTo(RootUrl(), forceLoad: false);
     }
 
     private async Task HandleLogin()
@@ -85,7 +95,7 @@
 
         if (result.Success)
         {
-            Nav.NavigateTo(Nav.BaseUri, forceLoad: false);
+            Nav.NavigateTo(RootUrl(), forceLoad: false);
         }
         else
         {

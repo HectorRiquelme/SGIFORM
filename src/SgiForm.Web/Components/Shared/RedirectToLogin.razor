@@ -1,13 +1,13 @@
 @inject NavigationManager Nav
+@inject IConfiguration Config
 
 @code {
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
-            // Nav.BaseUri incluye el PathBase (ej: /sgiform/)
-            // "/login" sin BaseUri ignoraría el PathBase y iría a la raíz del dominio
-            Nav.NavigateTo(Nav.BaseUri + "login", forceLoad: true);
+            var pb = (Config["PathBase"] ?? "").TrimEnd('/');
+            Nav.NavigateTo(pb + "/login", forceLoad: true);
         }
     }
 }
