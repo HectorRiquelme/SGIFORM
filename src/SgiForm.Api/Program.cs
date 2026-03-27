@@ -207,7 +207,9 @@ try
         });
     }
 
-    app.UseHttpsRedirection();
+    // UseHttpsRedirection solo en desarrollo: en producción IIS maneja SSL termination
+    if (app.Environment.IsDevelopment())
+        app.UseHttpsRedirection();
     app.UseCors();
     app.UseRateLimiter();       // ← Rate limiting antes de auth
     app.UseAuthentication();
