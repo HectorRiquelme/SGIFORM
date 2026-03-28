@@ -595,6 +595,7 @@ ON CONFLICT DO NOTHING;
 
 -- =============================================================================
 -- OPERADORES DE EJEMPLO
+-- password operadores: Op@123 (bcrypt hash)
 -- =============================================================================
 INSERT INTO sf.operador (id, empresa_id, codigo_operador, nombre, apellido, rut, telefono, email, zona, localidad, password_hash) VALUES
 (
@@ -603,7 +604,7 @@ INSERT INTO sf.operador (id, empresa_id, codigo_operador, nombre, apellido, rut,
     'OP001', 'Carlos', 'Muñoz', '12.345.678-9',
     '+56912345678', 'carlos.munoz@sanitaria-demo.cl',
     'Norte', 'La Serena',
-    '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/HS.i8Gu'
+    '$2a$12$AQISEYleb7Go..yDeeA29ebh.zmwm.wCEpnKxfceC5x3GeL2tbjeu'
 ),
 (
     'A0000000-0000-0000-0000-000000000002',
@@ -611,7 +612,7 @@ INSERT INTO sf.operador (id, empresa_id, codigo_operador, nombre, apellido, rut,
     'OP002', 'Ana', 'Rojas', '15.432.100-5',
     '+56987654321', 'ana.rojas@sanitaria-demo.cl',
     'Sur', 'Coquimbo',
-    '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/HS.i8Gu'
+    '$2a$12$AQISEYleb7Go..yDeeA29ebh.zmwm.wCEpnKxfceC5x3GeL2tbjeu'
 ),
 (
     'A0000000-0000-0000-0000-000000000003',
@@ -619,7 +620,7 @@ INSERT INTO sf.operador (id, empresa_id, codigo_operador, nombre, apellido, rut,
     'OP003', 'Pedro', 'González', '11.111.111-1',
     '+56911111111', 'pedro.gonzalez@sanitaria-demo.cl',
     'Centro', 'Ovalle',
-    '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/HS.i8Gu'
+    '$2a$12$AQISEYleb7Go..yDeeA29ebh.zmwm.wCEpnKxfceC5x3GeL2tbjeu'
 )
 ON CONFLICT DO NOTHING;
 
