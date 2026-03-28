@@ -1,6 +1,10 @@
 # =============================================================================
 # deploy-apps.solucionescloud.ps1
 # Ejecutar como Admin desde: C:\Aplicaciones\sgiform\src
+#
+# PRIMERA VEZ: crear C:\Aplicaciones\sgiform\sgiform.env con:
+#   PG_PASSWORD=tu_password_postgresql
+#   JWT_KEY=clave_jwt_minimo_64_chars
 # =============================================================================
 
 $ErrorActionPreference = "Stop"
@@ -8,6 +12,20 @@ $ErrorActionPreference = "Stop"
 $GitRoot    = "C:\Aplicaciones\sgiform\src"
 $PublishWeb = "C:\Aplicaciones\sgiform\publish\web"
 $PublishApi = "C:\Aplicaciones\sgiform\publish\api"
+$EnvFile    = "C:\Aplicaciones\sgiform\sgiform.env"
+
+# Leer credenciales desde archivo .env (fuera del repo)
+$PgPassword = "CAMBIAR_EN_PRODUCCION"
+$JwtKey     = "SgiForm_Produccion_JWT_2026_SecretKey_MustBe64BytesMinimum_XYZ!@#"
+
+if (Test-Path $EnvFile) {
+    Get-Content $EnvFile | ForEach-Object {
+        if ($_ -match "^PG_PASSWORD=(.+)$")  { $PgPassword = $Matches[1] }
+        if ($_ -match "^JWT_KEY=(.+)$")      { $JwtKey     = $Matches[1] }
+    }
+} else {
+    Write-Warning "No se encontró $EnvFile — usando valores placeholder para credenciales"
+}
 
 # Verificar que estamos en el directorio correcto
 if (-not (Test-Path "$GitRoot\.git")) {
@@ -34,16 +52,23 @@ if ($LASTEXITCODE -ne 0) {
     Write-Error "Publish Web falló"; exit 1
 }
 
-Write-Host "=== 4. Restaurar appsettings Web ===" -ForegroundColor Cyan
+Write-Host "=== 4. Restaurar appsettings API ===" -ForegroundColor Cyan
+$fileApi = "$PublishApi\appsettings.Production.json"
+$jsonApi = Get-Content $fileApi | ConvertFrom-Json
+$jsonApi.ConnectionStrings.Default = "Host=localhost;Port=5432;Database=sgiform;Username=sgiform;Password=$PgPassword;Search Path=sf,public;SSL Mode=Disable"
+$jsonApi.Jwt.Key = $JwtKey
+$jsonApi | ConvertTo-Json -Depth 10 | Set-Content $fileApi
+
+Write-Host "=== 5. Restaurar appsettings Web ===" -ForegroundColor Cyan
 $file = "$PublishWeb\appsettings.Production.json"
 $json = Get-Content $file | ConvertFrom-Json
 $json.ApiBaseUrl = "https://apps.solucionescloud.cl/sgiformapi/"
 $json | ConvertTo-Json -Depth 10 | Set-Content $file
 
-Write-Host "=== 5. Reactivar Web ===" -ForegroundColor Cyan
+Write-Host "=== 6. Reactivar Web ===" -ForegroundColor Cyan
 Remove-Item "$PublishWeb\app_offline.htm"
 
-Write-Host "=== 6. Reciclar AppPools ===" -ForegroundColor Cyan
+Write-Host "=== 7. Reciclar AppPools ===" -ForegroundColor Cyan
 & "$env:windir\system32\inetsrv\appcmd.exe" recycle apppool /apppool.name:"SgiFormApi"
 & "$env:windir\system32\inetsrv\appcmd.exe" recycle apppool /apppool.name:"SgiFormWeb"
 
