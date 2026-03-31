@@ -56,28 +56,86 @@ public class SyncController : ControllerBase
         var operador = await _db.Operadores.FindAsync(OperadorId);
         if (operador == null) return Unauthorized();
 
-        // Asignaciones activas para este operador
+        // Asignaciones activas — proyección ligera, sin flujo embebido
         var asignaciones = await _db.AsignacionesInspeccion
-            .Include(a => a.ServicioInspeccion)
-            .Include(a => a.TipoInspeccion)
-            .Include(a => a.FlujoVersion)
-                .ThenInclude(v => v.Secciones.OrderBy(s => s.Orden))
-                    .ThenInclude(s => s.Preguntas.OrderBy(p => p.Orden))
-                        .ThenInclude(p => p.Opciones.Where(o => o.Activo).OrderBy(o => o.Orden))
-            .Include(a => a.FlujoVersion)
-                .ThenInclude(v => v.Reglas.Where(r => r.Activo).OrderBy(r => r.Orden))
             .Where(a => a.OperadorId == OperadorId
                      && a.EmpresaId == EmpresaId
                      && a.DeletedAt == null
                      && a.Estado != EstadoAsignacion.Cerrada
                      && a.Estado != EstadoAsignacion.Rechazada
                      && (desde == null || a.UpdatedAt >= desde))
-            .AsSplitQuery()
+            .Select(a => new
+            {
+                a.Id,
+                a.Estado,
+                a.Prioridad,
+                a.FechaAsignacion,
+                a.FechaFinalizacion,
+                a.Observaciones,
+                flujo_version_id = a.FlujoVersionId,
+                tipo_inspeccion = new { a.TipoInspeccion.Id, a.TipoInspeccion.Nombre, a.TipoInspeccion.Codigo },
+                servicio = new
+                {
+                    a.ServicioInspeccion.Id,
+                    a.ServicioInspeccion.IdServicio,
+                    a.ServicioInspeccion.NumeroMedidor,
+                    a.ServicioInspeccion.Direccion,
+                    a.ServicioInspeccion.Localidad,
+                    a.ServicioInspeccion.Ruta,
+                    coord_x = a.ServicioInspeccion.CoordenadaX,
+                    coord_y = a.ServicioInspeccion.CoordenadaY
+                }
+            })
+            .ToListAsync();
+
+        // Flujos únicos requeridos por las asignaciones (deduplicados)
+        var flujoIds = asignaciones.Select(a => a.flujo_version_id).Distinct().ToList();
+        var flujoVersiones = await _db.FlujoVersiones
+            .Where(v => flujoIds.Contains(v.Id))
+            .Select(v => new
+            {
+                v.Id,
+                numero_version = v.NumeroVersion,
+                v.FlujoId,
+                secciones = v.Secciones.OrderBy(s => s.Orden).Select(s => new
+                {
+                    s.Id,
+                    s.Titulo,
+                    s.Orden,
+                    preguntas = s.Preguntas.OrderBy(p => p.Orden).Select(p => new
+                    {
+                        p.Id,
+                        p.Codigo,
+                        texto = p.Texto,
+                        p.Orden,
+                        obligatorio = p.Obligatorio,
+                        tipo_control = System.Text.Json.JsonNamingPolicy.SnakeCaseLower.ConvertName(p.TipoControl.ToString()),
+                        opciones = p.Opciones.Where(o => o.Activo).OrderBy(o => o.Orden).Select(o => new
+                        {
+                            o.Id,
+                            o.Codigo,
+                            texto = o.Texto,
+                            o.Orden
+                        })
+                    })
+                }),
+                reglas = v.Reglas.Where(r => r.Activo).OrderBy(r => r.Orden).Select(r => new
+                {
+                    r.Id,
+                    pregunta_origen_id = r.PreguntaOrigenId,
+                    r.ValorComparacion,
+                    accion = System.Text.Json.JsonNamingPolicy.SnakeCaseLower.ConvertName(r.Accion.ToString()),
+                    pregunta_destino_id = r.PreguntaDestinoId,
+                    seccion_destino_id = r.SeccionDestinoId,
+                    r.Orden
+                })
+            })
             .ToListAsync();
 
         // Catálogos actualizados
         var catalogos = await _db.Catalogos
             .Where(c => (c.EmpresaId == null || c.EmpresaId == EmpresaId) && c.Activo)
+            .Select(c => new { c.Id, c.Tipo, c.Codigo, c.Texto, c.Orden })
             .ToListAsync();
 
         // Actualizar fecha de última sincronización
@@ -102,6 +160,7 @@ public class SyncController : ControllerBase
             timestamp = DateTimeOffset.UtcNow,
             operador = new { operador.Id, operador.Nombre, operador.Apellido, operador.CodigoOperador },
             asignaciones,
+            flujo_versiones = flujoVersiones,
             catalogos,
             total_asignaciones = asignaciones.Count
         });
