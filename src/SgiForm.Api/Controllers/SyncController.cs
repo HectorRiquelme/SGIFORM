@@ -72,6 +72,7 @@ public class SyncController : ControllerBase
                      && a.Estado != EstadoAsignacion.Cerrada
                      && a.Estado != EstadoAsignacion.Rechazada
                      && (desde == null || a.UpdatedAt >= desde))
+            .AsSplitQuery()
             .ToListAsync();
 
         // Catálogos actualizados

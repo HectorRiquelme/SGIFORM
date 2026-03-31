@@ -51,7 +51,7 @@ public class FlujoController : ControllerBase
                 tipo_inspeccion = f.TipoInspeccion == null ? null : new { f.TipoInspeccion.Id, f.TipoInspeccion.Nombre },
                 versiones = f.Versiones.Select(v => new
                 {
-                    v.Id, v.NumeroVersion, estado = v.Estado.ToString().ToLower(), v.PublicadoEn
+                    v.Id, v.NumeroVersion, estado = System.Text.Json.JsonNamingPolicy.SnakeCaseLower.ConvertName(v.Estado.ToString()), v.PublicadoEn
                 }).ToList()
             })
             .ToListAsync();
@@ -86,7 +86,7 @@ public class FlujoController : ControllerBase
                 {
                     v.Id,
                     v.NumeroVersion,
-                    estado = v.Estado.ToString().ToLower(),
+                    estado = System.Text.Json.JsonNamingPolicy.SnakeCaseLower.ConvertName(v.Estado.ToString()),
                     v.DescripcionCambio,
                     v.PublicadoEn,
                     v.CreatedAt
@@ -159,7 +159,7 @@ public class FlujoController : ControllerBase
             version.Id,
             version.FlujoId,
             version.NumeroVersion,
-            estado = version.Estado.ToString().ToLower(),
+            estado = System.Text.Json.JsonNamingPolicy.SnakeCaseLower.ConvertName(version.Estado.ToString()),
             version.DescripcionCambio,
             version.PublicadoPor,
             version.PublicadoEn,
@@ -182,7 +182,7 @@ public class FlujoController : ControllerBase
                     p.Id,
                     p.Codigo,
                     p.Texto,
-                    tipo_control = p.TipoControl.ToString().ToLower(),
+                    tipo_control = System.Text.Json.JsonNamingPolicy.SnakeCaseLower.ConvertName(p.TipoControl.ToString()),
                     p.Placeholder,
                     p.Ayuda,
                     p.Obligatorio,
@@ -208,10 +208,10 @@ public class FlujoController : ControllerBase
                 r.Codigo,
                 r.Descripcion,
                 r.PreguntaOrigenId,
-                operador = r.Operador.ToString().ToLower(),
+                operador = System.Text.Json.JsonNamingPolicy.SnakeCaseLower.ConvertName(r.Operador.ToString()),
                 r.ValorComparacion,
                 r.ValorComparacionJson,
-                accion = r.Accion.ToString().ToLower(),
+                accion = System.Text.Json.JsonNamingPolicy.SnakeCaseLower.ConvertName(r.Accion.ToString()),
                 r.PreguntaDestinoId,
                 r.SeccionDestinoId,
                 r.ParametrosJson,
