@@ -98,6 +98,21 @@ public partial class InspeccionViewModel : ObservableObject
 
             // Cargar secciones visibles
             Secciones = _engine.GetSecciones();
+
+            // Si no hay secciones, intentar sincronizar para descargar el flujo
+            if (Secciones.Count == 0 && _sync.TieneConexion)
+            {
+                await _sync.DescargarAsignacionesAsync();
+                await _engine.InicializarAsync(Asignacion.FlujoVersionId, Inspeccion.Id);
+                Secciones = _engine.GetSecciones();
+            }
+
+            if (Secciones.Count == 0)
+            {
+                MensajeError = "Formulario no descargado. Por favor sincronice en la pestaña Sincronizar.";
+                return;
+            }
+
             NavigarSeccion(0);
 
             EstadoBadge = Inspeccion.Estado;
