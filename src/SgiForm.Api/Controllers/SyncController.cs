@@ -150,7 +150,8 @@ public class SyncController : ControllerBase
                 }
 
                 // Actualizar datos — TryParse para evitar excepción con valores inválidos
-                if (!Enum.TryParse<EstadoInspeccion>(inspReq.Estado, ignoreCase: true, out var estadoParsed))
+                // Acepta snake_case ("en_progreso") o PascalCase ("EnProgreso")
+                if (!Enum.TryParse<EstadoInspeccion>(SnakeToPascal(inspReq.Estado), ignoreCase: true, out var estadoParsed))
                 {
                     errores.Add(new { asignacion_id = inspReq.AsignacionId, error = $"Estado inválido: '{inspReq.Estado}'" });
                     continue;
@@ -177,7 +178,7 @@ public class SyncController : ControllerBase
                     }
                     else
                     {
-                        if (!Enum.TryParse<TipoControl>(respReq.TipoControl, ignoreCase: true, out var tipoControlParsed))
+                        if (!Enum.TryParse<TipoControl>(SnakeToPascal(respReq.TipoControl), ignoreCase: true, out var tipoControlParsed))
                         {
                             _logger.LogWarning("TipoControl inválido '{Tipo}' en pregunta {PreguntaId}", respReq.TipoControl, respReq.PreguntaId);
                             continue;
@@ -396,6 +397,14 @@ public class SyncController : ControllerBase
     // ──────────────────────────────────────────────────────────────────────────
     // Helpers
     // ──────────────────────────────────────────────────────────────────────────
+    /// <summary>Convierte snake_case a PascalCase para Enum.TryParse ("en_progreso" → "EnProgreso")</summary>
+    private static string SnakeToPascal(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return value;
+        return string.Join("", value.Split('_')
+            .Select(w => w.Length > 0 ? char.ToUpperInvariant(w[0]) + w[1..] : ""));
+    }
+
     private static void ActualizarRespuesta(InspeccionRespuesta resp, RespuestaUploadItem req)
     {
         resp.ValorTexto = req.ValorTexto;

@@ -217,6 +217,10 @@ public class AppDbContext : DbContext
             e.Property(x => x.Descripcion).HasColumnName("descripcion");
             e.Property(x => x.Activo).HasColumnName("activo");
             e.Property(x => x.FlujoVersionIdDef).HasColumnName("flujo_version_id_def");
+            e.HasOne(x => x.FlujoVersionDefecto)
+                .WithMany()
+                .HasForeignKey(x => x.FlujoVersionIdDef)
+                .OnDelete(DeleteBehavior.SetNull);
             e.Property(x => x.Icono).HasColumnName("icono");
             e.Property(x => x.Color).HasColumnName("color");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
