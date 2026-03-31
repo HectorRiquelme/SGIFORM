@@ -76,7 +76,7 @@ public class AppDbContext : DbContext
             e.Property(x => x.TenantSlug).HasColumnName("tenant_slug");
             e.Property(x => x.Activo).HasColumnName("activo");
             e.Property(x => x.Plan).HasColumnName("plan");
-            e.Property(x => x.Configuracion).HasColumnName("configuracion");
+            e.Property(x => x.Configuracion).HasColumnName("configuracion").HasColumnType("jsonb");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
             e.Property(x => x.DeletedAt).HasColumnName("deleted_at");
@@ -255,7 +255,7 @@ public class AppDbContext : DbContext
             e.Property(x => x.DescripcionCambio).HasColumnName("descripcion_cambio");
             e.Property(x => x.PublicadoPor).HasColumnName("publicado_por");
             e.Property(x => x.PublicadoEn).HasColumnName("publicado_en");
-            e.Property(x => x.Configuracion).HasColumnName("configuracion");
+            e.Property(x => x.Configuracion).HasColumnName("configuracion").HasColumnType("jsonb");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
         });
@@ -272,7 +272,7 @@ public class AppDbContext : DbContext
             e.Property(x => x.Descripcion).HasColumnName("descripcion");
             e.Property(x => x.Orden).HasColumnName("orden");
             e.Property(x => x.Visible).HasColumnName("visible");
-            e.Property(x => x.CondicionalJson).HasColumnName("condicional_json");
+            e.Property(x => x.CondicionalJson).HasColumnName("condicional_json").HasColumnType("jsonb");
             e.Property(x => x.Icono).HasColumnName("icono");
             e.Property(x => x.Color).HasColumnName("color");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
@@ -299,8 +299,8 @@ public class AppDbContext : DbContext
             e.Property(x => x.Visible).HasColumnName("visible");
             e.Property(x => x.Editable).HasColumnName("editable");
             e.Property(x => x.ValorPorDefecto).HasColumnName("valor_por_defecto");
-            e.Property(x => x.ValidacionesJson).HasColumnName("validaciones_json");
-            e.Property(x => x.ConfiguracionJson).HasColumnName("configuracion_json");
+            e.Property(x => x.ValidacionesJson).HasColumnName("validaciones_json").HasColumnType("jsonb");
+            e.Property(x => x.ConfiguracionJson).HasColumnName("configuracion_json").HasColumnType("jsonb");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
             // Relaciones hacia FlujoRegla son configuradas en FlujoRegla
@@ -321,7 +321,7 @@ public class AppDbContext : DbContext
             e.Property(x => x.Orden).HasColumnName("orden");
             e.Property(x => x.Activo).HasColumnName("activo");
             e.Property(x => x.ValorNumerico).HasColumnName("valor_numerico");
-            e.Property(x => x.MetadataJson).HasColumnName("metadata_json");
+            e.Property(x => x.MetadataJson).HasColumnName("metadata_json").HasColumnType("jsonb");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
         });
@@ -340,13 +340,13 @@ public class AppDbContext : DbContext
                 .HasColumnName("operador")
                 .HasConversion(new SnakeCaseEnumConverter<OperadorRegla>());
             e.Property(x => x.ValorComparacion).HasColumnName("valor_comparacion");
-            e.Property(x => x.ValorComparacionJson).HasColumnName("valor_comparacion_json");
+            e.Property(x => x.ValorComparacionJson).HasColumnName("valor_comparacion_json").HasColumnType("jsonb");
             e.Property(x => x.Accion)
                 .HasColumnName("accion")
                 .HasConversion(new SnakeCaseEnumConverter<AccionRegla>());
             e.Property(x => x.PreguntaDestinoId).HasColumnName("pregunta_destino_id");
             e.Property(x => x.SeccionDestinoId).HasColumnName("seccion_destino_id");
-            e.Property(x => x.ParametrosJson).HasColumnName("parametros_json");
+            e.Property(x => x.ParametrosJson).HasColumnName("parametros_json").HasColumnType("jsonb");
             e.Property(x => x.Orden).HasColumnName("orden");
             e.Property(x => x.Activo).HasColumnName("activo");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
@@ -388,7 +388,7 @@ public class AppDbContext : DbContext
             e.Property(x => x.UsuarioId).HasColumnName("usuario_id");
             e.Property(x => x.Notas).HasColumnName("notas");
             e.Property(x => x.ErrorGeneral).HasColumnName("error_general");
-            e.Property(x => x.ConfiguracionMapeo).HasColumnName("configuracion_mapeo");
+            e.Property(x => x.ConfiguracionMapeo).HasColumnName("configuracion_mapeo").HasColumnType("jsonb");
             e.Property(x => x.ProcesadoEn).HasColumnName("procesado_en");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
@@ -403,8 +403,8 @@ public class AppDbContext : DbContext
             e.Property(x => x.LoteId).HasColumnName("lote_id");
             e.Property(x => x.NumeroFila).HasColumnName("numero_fila");
             e.Property(x => x.Estado).HasColumnName("estado");
-            e.Property(x => x.ErroresJson).HasColumnName("errores_json");
-            e.Property(x => x.DatosOriginales).HasColumnName("datos_originales");
+            e.Property(x => x.ErroresJson).HasColumnName("errores_json").HasColumnType("jsonb");
+            e.Property(x => x.DatosOriginales).HasColumnName("datos_originales").HasColumnType("jsonb");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
         });
@@ -529,9 +529,9 @@ public class AppDbContext : DbContext
             e.Property(x => x.ValorHora).HasColumnName("valor_hora");
             e.Property(x => x.ValorFechaHora).HasColumnName("valor_fecha_hora");
             e.Property(x => x.ValorBooleano).HasColumnName("valor_booleano");
-            e.Property(x => x.ValorJson).HasColumnName("valor_json");
+            e.Property(x => x.ValorJson).HasColumnName("valor_json").HasColumnType("jsonb");
             e.Property(x => x.EsValido).HasColumnName("es_valido");
-            e.Property(x => x.ErroresValidacion).HasColumnName("errores_validacion");
+            e.Property(x => x.ErroresValidacion).HasColumnName("errores_validacion").HasColumnType("jsonb");
             e.Property(x => x.RespondidaEn).HasColumnName("respondida_en");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
@@ -558,7 +558,7 @@ public class AppDbContext : DbContext
             e.Property(x => x.TieneMarcaAgua).HasColumnName("tiene_marca_agua");
             e.Property(x => x.HashSha256).HasColumnName("hash_sha256");
             e.Property(x => x.Orden).HasColumnName("orden");
-            e.Property(x => x.MetadataJson).HasColumnName("metadata_json");
+            e.Property(x => x.MetadataJson).HasColumnName("metadata_json").HasColumnType("jsonb");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
         });
@@ -580,7 +580,7 @@ public class AppDbContext : DbContext
                 .HasColumnName("estado_nuevo")
                 .HasConversion(new SnakeCaseEnumConverter<EstadoInspeccion>());
             e.Property(x => x.Observacion).HasColumnName("observacion");
-            e.Property(x => x.MetadataJson).HasColumnName("metadata_json");
+            e.Property(x => x.MetadataJson).HasColumnName("metadata_json").HasColumnType("jsonb");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
         });
@@ -604,7 +604,7 @@ public class AppDbContext : DbContext
             e.Property(x => x.BytesTransferidos).HasColumnName("bytes_transferidos");
             e.Property(x => x.DuracionMs).HasColumnName("duracion_ms");
             e.Property(x => x.Exitoso).HasColumnName("exitoso");
-            e.Property(x => x.ErroresJson).HasColumnName("errores_json");
+            e.Property(x => x.ErroresJson).HasColumnName("errores_json").HasColumnType("jsonb");
             e.Property(x => x.IpOrigen).HasColumnName("ip_origen").HasColumnType("text");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
@@ -622,7 +622,7 @@ public class AppDbContext : DbContext
             e.Property(x => x.Texto).HasColumnName("texto");
             e.Property(x => x.Orden).HasColumnName("orden");
             e.Property(x => x.Activo).HasColumnName("activo");
-            e.Property(x => x.Metadata).HasColumnName("metadata");
+            e.Property(x => x.Metadata).HasColumnName("metadata").HasColumnType("jsonb");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
         });
@@ -639,8 +639,8 @@ public class AppDbContext : DbContext
             e.Property(x => x.Entidad).HasColumnName("entidad");
             e.Property(x => x.EntidadId).HasColumnName("entidad_id");
             e.Property(x => x.Accion).HasColumnName("accion");
-            e.Property(x => x.DatosAnteriores).HasColumnName("datos_anteriores");
-            e.Property(x => x.DatosNuevos).HasColumnName("datos_nuevos");
+            e.Property(x => x.DatosAnteriores).HasColumnName("datos_anteriores").HasColumnType("jsonb");
+            e.Property(x => x.DatosNuevos).HasColumnName("datos_nuevos").HasColumnType("jsonb");
             e.Property(x => x.Ip).HasColumnName("ip").HasColumnType("text");
             e.Property(x => x.UserAgent).HasColumnName("user_agent");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
