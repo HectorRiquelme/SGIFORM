@@ -28,7 +28,7 @@ public static class MauiProgram
 
         // ─── HTTP Client compartido via HttpClientHolder ──────────────────────
         // Lee la URL guardada por el usuario, o usa la default
-        var savedUrl = Preferences.Get("api_url", "https://api.sgiform.cl");
+        var savedUrl = Preferences.Get("api_url", "https://apps.solucionescloud.cl/sgiformapi");
         var apiBaseUrl = savedUrl.TrimEnd('/') + "/";
         var httpHolder = new HttpClientHolder(apiBaseUrl);
         builder.Services.AddSingleton(httpHolder);

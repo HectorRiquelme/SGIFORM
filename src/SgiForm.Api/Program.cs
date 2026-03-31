@@ -139,6 +139,8 @@ try
                 System.Text.Json.JsonNamingPolicy.SnakeCaseLower;
             opt.JsonSerializerOptions.DefaultIgnoreCondition =
                 System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+            opt.JsonSerializerOptions.ReferenceHandler =
+                System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
         });
 
     // ─── Swagger / OpenAPI ────────────────────────────────────────────────────

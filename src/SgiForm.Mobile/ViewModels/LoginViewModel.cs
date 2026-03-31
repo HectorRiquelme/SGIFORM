@@ -16,7 +16,7 @@ public partial class LoginViewModel : ObservableObject
         _sync = sync;
         _releaseNotes = releaseNotes;
         // Leer URL guardada
-        ApiUrl = Preferences.Get("api_url", "https://api.sgiform.cl");
+        ApiUrl = Preferences.Get("api_url", "https://apps.solucionescloud.cl/sgiformapi");
     }
 
     [ObservableProperty] private string codigoOperador = "";
