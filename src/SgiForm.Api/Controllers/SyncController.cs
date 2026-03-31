@@ -254,6 +254,16 @@ public class SyncController : ControllerBase
                     }
                 }
 
+                // Actualizar contadores de respuestas
+                if (inspReq.Respuestas.Any())
+                {
+                    inspeccion.TotalRespondidas = inspeccion.Respuestas.Count;
+                    inspeccion.TotalPreguntas = await _db.FlujoPreguntas
+                        .CountAsync(p => p.FlujoVersionId == inspeccion.FlujoVersionId
+                                      && p.TipoControl != TipoControl.FotoUnica
+                                      && p.TipoControl != TipoControl.FotosMultiples);
+                }
+
                 // Validación server-side del flujo
                 var validacion = await _flowValidator.ValidarAsync(
                     inspeccion.FlujoVersionId,
