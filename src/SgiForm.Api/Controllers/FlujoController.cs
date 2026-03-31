@@ -69,6 +69,29 @@ public class FlujoController : ControllerBase
             .Include(f => f.TipoInspeccion)
             .Include(f => f.Versiones)
             .Where(f => f.Id == id && f.EmpresaId == EmpresaId && f.DeletedAt == null)
+            .Select(f => new
+            {
+                f.Id,
+                f.Nombre,
+                f.Descripcion,
+                f.Activo,
+                f.CreatedAt,
+                tipo_inspeccion = f.TipoInspeccion == null ? null : new
+                {
+                    f.TipoInspeccion.Id,
+                    f.TipoInspeccion.Nombre,
+                    f.TipoInspeccion.Codigo
+                },
+                versiones = f.Versiones.Select(v => new
+                {
+                    v.Id,
+                    v.NumeroVersion,
+                    estado = v.Estado.ToString().ToLower(),
+                    v.DescripcionCambio,
+                    v.PublicadoEn,
+                    v.CreatedAt
+                }).OrderBy(v => v.NumeroVersion).ToList()
+            })
             .FirstOrDefaultAsync();
 
         if (flujo == null) return NotFound();
@@ -131,7 +154,70 @@ public class FlujoController : ControllerBase
 
         if (version == null) return NotFound();
 
-        return Ok(version);
+        return Ok(new
+        {
+            version.Id,
+            version.FlujoId,
+            version.NumeroVersion,
+            estado = version.Estado.ToString().ToLower(),
+            version.DescripcionCambio,
+            version.PublicadoPor,
+            version.PublicadoEn,
+            version.Configuracion,
+            version.CreatedAt,
+            version.UpdatedAt,
+            secciones = version.Secciones.Select(s => new
+            {
+                s.Id,
+                s.Codigo,
+                s.Titulo,
+                s.Descripcion,
+                s.Orden,
+                s.Visible,
+                s.Icono,
+                s.Color,
+                s.CondicionalJson,
+                preguntas = s.Preguntas.Select(p => new
+                {
+                    p.Id,
+                    p.Codigo,
+                    p.Texto,
+                    tipo_control = p.TipoControl.ToString().ToLower(),
+                    p.Placeholder,
+                    p.Ayuda,
+                    p.Obligatorio,
+                    p.Orden,
+                    p.Visible,
+                    p.Editable,
+                    p.ValorPorDefecto,
+                    p.ValidacionesJson,
+                    p.ConfiguracionJson,
+                    opciones = p.Opciones.Select(o => new
+                    {
+                        o.Id,
+                        o.Codigo,
+                        o.Texto,
+                        o.Orden,
+                        o.ValorNumerico
+                    }).ToList()
+                }).ToList()
+            }).ToList(),
+            reglas = version.Reglas.Select(r => new
+            {
+                r.Id,
+                r.Codigo,
+                r.Descripcion,
+                r.PreguntaOrigenId,
+                operador = r.Operador.ToString().ToLower(),
+                r.ValorComparacion,
+                r.ValorComparacionJson,
+                accion = r.Accion.ToString().ToLower(),
+                r.PreguntaDestinoId,
+                r.SeccionDestinoId,
+                r.ParametrosJson,
+                r.Orden
+            }).ToList()
+        });
     }
 
     // ──────────────────────────────────────────────────────────────────────────
