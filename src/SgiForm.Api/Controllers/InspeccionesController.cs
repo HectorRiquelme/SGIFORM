@@ -44,7 +44,7 @@ public class InspeccionesController : ControllerBase
             .Select(i => new
             {
                 i.Id,
-                estado = i.Estado.ToString().ToLower(),
+                i.Estado,
                 i.TotalPreguntas, i.TotalRespondidas, i.TotalFotografias,
                 coord_x_fin = i.CoordXFin,
                 sincronizado_en = i.SincronizadoEn,

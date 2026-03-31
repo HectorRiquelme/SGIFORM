@@ -32,13 +32,13 @@ public class DashboardController : ControllerBase
         var asignacionesPorEstado = await _db.AsignacionesInspeccion
             .Where(a => a.EmpresaId == empresa && a.DeletedAt == null)
             .GroupBy(a => a.Estado)
-            .Select(g => new { estado = g.Key.ToString().ToLower(), total = g.Count() })
+            .Select(g => new { estado = g.Key, total = g.Count() })
             .ToListAsync();
 
         var inspeccionesPorEstado = await _db.Inspecciones
             .Where(i => i.EmpresaId == empresa)
             .GroupBy(i => i.Estado)
-            .Select(g => new { estado = g.Key.ToString().ToLower(), total = g.Count() })
+            .Select(g => new { estado = g.Key, total = g.Count() })
             .ToListAsync();
 
         var totalFotografias = await _db.InspeccionFotografias

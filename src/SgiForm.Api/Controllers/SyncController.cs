@@ -378,7 +378,7 @@ public class SyncController : ControllerBase
         var stats = await _db.AsignacionesInspeccion
             .Where(a => a.OperadorId == operadorId && a.EmpresaId == EmpresaId && a.DeletedAt == null)
             .GroupBy(a => a.Estado)
-            .Select(g => new { estado = g.Key.ToString().ToLower(), total = g.Count() })
+            .Select(g => new { estado = g.Key, total = g.Count() })
             .ToListAsync();
 
         var ultimaSync = await _db.SincronizacionLogs

@@ -64,7 +64,7 @@ public class ImportacionController : ControllerBase
                 lote_id = lote.Id,
                 nombre_original = lote.NombreOriginal,
                 total_filas = lote.TotalFilas,
-                estado = lote.Estado.ToString().ToLower(),
+                lote.Estado,
                 mensaje = "Archivo recibido. Use /preview para ver los datos y /confirmar para procesar."
             });
     }
@@ -107,7 +107,7 @@ public class ImportacionController : ControllerBase
         return Ok(new
         {
             lote_id = loteActualizado.Id,
-            estado = loteActualizado.Estado.ToString().ToLower(),
+            estado = loteActualizado.Estado,
             total_filas = loteActualizado.TotalFilas,
             filas_validas = loteActualizado.FilasValidas,
             filas_error = loteActualizado.FilasError,
@@ -139,7 +139,7 @@ public class ImportacionController : ControllerBase
                 l.TotalFilas,
                 l.FilasValidas,
                 l.FilasError,
-                estado = l.Estado.ToString().ToLower(),
+                l.Estado,
                 l.ProcesadoEn,
                 l.CreatedAt,
                 usuario = l.Usuario.Nombre + " " + l.Usuario.Apellido
@@ -167,7 +167,7 @@ public class ImportacionController : ControllerBase
                 l.FilasValidas,
                 l.FilasError,
                 l.FilasOmitidas,
-                estado = l.Estado.ToString().ToLower(),
+                l.Estado,
                 l.Notas,
                 l.ErrorGeneral,
                 l.ProcesadoEn,

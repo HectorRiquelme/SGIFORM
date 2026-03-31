@@ -69,8 +69,8 @@ public class AsignacionController : ControllerBase
             .Select(a => new
             {
                 a.Id,
-                estado = a.Estado.ToString().ToLower(),
-                prioridad = a.Prioridad.ToString().ToLower(),
+                a.Estado,
+                a.Prioridad,
                 a.FechaAsignacion,
                 a.FechaFinalizacion,
                 servicio = new

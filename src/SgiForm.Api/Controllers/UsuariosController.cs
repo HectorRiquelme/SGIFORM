@@ -31,7 +31,7 @@ public class UsuariosController : ControllerBase
             {
                 u.Id, u.Email, u.Nombre, u.Apellido, u.Telefono,
                 nombre_completo = u.Nombre + " " + u.Apellido,
-                estado = u.Estado.ToString().ToLower(),
+                u.Estado,
                 rol = new { u.Rol.Id, u.Rol.Nombre, u.Rol.Codigo },
                 u.UltimoAcceso, u.CreatedAt
             })
@@ -50,7 +50,7 @@ public class UsuariosController : ControllerBase
         return Ok(new
         {
             u.Id, u.Email, u.Nombre, u.Apellido, u.Telefono,
-            estado = u.Estado.ToString().ToLower(),
+            u.Estado,
             rol_id = u.RolId, rol_nombre = u.Rol.Nombre,
             u.UltimoAcceso, u.CreatedAt
         });
