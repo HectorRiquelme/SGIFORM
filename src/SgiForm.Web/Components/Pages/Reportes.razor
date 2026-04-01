@@ -3,6 +3,8 @@
 @inject ApiClient Api
 @inject AuthStateService Auth
 @inject NavigationManager Nav
+@inject IJSRuntime JS
+@inject IConfiguration Config
 
 <PageTitle>Reportes — SGI-FORM</PageTitle>
 
@@ -55,7 +57,7 @@
             </div>
         </div>
 
-        <button class="sf-btn sf-btn-primary" @onclick="DescargarExcel" disabled="@descargando">
+        <button class="sf-btn sf-btn-primary" @onclick="() => DescargarExcel()" disabled="@descargando">
             @(descargando ? "Generando..." : "⬇️ Descargar Excel")
         </button>
     </div>
@@ -207,19 +209,26 @@
         await Task.WhenAll(tasks);
     }
 
-    private void DescargarExcel()
+    private async Task DescargarExcel()
     {
         descargando = true;
-        var q = "api/v1/reportes/excel?";
-        if (!string.IsNullOrEmpty(excelFiltros.Estado)) q += $"estado={excelFiltros.Estado}&";
-        if (!string.IsNullOrEmpty(excelFiltros.OperadorId)) q += $"operadorId={excelFiltros.OperadorId}&";
-        if (!string.IsNullOrEmpty(excelFiltros.Localidad)) q += $"localidad={Uri.EscapeDataString(excelFiltros.Localidad)}&";
-        if (!string.IsNullOrEmpty(excelFiltros.Ruta)) q += $"ruta={Uri.EscapeDataString(excelFiltros.Ruta)}&";
+        StateHasChanged();
+        try
+        {
+            var apiBase = (Config["ApiBaseUrl"] ?? "http://localhost:5043").TrimEnd('/');
+            var qs = "api/v1/reportes/productividad-excel?";
+            if (!string.IsNullOrEmpty(excelFiltros.Estado))    qs += $"estado={excelFiltros.Estado}&";
+            if (!string.IsNullOrEmpty(excelFiltros.OperadorId)) qs += $"operadorId={excelFiltros.OperadorId}&";
+            if (!string.IsNullOrEmpty(excelFiltros.Localidad)) qs += $"localidad={Uri.EscapeDataString(excelFiltros.Localidad)}&";
+            if (!string.IsNullOrEmpty(excelFiltros.Ruta))      qs += $"ruta={Uri.EscapeDataString(excelFiltros.Ruta)}&";
 
-        // Abrir en nueva pestaña con token en URL (alternativa simple)
-        var url = $"http://localhost:5043/{q.TrimEnd('&')}";
-        Nav.NavigateTo(url, forceLoad: true);
-        descargando = false;
+            var url = $"{apiBase}/{qs.TrimEnd('&')}";
+            await JS.InvokeAsync<bool>("sgiDownloadFile", url, Auth.AccessToken, "reporte_productividad.xlsx");
+        }
+        finally
+        {
+            descargando = false;
+        }
     }
 
     private int GetAsignacionCount(string estado) =>

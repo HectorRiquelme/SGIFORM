@@ -126,6 +126,25 @@ public class ApiClient
         }
     }
 
+    // ── POST MULTIPART ───────────────────────────────────────────────────────
+    public async Task<ApiResult<T>> PostMultipartAsync<T>(string url, MultipartFormDataContent content)
+    {
+        SetAuthHeader();
+        try
+        {
+            var response = await _http.PostAsync(url, content);
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+                return ApiResult<T>.Ok(JsonSerializer.Deserialize<T>(body, JsonOptions)!);
+            return ApiResult<T>.Fail($"Error {(int)response.StatusCode}: {body}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "POST multipart {Url} failed", url);
+            return ApiResult<T>.Fail(ex.Message);
+        }
+    }
+
     // ── LOGIN ─────────────────────────────────────────────────────────────────
     /// <summary>
     /// Llama a POST /api/v1/auth/login, guarda el token en AuthStateService.

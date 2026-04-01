@@ -33,6 +33,55 @@ public class ImportacionController : ControllerBase
         Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
 
     // ──────────────────────────────────────────────────────────────────────────
+    // GET /importaciones/plantilla — descargar plantilla Excel de ejemplo
+    // ──────────────────────────────────────────────────────────────────────────
+    [HttpGet("plantilla")]
+    public IActionResult DescargarPlantilla()
+    {
+        using var wb = new ClosedXML.Excel.XLWorkbook();
+        var ws = wb.AddWorksheet("Servicios");
+
+        // Encabezados requeridos
+        var cols = new[]
+        {
+            "ID_SERVICIO", "ID_MEDIDOR", "TIPO_MEDIDOR", "CLIENTE",
+            "DIRECCION", "LOCALIDAD", "ZONA", "RUTA",
+            "LATITUD", "LONGITUD", "ESTADO", "OBSERVACIONES"
+        };
+        for (int i = 0; i < cols.Length; i++)
+        {
+            var cell = ws.Cell(1, i + 1);
+            cell.Value = cols[i];
+            cell.Style.Font.Bold = true;
+            cell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightSteelBlue;
+        }
+
+        // Fila de ejemplo
+        ws.Cell(2, 1).Value  = "SRV001";
+        ws.Cell(2, 2).Value  = "MED-001";
+        ws.Cell(2, 3).Value  = "Elster 15mm";
+        ws.Cell(2, 4).Value  = "Juan Pérez";
+        ws.Cell(2, 5).Value  = "Av. Ejemplo 123";
+        ws.Cell(2, 6).Value  = "La Serena";
+        ws.Cell(2, 7).Value  = "Norte";
+        ws.Cell(2, 8).Value  = "R01";
+        ws.Cell(2, 9).Value  = -29.9500;
+        ws.Cell(2, 10).Value = -71.3350;
+        ws.Cell(2, 11).Value = "activo";
+        ws.Cell(2, 12).Value = "";
+
+        ws.Columns().AdjustToContents();
+
+        using var ms = new System.IO.MemoryStream();
+        wb.SaveAs(ms);
+        ms.Position = 0;
+
+        return File(ms.ToArray(),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "plantilla_importacion_servicios.xlsx");
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
     // POST /importaciones/upload — subir archivo Excel
     // ──────────────────────────────────────────────────────────────────────────
     [HttpPost("upload")]

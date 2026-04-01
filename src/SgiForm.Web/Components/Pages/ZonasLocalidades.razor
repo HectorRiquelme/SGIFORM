@@ -1,0 +1,390 @@
+@page "/zonas-localidades"
+@layout SgiForm.Web.Components.Layout.MainLayout
+@inject ApiClient Api
+@inject IJSRuntime JS
+
+<PageTitle>Zonas y Localidades — SGI-FORM</PageTitle>
+
+<div class="sf-page-header">
+    <div>
+        <h2>Zonas y Localidades</h2>
+        <span class="sf-text-muted">Organiza geográficamente los servicios y operadores</span>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+    <!-- ── ZONAS ────────────────────────────────────────────────────────── -->
+    <div class="sf-card">
+        <div class="sf-card-header" style="display:flex;justify-content:space-between;align-items:center">
+            <h3>Zonas</h3>
+            <button class="sf-btn sf-btn-primary sf-btn-sm" @onclick="AbrirNuevaZona">+ Nueva zona</button>
+        </div>
+
+        @if (zonas == null)
+        {
+            <div class="sf-loading-row">Cargando...</div>
+        }
+        else if (!zonas.Any())
+        {
+            <div class="sf-empty-state" style="padding:24px;text-align:center">
+                <p class="sf-text-muted">No hay zonas registradas.</p>
+            </div>
+        }
+        else
+        {
+            <table class="sf-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th class="sf-text-center">Localidades</th>
+                        <th class="sf-text-center">Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var z in zonas)
+                    {
+                        <tr class="@(zonaSeleccionada?.Id == z.Id ? "sf-row-selected" : "")"
+                            style="cursor:pointer" @onclick="() => SeleccionarZona(z)">
+                            <td><code>@z.Codigo</code></td>
+                            <td><strong>@z.Nombre</strong>
+                                @if (!string.IsNullOrEmpty(z.Descripcion))
+                                { <div class="sf-text-xs sf-text-muted">@z.Descripcion</div> }
+                            </td>
+                            <td class="sf-text-center">
+                                <span class="sf-badge sf-badge-info">@z.TotalLocalidades</span>
+                            </td>
+                            <td class="sf-text-center">
+                                <span class="sf-badge @(z.Activo ? "sf-badge-success" : "sf-badge-secondary")">
+                                    @(z.Activo ? "Activa" : "Inactiva")
+                                </span>
+                            </td>
+                            <td style="white-space:nowrap">
+                                <button class="sf-btn-icon" title="Editar"
+                                    @onclick:stopPropagation="true"
+                                    @onclick="() => AbrirEditarZona(z)">✏️</button>
+                                <button class="sf-btn-icon sf-btn-icon-danger" title="Eliminar"
+                                    @onclick:stopPropagation="true"
+                                    @onclick="() => EliminarZona(z)">🗑️</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <!-- ── LOCALIDADES ──────────────────────────────────────────────────── -->
+    <div class="sf-card">
+        <div class="sf-card-header" style="display:flex;justify-content:space-between;align-items:center">
+            <h3>Localidades @(zonaSeleccionada != null ? $"— {zonaSeleccionada.Nombre}" : "")</h3>
+            @if (zonaSeleccionada != null)
+            {
+                <button class="sf-btn sf-btn-primary sf-btn-sm" @onclick="AbrirNuevaLocalidad">+ Nueva localidad</button>
+            }
+        </div>
+
+        @if (zonaSeleccionada == null)
+        {
+            <div class="sf-empty-state" style="padding:24px;text-align:center">
+                <p class="sf-text-muted">Selecciona una zona para ver sus localidades.</p>
+            </div>
+        }
+        else if (localidades == null)
+        {
+            <div class="sf-loading-row">Cargando...</div>
+        }
+        else if (!localidades.Any())
+        {
+            <div class="sf-empty-state" style="padding:24px;text-align:center">
+                <p class="sf-text-muted">Esta zona no tiene localidades.</p>
+            </div>
+        }
+        else
+        {
+            <table class="sf-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th class="sf-text-center">Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var l in localidades)
+                    {
+                        <tr>
+                            <td><code>@l.Codigo</code></td>
+                            <td>@l.Nombre</td>
+                            <td class="sf-text-center">
+                                <span class="sf-badge @(l.Activo ? "sf-badge-success" : "sf-badge-secondary")">
+                                    @(l.Activo ? "Activa" : "Inactiva")
+                                </span>
+                            </td>
+                            <td style="white-space:nowrap">
+                                <button class="sf-btn-icon" title="Editar"
+                                    @onclick="() => AbrirEditarLocalidad(l)">✏️</button>
+                                <button class="sf-btn-icon sf-btn-icon-danger" title="Eliminar"
+                                    @onclick="() => EliminarLocalidad(l)">🗑️</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<!-- ── MODAL ZONA ─────────────────────────────────────────────────────────── -->
+@if (modalZonaAbierto)
+{
+    <div class="sf-modal-overlay" @onclick="CerrarModalZona">
+        <div class="sf-modal" @onclick:stopPropagation="true" style="max-width:480px">
+            <div class="sf-modal-header">
+                <h3>@(zonaEditando?.Id == Guid.Empty ? "Nueva zona" : "Editar zona")</h3>
+                <button class="sf-modal-close" @onclick="CerrarModalZona">✕</button>
+            </div>
+            <div class="sf-modal-body">
+                @if (!string.IsNullOrEmpty(errorModal))
+                {
+                    <div class="sf-alert sf-alert-danger" style="margin-bottom:12px">@errorModal</div>
+                }
+                <div class="sf-form-group">
+                    <label>Código *</label>
+                    <input class="sf-input" @bind="zonaEditando!.Codigo"
+                           placeholder="Ej: ZON-NORTE" maxlength="50" />
+                </div>
+                <div class="sf-form-group">
+                    <label>Nombre *</label>
+                    <input class="sf-input" @bind="zonaEditando!.Nombre"
+                           placeholder="Ej: Zona Norte" maxlength="200" />
+                </div>
+                <div class="sf-form-group">
+                    <label>Descripción</label>
+                    <textarea class="sf-input" @bind="zonaEditando!.Descripcion"
+                              placeholder="Descripción opcional..." rows="2"></textarea>
+                </div>
+                <div class="sf-form-group">
+                    <label>
+                        <input type="checkbox" @bind="zonaEditando!.Activo" /> Activa
+                    </label>
+                </div>
+            </div>
+            <div class="sf-modal-footer">
+                <button class="sf-btn sf-btn-secondary" @onclick="CerrarModalZona">Cancelar</button>
+                <button class="sf-btn sf-btn-primary" @onclick="GuardarZona" disabled="@guardando">
+                    @(guardando ? "Guardando..." : "Guardar")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ── MODAL LOCALIDAD ────────────────────────────────────────────────────── -->
+@if (modalLocalidadAbierto)
+{
+    <div class="sf-modal-overlay" @onclick="CerrarModalLocalidad">
+        <div class="sf-modal" @onclick:stopPropagation="true" style="max-width:480px">
+            <div class="sf-modal-header">
+                <h3>@(localidadEditando?.Id == Guid.Empty ? "Nueva localidad" : "Editar localidad")</h3>
+                <button class="sf-modal-close" @onclick="CerrarModalLocalidad">✕</button>
+            </div>
+            <div class="sf-modal-body">
+                @if (!string.IsNullOrEmpty(errorModal))
+                {
+                    <div class="sf-alert sf-alert-danger" style="margin-bottom:12px">@errorModal</div>
+                }
+                <div class="sf-form-group">
+                    <label>Código *</label>
+                    <input class="sf-input" @bind="localidadEditando!.Codigo"
+                           placeholder="Ej: LA-SERENA" maxlength="50" />
+                </div>
+                <div class="sf-form-group">
+                    <label>Nombre *</label>
+                    <input class="sf-input" @bind="localidadEditando!.Nombre"
+                           placeholder="Ej: La Serena" maxlength="200" />
+                </div>
+                <div class="sf-form-group">
+                    <label>
+                        <input type="checkbox" @bind="localidadEditando!.Activo" /> Activa
+                    </label>
+                </div>
+            </div>
+            <div class="sf-modal-footer">
+                <button class="sf-btn sf-btn-secondary" @onclick="CerrarModalLocalidad">Cancelar</button>
+                <button class="sf-btn sf-btn-primary" @onclick="GuardarLocalidad" disabled="@guardando">
+                    @(guardando ? "Guardando..." : "Guardar")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<ZonaVm>? zonas;
+    private List<LocalidadVm>? localidades;
+    private ZonaVm? zonaSeleccionada;
+
+    private bool modalZonaAbierto;
+    private bool modalLocalidadAbierto;
+    private bool guardando;
+    private string? errorModal;
+
+    private ZonaForm? zonaEditando;
+    private LocalidadForm? localidadEditando;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarZonas();
+    }
+
+    private async Task CargarZonas()
+    {
+        zonas = await Api.GetAsync<List<ZonaVm>>("api/v1/zonas") ?? new();
+    }
+
+    private async Task SeleccionarZona(ZonaVm z)
+    {
+        zonaSeleccionada = z;
+        localidades = null;
+        localidades = await Api.GetAsync<List<LocalidadVm>>($"api/v1/zonas/{z.Id}/localidades") ?? new();
+    }
+
+    // ── ZONA CRUD ──────────────────────────────────────────────────────────────
+    private void AbrirNuevaZona()
+    {
+        errorModal = null;
+        zonaEditando = new ZonaForm { Id = Guid.Empty, Activo = true };
+        modalZonaAbierto = true;
+    }
+
+    private void AbrirEditarZona(ZonaVm z)
+    {
+        errorModal = null;
+        zonaEditando = new ZonaForm
+        {
+            Id = z.Id, Codigo = z.Codigo, Nombre = z.Nombre,
+            Descripcion = z.Descripcion, Activo = z.Activo
+        };
+        modalZonaAbierto = true;
+    }
+
+    private void CerrarModalZona() { modalZonaAbierto = false; zonaEditando = null; }
+
+    private async Task GuardarZona()
+    {
+        if (zonaEditando == null) return;
+        errorModal = null;
+        guardando = true;
+        try
+        {
+            var body = new { zonaEditando.Codigo, zonaEditando.Nombre, zonaEditando.Descripcion, zonaEditando.Activo };
+            if (zonaEditando.Id == Guid.Empty)
+            {
+                var r = await Api.PostAsync<ZonaVm>("api/v1/zonas", body);
+                if (!r.Success) { errorModal = r.Error; return; }
+            }
+            else
+            {
+                var r = await Api.PutAsync<ZonaVm>($"api/v1/zonas/{zonaEditando.Id}", body);
+                if (!r.Success) { errorModal = r.Error; return; }
+            }
+            CerrarModalZona();
+            await CargarZonas();
+            if (zonaSeleccionada != null)
+            {
+                var actualizada = zonas?.FirstOrDefault(z => z.Id == zonaSeleccionada.Id);
+                if (actualizada != null) await SeleccionarZona(actualizada);
+            }
+        }
+        finally { guardando = false; }
+    }
+
+    private async Task EliminarZona(ZonaVm z)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", $"¿Eliminar la zona '{z.Nombre}'? Esta acción no se puede deshacer."))
+            return;
+        var r = await Api.DeleteAsync($"api/v1/zonas/{z.Id}");
+        if (!r.Success) { await JS.InvokeVoidAsync("alert", r.Error); return; }
+        if (zonaSeleccionada?.Id == z.Id) { zonaSeleccionada = null; localidades = null; }
+        await CargarZonas();
+    }
+
+    // ── LOCALIDAD CRUD ─────────────────────────────────────────────────────────
+    private void AbrirNuevaLocalidad()
+    {
+        errorModal = null;
+        localidadEditando = new LocalidadForm { Id = Guid.Empty, Activo = true };
+        modalLocalidadAbierto = true;
+    }
+
+    private void AbrirEditarLocalidad(LocalidadVm l)
+    {
+        errorModal = null;
+        localidadEditando = new LocalidadForm { Id = l.Id, Codigo = l.Codigo, Nombre = l.Nombre, Activo = l.Activo };
+        modalLocalidadAbierto = true;
+    }
+
+    private void CerrarModalLocalidad() { modalLocalidadAbierto = false; localidadEditando = null; }
+
+    private async Task GuardarLocalidad()
+    {
+        if (localidadEditando == null || zonaSeleccionada == null) return;
+        errorModal = null;
+        guardando = true;
+        try
+        {
+            var body = new { localidadEditando.Codigo, localidadEditando.Nombre, localidadEditando.Activo };
+            if (localidadEditando.Id == Guid.Empty)
+            {
+                var r = await Api.PostAsync<LocalidadVm>($"api/v1/zonas/{zonaSeleccionada.Id}/localidades", body);
+                if (!r.Success) { errorModal = r.Error; return; }
+            }
+            else
+            {
+                var r = await Api.PutAsync<LocalidadVm>($"api/v1/zonas/localidades/{localidadEditando.Id}", body);
+                if (!r.Success) { errorModal = r.Error; return; }
+            }
+            CerrarModalLocalidad();
+            await SeleccionarZona(zonaSeleccionada);
+            await CargarZonas();
+        }
+        finally { guardando = false; }
+    }
+
+    private async Task EliminarLocalidad(LocalidadVm l)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", $"¿Eliminar la localidad '{l.Nombre}'?"))
+            return;
+        var r = await Api.DeleteAsync($"api/v1/zonas/localidades/{l.Id}");
+        if (!r.Success) { await JS.InvokeVoidAsync("alert", r.Error); return; }
+        if (zonaSeleccionada != null) await SeleccionarZona(zonaSeleccionada);
+        await CargarZonas();
+    }
+
+    // ── ViewModels ─────────────────────────────────────────────────────────────
+    private record ZonaVm(Guid Id, string Codigo, string Nombre, string? Descripcion,
+        bool Activo, int TotalLocalidades);
+
+    private record LocalidadVm(Guid Id, string Codigo, string Nombre, bool Activo, Guid? ZonaId);
+
+    private class ZonaForm
+    {
+        public Guid Id { get; set; }
+        public string? Codigo { get; set; }
+        public string? Nombre { get; set; }
+        public string? Descripcion { get; set; }
+        public bool Activo { get; set; } = true;
+    }
+
+    private class LocalidadForm
+    {
+        public Guid Id { get; set; }
+        public string? Codigo { get; set; }
+        public string? Nombre { get; set; }
+        public bool Activo { get; set; } = true;
+    }
+}

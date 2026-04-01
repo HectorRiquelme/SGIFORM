@@ -106,14 +106,28 @@ public class FlujoController : ControllerBase
     [Authorize(Roles = "admin,supervisor")]
     public async Task<IActionResult> Create([FromBody] CreateFlujoRequest req)
     {
+        if (string.IsNullOrWhiteSpace(req.Nombre))
+            return BadRequest(new { error = "El nombre es obligatorio" });
+
+        if (req.TipoInspeccionId.HasValue)
+        {
+            var tipoExiste = await _db.TiposInspeccion
+                .AnyAsync(t => t.Id == req.TipoInspeccionId.Value && t.EmpresaId == EmpresaId && t.DeletedAt == null);
+            if (!tipoExiste)
+                return BadRequest(new { error = "El tipo de inspección seleccionado no existe o no pertenece a esta empresa" });
+        }
+
+        var createdByStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        Guid? createdById = createdByStr != null && Guid.TryParse(createdByStr, out var cid) ? cid : null;
+
         var flujo = new Flujo
         {
             EmpresaId = EmpresaId,
             TipoInspeccionId = req.TipoInspeccionId,
             Nombre = req.Nombre,
-            Descripcion = req.Descripcion,
+            Descripcion = string.IsNullOrEmpty(req.Descripcion) ? null : req.Descripcion,
             Activo = true,
-            CreatedBy = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value)
+            CreatedBy = createdById
         };
 
         _db.Flujos.Add(flujo);
@@ -293,9 +307,28 @@ public class FlujoController : ControllerBase
         var seccion = version.Secciones.FirstOrDefault(s => s.Id == seccionId);
         if (seccion == null) return NotFound(new { error = "Sección no encontrada" });
 
+        if (string.IsNullOrWhiteSpace(req.Codigo) || string.IsNullOrWhiteSpace(req.Texto))
+            return BadRequest(new { error = "Código y texto son obligatorios." });
+
         // Validar código único en la versión
         if (version.Preguntas.Any(p => p.Codigo == req.Codigo))
             return Conflict(new { error = $"Ya existe una pregunta con código '{req.Codigo}' en esta versión" });
+
+        // Construir ConfiguracionJson con campos de foto si aplica
+        string configJson = req.ConfiguracionJson ?? "{}";
+        if (req.TipoControl == TipoControl.FotoUnica || req.TipoControl == TipoControl.FotosMultiples)
+        {
+            var config = new System.Text.Json.Nodes.JsonObject();
+            if (!string.IsNullOrEmpty(req.FotoNombre))
+                config["foto_nombre"] = req.FotoNombre;
+            if (!string.IsNullOrEmpty(req.FotoNombresJson))
+                config["foto_nombres"] = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.Nodes.JsonNode>(req.FotoNombresJson);
+            config["foto_obligatoria"] = req.FotoObligatoria;
+            config["foto_depende_respuesta"] = req.FotoDepenDeRespuesta;
+            if (!string.IsNullOrEmpty(req.OpcionesRespuestaJson))
+                config["opciones_respuesta"] = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.Nodes.JsonNode>(req.OpcionesRespuestaJson);
+            configJson = config.ToJsonString();
+        }
 
         var pregunta = new FlujoPregunta
         {
@@ -303,7 +336,7 @@ public class FlujoController : ControllerBase
             SeccionId = seccionId,
             Codigo = req.Codigo,
             Texto = req.Texto,
-            TipoControl = Enum.Parse<TipoControl>(req.TipoControl, true),
+            TipoControl = req.TipoControl,
             Placeholder = req.Placeholder,
             Ayuda = req.Ayuda,
             Obligatorio = req.Obligatorio,
@@ -312,7 +345,7 @@ public class FlujoController : ControllerBase
             Editable = req.Editable ?? true,
             ValorPorDefecto = req.ValorPorDefecto,
             ValidacionesJson = req.ValidacionesJson ?? "{}",
-            ConfiguracionJson = req.ConfiguracionJson ?? "{}"
+            ConfiguracionJson = configJson
         };
 
         _db.FlujoPreguntas.Add(pregunta);
@@ -395,14 +428,20 @@ public record CreateSeccionRequest(
     int? Orden, string? Icono, string? Color);
 
 public record CreatePreguntaRequest(
-    string Codigo, string Texto, string TipoControl,
+    string Codigo, string Texto, TipoControl TipoControl,
     string? Placeholder, string? Ayuda,
     bool Obligatorio = false, int? Orden = null,
     bool? Visible = true, bool? Editable = true,
     string? ValorPorDefecto = null,
     string? ValidacionesJson = null,
     string? ConfiguracionJson = null,
-    List<CreateOpcionRequest>? Opciones = null);
+    List<CreateOpcionRequest>? Opciones = null,
+    // Campos para preguntas con foto (BLOQUE 3)
+    string? FotoNombre = null,
+    string? FotoNombresJson = null,
+    bool FotoObligatoria = false,
+    bool FotoDepenDeRespuesta = false,
+    string? OpcionesRespuestaJson = null);
 
 public record CreateOpcionRequest(
     string Codigo, string Texto, int? Orden = null, decimal? ValorNumerico = null);

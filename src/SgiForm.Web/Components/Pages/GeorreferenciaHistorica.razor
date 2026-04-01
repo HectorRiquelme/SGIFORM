@@ -1,0 +1,251 @@
+@page "/georeferencia/historica"
+@layout SgiForm.Web.Components.Layout.MainLayout
+@inject ApiClient Api
+@inject IJSRuntime JS
+@inject IConfiguration Config
+@inject AuthStateService Auth
+
+<PageTitle>Georreferencia Histórica — SGI-FORM</PageTitle>
+
+<div class="sf-page-header">
+    <div>
+        <h2>Georreferencia Histórica</h2>
+        <span class="sf-text-muted">Trazabilidad de inspecciones realizadas en terreno</span>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="sf-card" style="padding:16px;margin-bottom:16px">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+        <div class="sf-form-group" style="margin:0">
+            <label>Desde</label>
+            <input type="date" class="sf-input sf-input-sm" @bind="filtroDesde" />
+        </div>
+        <div class="sf-form-group" style="margin:0">
+            <label>Hasta</label>
+            <input type="date" class="sf-input sf-input-sm" @bind="filtroHasta" />
+        </div>
+        <div class="sf-form-group" style="margin:0;min-width:160px">
+            <label>Operador</label>
+            <select class="sf-select sf-select-sm" @bind="filtroOperadorId">
+                <option value="">Todos</option>
+                @foreach (var op in operadores)
+                { <option value="@op.Id">@op.NombreCompleto</option> }
+            </select>
+        </div>
+        <div class="sf-form-group" style="margin:0;min-width:140px">
+            <label>Estado</label>
+            <select class="sf-select sf-select-sm" @bind="filtroEstado">
+                <option value="">Todos</option>
+                <option value="borrador">Borrador</option>
+                <option value="finalizada">Finalizada</option>
+                <option value="sincronizada">Sincronizada</option>
+            </select>
+        </div>
+        <button class="sf-btn sf-btn-primary sf-btn-sm" @onclick="Buscar" disabled="@cargando">
+            @(cargando ? "Buscando..." : "🔍 Buscar")
+        </button>
+        @if (inspecciones != null)
+        {
+            <button class="sf-btn sf-btn-secondary sf-btn-sm" @onclick="DescargarExcel">
+                ⬇️ Excel
+            </button>
+        }
+    </div>
+</div>
+
+@if (inspecciones != null)
+{
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+
+        <!-- Tabla -->
+        <div class="sf-card" style="overflow:hidden">
+            <div class="sf-card-header">
+                <h3>Inspecciones (@total)</h3>
+            </div>
+            @if (!inspecciones.Any())
+            {
+                <div style="padding:24px;text-align:center">
+                    <p class="sf-text-muted">No hay inspecciones para los filtros seleccionados.</p>
+                </div>
+            }
+            else
+            {
+                <table class="sf-table sf-table-sm">
+                    <thead>
+                        <tr>
+                            <th>Servicio</th>
+                            <th>Operador</th>
+                            <th>Estado</th>
+                            <th>Fecha Fin</th>
+                            <th>GPS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var i in inspecciones)
+                        {
+                            <tr class="@(inspeccionSeleccionada?.Id == i.Id ? "sf-row-selected" : "")"
+                                style="cursor:pointer" @onclick="() => SeleccionarInspeccion(i)">
+                                <td><code style="font-size:11px">@i.Servicio</code></td>
+                                <td>@i.Operador</td>
+                                <td>
+                                    <span class="sf-badge @GetEstadoBadge(i.Estado)">@i.Estado</span>
+                                </td>
+                                <td class="sf-text-xs sf-text-muted">
+                                    @(i.FechaFin?.ToLocalTime().ToString("dd/MM HH:mm") ?? "—")
+                                </td>
+                                <td>
+                                    @if (i.Lat.HasValue)
+                                    { <span style="color:#22c55e">📍</span> }
+                                    else
+                                    { <span class="sf-text-muted">—</span> }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <!-- Paginación -->
+                @if (total > porPagina)
+                {
+                    <div style="display:flex;justify-content:center;gap:8px;padding:12px">
+                        <button class="sf-btn sf-btn-secondary sf-btn-sm"
+                            disabled="@(pagina == 1)" @onclick="() => CambiarPagina(pagina - 1)">←</button>
+                        <span class="sf-text-xs" style="line-height:2.5">@pagina / @((total + porPagina - 1) / porPagina)</span>
+                        <button class="sf-btn sf-btn-secondary sf-btn-sm"
+                            disabled="@(pagina * porPagina >= total)" @onclick="() => CambiarPagina(pagina + 1)">→</button>
+                    </div>
+                }
+            }
+        </div>
+
+        <!-- Mapa -->
+        <div class="sf-card" style="padding:0;overflow:hidden">
+            <div id="mapa-historico" style="height:450px;width:100%"></div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool cargando = false;
+    private bool mapaInicializado = false;
+
+    private DateTime filtroDesde = DateTime.Today.AddDays(-7);
+    private DateTime filtroHasta = DateTime.Today;
+    private string filtroOperadorId = "";
+    private string filtroEstado = "";
+
+    private int pagina = 1;
+    private const int porPagina = 20;
+    private int total = 0;
+
+    private List<OperadorItem>? operadores;
+    private List<InspeccionGeo>? inspecciones;
+    private InspeccionGeo? inspeccionSeleccionada;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var ops = await Api.GetAsync<OperadoresResp>("api/v1/operadores?porPagina=100");
+        operadores = ops?.Items ?? new();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("sgiInitMap", "mapa-historico", -29.95, -71.34, 11);
+            mapaInicializado = true;
+        }
+    }
+
+    private async Task Buscar()
+    {
+        pagina = 1;
+        await EjecutarBusqueda();
+    }
+
+    private async Task CambiarPagina(int nuevaPagina)
+    {
+        pagina = nuevaPagina;
+        await EjecutarBusqueda();
+    }
+
+    private async Task EjecutarBusqueda()
+    {
+        cargando = true;
+        inspeccionSeleccionada = null;
+        StateHasChanged();
+        try
+        {
+            var desde = filtroDesde.ToString("yyyy-MM-dd");
+            var hasta = filtroHasta.AddDays(1).ToString("yyyy-MM-dd");
+            var qs = $"desde={desde}&hasta={hasta}&pagina={pagina}&porPagina={porPagina}";
+            if (!string.IsNullOrEmpty(filtroOperadorId)) qs += $"&operadorId={filtroOperadorId}";
+            if (!string.IsNullOrEmpty(filtroEstado)) qs += $"&estado={filtroEstado}";
+
+            var r = await Api.GetAsync<InspeccionesResp>($"api/v1/inspecciones/geo?{qs}");
+            inspecciones = r?.Items ?? new();
+            total = r?.Total ?? 0;
+
+            if (mapaInicializado) await RenderizarMapa();
+        }
+        finally { cargando = false; }
+    }
+
+    private async Task RenderizarMapa()
+    {
+        await JS.InvokeVoidAsync("sgiClearMarkers", "mapa-historico");
+        if (inspecciones == null) return;
+
+        foreach (var i in inspecciones.Where(x => x.Lat.HasValue && x.Lng.HasValue))
+        {
+            var color = i.Estado switch
+            {
+                "sincronizada" => "#22c55e",
+                "finalizada"  => "#3b82f6",
+                _             => "#94a3b8"
+            };
+            var label = $"<b>{i.Servicio}</b><br>👷 {i.Operador}<br>{i.Estado}";
+            await JS.InvokeVoidAsync("sgiAddMarker", "mapa-historico",
+                (double)i.Lat!.Value, (double)i.Lng!.Value, label, color);
+        }
+        await JS.InvokeVoidAsync("sgiFitBounds", "mapa-historico");
+    }
+
+    private async Task SeleccionarInspeccion(InspeccionGeo insp)
+    {
+        inspeccionSeleccionada = insp;
+        if (insp.Lat.HasValue && insp.Lng.HasValue && mapaInicializado)
+        {
+            await JS.InvokeVoidAsync("eval",
+                $"window.sgiMaps['mapa-historico'].setView([{insp.Lat},{insp.Lng}],17)");
+        }
+    }
+
+    private async Task DescargarExcel()
+    {
+        var apiBase = (Config["ApiBaseUrl"] ?? "http://localhost:5043").TrimEnd('/');
+        var desde = filtroDesde.ToString("yyyy-MM-dd");
+        var hasta = filtroHasta.AddDays(1).ToString("yyyy-MM-dd");
+        var qs = $"desde={desde}&hasta={hasta}";
+        if (!string.IsNullOrEmpty(filtroOperadorId)) qs += $"&operadorId={filtroOperadorId}";
+        if (!string.IsNullOrEmpty(filtroEstado)) qs += $"&estado={filtroEstado}";
+        var url = $"{apiBase}/api/v1/reportes/excel?{qs}";
+        await JS.InvokeAsync<bool>("sgiDownloadFile", url, Auth.AccessToken, "inspecciones.xlsx");
+    }
+
+    private static string GetEstadoBadge(string? estado) => estado switch
+    {
+        "sincronizada" => "sf-badge-success",
+        "finalizada"   => "sf-badge-info",
+        "borrador"     => "sf-badge-warning",
+        _              => "sf-badge-secondary"
+    };
+
+    private record OperadorItem(Guid Id, string? NombreCompleto);
+    private record OperadoresResp(int Total, List<OperadorItem>? Items);
+    private record InspeccionGeo(Guid Id, string? Operador, string? Estado,
+        string? Servicio, decimal? Lat, decimal? Lng,
+        DateTimeOffset? FechaInicio, DateTimeOffset? FechaFin);
+    private record InspeccionesResp(int Total, List<InspeccionGeo>? Items);
+}

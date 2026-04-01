@@ -145,6 +145,45 @@ public class InspeccionesController : ControllerBase
         await _db.SaveChangesAsync();
         return Ok(new { mensaje = "Inspección rechazada" });
     }
+
+    // ── Georreferencia histórica ──────────────────────────────────────────────
+    [HttpGet("geo")]
+    public async Task<IActionResult> GetGeo(
+        [FromQuery] string? desde,
+        [FromQuery] string? hasta,
+        [FromQuery] Guid? operadorId,
+        [FromQuery] string? estado,
+        [FromQuery] int pagina = 1,
+        [FromQuery] int porPagina = 20)
+    {
+        var q = _db.Inspecciones
+            .Where(i => i.EmpresaId == EmpresaId);
+
+        if (DateTimeOffset.TryParse(desde, out var d)) q = q.Where(i => i.CreatedAt >= d);
+        if (DateTimeOffset.TryParse(hasta, out var h)) q = q.Where(i => i.CreatedAt <= h);
+        if (operadorId.HasValue) q = q.Where(i => i.OperadorId == operadorId.Value);
+        if (!string.IsNullOrEmpty(estado) && Enum.TryParse<EstadoInspeccion>(estado, true, out var est))
+            q = q.Where(i => i.Estado == est);
+
+        var total = await q.CountAsync();
+        var items = await q
+            .OrderByDescending(i => i.FechaFin ?? i.CreatedAt)
+            .Skip((pagina - 1) * porPagina)
+            .Take(porPagina)
+            .Select(i => new
+            {
+                i.Id,
+                operador = i.Operador.Nombre + " " + i.Operador.Apellido,
+                estado = i.Estado,
+                servicio = i.ServicioInspeccion.IdServicio,
+                lat = i.CoordYFin ?? i.CoordYInicio,
+                lng = i.CoordXFin ?? i.CoordXInicio,
+                i.FechaInicio, i.FechaFin
+            })
+            .ToListAsync();
+
+        return Ok(new { total, pagina, por_pagina = porPagina, items });
+    }
 }
 
 public record RevisionRequest(string? Observacion);

@@ -45,6 +45,10 @@ public class AppDbContext : DbContext
     public DbSet<InspeccionFotografia> InspeccionFotografias => Set<InspeccionFotografia>();
     public DbSet<InspeccionHistorial> InspeccionHistoriales => Set<InspeccionHistorial>();
 
+    // Zonas y Localidades
+    public DbSet<Zona> Zonas => Set<Zona>();
+    public DbSet<Localidad> Localidades => Set<Localidad>();
+
     // Operaciones
     public DbSet<SincronizacionLog> SincronizacionLogs => Set<SincronizacionLog>();
     public DbSet<Catalogo> Catalogos => Set<Catalogo>();
@@ -629,6 +633,42 @@ public class AppDbContext : DbContext
             e.Property(x => x.Metadata).HasColumnName("metadata").HasColumnType("jsonb");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+        });
+
+        // zona
+        modelBuilder.Entity<Zona>(e =>
+        {
+            e.ToTable("zona");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasColumnName("id");
+            e.Property(x => x.EmpresaId).HasColumnName("empresa_id");
+            e.Property(x => x.Codigo).HasColumnName("codigo");
+            e.Property(x => x.Nombre).HasColumnName("nombre");
+            e.Property(x => x.Descripcion).HasColumnName("descripcion");
+            e.Property(x => x.Activo).HasColumnName("activo");
+            e.Property(x => x.CreatedAt).HasColumnName("created_at");
+            e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+            e.Property(x => x.DeletedAt).HasColumnName("deleted_at");
+            e.HasMany(x => x.Localidades)
+                .WithOne(l => l.Zona)
+                .HasForeignKey(l => l.ZonaId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // localidad
+        modelBuilder.Entity<Localidad>(e =>
+        {
+            e.ToTable("localidad");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasColumnName("id");
+            e.Property(x => x.EmpresaId).HasColumnName("empresa_id");
+            e.Property(x => x.ZonaId).HasColumnName("zona_id");
+            e.Property(x => x.Codigo).HasColumnName("codigo");
+            e.Property(x => x.Nombre).HasColumnName("nombre");
+            e.Property(x => x.Activo).HasColumnName("activo");
+            e.Property(x => x.CreatedAt).HasColumnName("created_at");
+            e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+            e.Property(x => x.DeletedAt).HasColumnName("deleted_at");
         });
 
         // auditoria

@@ -1,6 +1,9 @@
 @page "/servicios"
 @layout SgiForm.Web.Components.Layout.MainLayout
 @inject ApiClient Api
+@inject AuthStateService Auth
+@inject IJSRuntime JS
+@inject IConfiguration Config
 
 <PageTitle>Servicios — SGI-FORM</PageTitle>
 
@@ -9,7 +12,7 @@
         <h2>Servicios de Inspección</h2>
         <span class="sf-text-muted">Registros importados desde Excel listos para asignar</span>
     </div>
-    <a href="/importaciones" class="sf-btn sf-btn-primary">+ Importar Excel</a>
+    <button class="sf-btn sf-btn-primary" @onclick="AbrirModalImport">+ Importar Excel</button>
 </div>
 
 <!-- Filtros -->
@@ -35,20 +38,13 @@ else
 {
     <div class="sf-card">
         <div class="sf-card-header">
-            <span class="sf-text-muted" style="font-size:13px">
-                @total registros encontrados
-            </span>
+            <span class="sf-text-muted" style="font-size:13px">@total registros encontrados</span>
         </div>
         <table class="sf-table">
             <thead>
                 <tr>
-                    <th>ID Servicio</th>
-                    <th>Medidor</th>
-                    <th>Cliente</th>
-                    <th>Dirección</th>
-                    <th>Localidad</th>
-                    <th>Ruta</th>
-                    <th>Asignado</th>
+                    <th>ID Servicio</th><th>Medidor</th><th>Cliente</th>
+                    <th>Dirección</th><th>Localidad</th><th>Ruta</th><th>Asignado</th>
                 </tr>
             </thead>
             <tbody>
@@ -64,20 +60,14 @@ else
                             </td>
                             <td>@(s.NombreCliente ?? "—")</td>
                             <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
-                                title="@s.Direccion">
-                                @(s.Direccion ?? "—")
-                            </td>
+                                title="@s.Direccion">@(s.Direccion ?? "—")</td>
                             <td>@(s.Localidad ?? "—")</td>
                             <td>@(s.Ruta ?? "—")</td>
                             <td>
                                 @if (s.TieneAsignacion)
-                                {
-                                    <span class="sf-badge sf-badge-success">Asignado</span>
-                                }
+                                { <span class="sf-badge sf-badge-success">Asignado</span> }
                                 else
-                                {
-                                    <span class="sf-badge sf-badge-secondary">Libre</span>
-                                }
+                                { <span class="sf-badge sf-badge-secondary">Libre</span> }
                             </td>
                         </tr>
                     }
@@ -86,7 +76,7 @@ else
                 {
                     <tr>
                         <td colspan="7" class="sf-text-center sf-text-muted" style="padding:32px">
-                            No hay servicios. <a href="/importaciones">Importa un Excel</a> para comenzar.
+                            No hay servicios. Usa el botón <strong>+ Importar Excel</strong> para cargar registros.
                         </td>
                     </tr>
                 }
@@ -94,7 +84,6 @@ else
         </table>
     </div>
 
-    <!-- Paginación -->
     @if (total > filtros.PorPagina)
     {
         <div class="sf-pagination">
@@ -109,7 +98,234 @@ else
     }
 }
 
+<!-- ═══════════════════════════════════════════════════════
+     MODAL IMPORTAR EXCEL (4 pasos)
+     ═══════════════════════════════════════════════════════ -->
+@if (mostrarModalImport)
+{
+    <div class="sf-modal-overlay">
+        <div class="sf-modal" style="max-width:700px;width:95%">
+            <div class="sf-modal-header">
+                <h3>Importar servicios desde Excel</h3>
+                <button class="sf-btn-close" @onclick="CerrarModalImport">✕</button>
+            </div>
+
+            <!-- Pasos indicadores -->
+            <div style="display:flex;gap:8px;padding:12px 24px 0;border-bottom:1px solid #f3f4f6;margin-bottom:4px">
+                @foreach (var (label, n) in new[]{("Subir",1),("Vista previa",2),("Confirmar",3),("Resultado",4)})
+                {
+                    <div style="display:flex;align-items:center;gap:4px;font-size:12px;
+                                color:@(importPaso == n ? "#1a56db" : importPaso > n ? "#16a34a" : "#9ca3af");
+                                font-weight:@(importPaso == n ? "600" : "400")">
+                        <span style="width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+                                     font-size:11px;background:@(importPaso > n ? "#dcfce7" : importPaso == n ? "#eff6ff" : "#f3f4f6");
+                                     color:@(importPaso > n ? "#16a34a" : importPaso == n ? "#1a56db" : "#9ca3af")">
+                            @(importPaso > n ? "✓" : n.ToString())
+                        </span>
+                        @label
+                        @if (n < 4) { <span style="color:#e5e7eb;margin-left:4px">›</span> }
+                    </div>
+                }
+            </div>
+
+            <div class="sf-modal-body" style="min-height:220px;padding-top:16px">
+
+                @if (!string.IsNullOrEmpty(importError))
+                {
+                    <div class="sf-alert sf-alert-danger" style="margin-bottom:12px">@importError</div>
+                }
+
+                <!-- PASO 1: Seleccionar archivo -->
+                @if (importPaso == 1)
+                {
+                    <div style="text-align:center;padding:16px 0">
+                        <p class="sf-text-muted" style="font-size:13px;margin-bottom:16px">
+                            El archivo debe tener formato <strong>.xlsx</strong> y contener las columnas:
+                            ID_SERVICIO, ID_MEDIDOR, TIPO_MEDIDOR, CLIENTE, DIRECCION, LOCALIDAD, ZONA, RUTA, LATITUD, LONGITUD, ESTADO, OBSERVACIONES.
+                            Tamaño máximo: <strong>10 MB</strong>.
+                        </p>
+                        <button class="sf-btn sf-btn-secondary sf-btn-sm"
+                                style="margin-bottom:16px"
+                                @onclick="DescargarPlantilla">
+                            📥 Ver plantilla de ejemplo
+                        </button>
+
+                        <div style="border:2px dashed #d1d5db;border-radius:8px;padding:32px 16px;
+                                    background:#fafafa;cursor:pointer"
+                             @onclick="TriggerFileInput">
+                            <div style="font-size:32px;margin-bottom:8px">📂</div>
+                            <p style="margin:0;font-size:13px;color:#6b7280">
+                                Haz clic para seleccionar el archivo Excel
+                            </p>
+                            @if (!string.IsNullOrEmpty(archivoNombre))
+                            {
+                                <p style="margin:8px 0 0;font-size:13px;color:#1a56db;font-weight:600">
+                                    ✓ @archivoNombre
+                                </p>
+                            }
+                            <InputFile id="importFileInput" OnChange="OnFileSelected"
+                                       accept=".xlsx" style="display:none" />
+                        </div>
+                    </div>
+                }
+
+                <!-- PASO 2: Vista previa -->
+                @if (importPaso == 2 && previewData != null)
+                {
+                    <div style="font-size:13px;margin-bottom:8px">
+                        <strong>@previewData.TotalFilas</strong> filas detectadas.
+                        @if (previewData.FilasConError > 0)
+                        {
+                            <span style="color:#dc2626;margin-left:8px">
+                                ⚠️ @previewData.FilasConError filas con errores
+                            </span>
+                        }
+                    </div>
+
+                    @if (previewData.Errores?.Any() == true)
+                    {
+                        <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:10px;margin-bottom:10px;max-height:120px;overflow-y:auto">
+                            <p style="font-size:12px;font-weight:600;color:#991b1b;margin:0 0 4px">Errores detectados:</p>
+                            @foreach (var e in previewData.Errores.Take(20))
+                            {
+                                <p style="font-size:12px;color:#dc2626;margin:2px 0">• Fila @e.Fila: @e.Mensaje</p>
+                            }
+                        </div>
+                    }
+
+                    <div style="overflow-x:auto;max-height:260px;overflow-y:auto">
+                        <table class="sf-table sf-table-sm">
+                            <thead>
+                                <tr>
+                                    <th>#</th><th>ID Servicio</th><th>Medidor</th>
+                                    <th>Cliente</th><th>Localidad</th><th>Ruta</th><th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var f in (previewData.Filas ?? new()))
+                                {
+                                    <tr style="@(f.TieneError ? "background:#fef2f2" : "")">
+                                        <td class="sf-text-xs">@f.Fila</td>
+                                        <td class="sf-text-xs">@f.IdServicio</td>
+                                        <td class="sf-text-xs">@f.IdMedidor</td>
+                                        <td class="sf-text-xs">@f.Cliente</td>
+                                        <td class="sf-text-xs">@f.Localidad</td>
+                                        <td class="sf-text-xs">@f.Ruta</td>
+                                        <td class="sf-text-xs">
+                                            @if (f.TieneError)
+                                            { <span style="color:#dc2626" title="@f.Error">⚠️</span> }
+                                            else
+                                            { <span style="color:#16a34a">✓</span> }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+
+                <!-- PASO 3: Confirmar -->
+                @if (importPaso == 3 && previewData != null)
+                {
+                    <div style="text-align:center;padding:24px 0">
+                        <div style="font-size:48px;margin-bottom:12px">📋</div>
+                        <h4>¿Confirmar importación?</h4>
+                        <p class="sf-text-muted" style="font-size:13px">
+                            Se importarán <strong>@(previewData.TotalFilas - previewData.FilasConError)</strong> registros válidos.
+                            @if (previewData.FilasConError > 0)
+                            {
+                                <span> Se omitirán <strong>@previewData.FilasConError</strong> filas con errores.</span>
+                            }
+                        </p>
+                    </div>
+                }
+
+                <!-- PASO 4: Resultado -->
+                @if (importPaso == 4 && resultadoImport != null)
+                {
+                    <div style="text-align:center;padding:16px 0">
+                        @if (resultadoImport.FilasError == 0)
+                        {
+                            <div style="font-size:48px">✅</div>
+                            <h4 style="color:#16a34a">Importación completada</h4>
+                        }
+                        else
+                        {
+                            <div style="font-size:48px">⚠️</div>
+                            <h4 style="color:#d97706">Importación con advertencias</h4>
+                        }
+                        <div style="display:flex;justify-content:center;gap:24px;margin:16px 0">
+                            <div style="text-align:center">
+                                <div style="font-size:28px;font-weight:700;color:#16a34a">@resultadoImport.FilasValidas</div>
+                                <div class="sf-text-xs sf-text-muted">registros importados</div>
+                            </div>
+                            @if (resultadoImport.FilasError > 0)
+                            {
+                                <div style="text-align:center">
+                                    <div style="font-size:28px;font-weight:700;color:#dc2626">@resultadoImport.FilasError</div>
+                                    <div class="sf-text-xs sf-text-muted">errores</div>
+                                </div>
+                            }
+                        </div>
+                        @if (!string.IsNullOrEmpty(resultadoImport.ErrorGeneral))
+                        {
+                            <p style="font-size:13px;color:#dc2626">@resultadoImport.ErrorGeneral</p>
+                        }
+                    </div>
+                }
+
+                @if (importando)
+                {
+                    <div style="text-align:center;padding:16px">
+                        <div class="sf-spinner" style="margin:0 auto 8px"></div>
+                        <p class="sf-text-muted sf-text-xs">Procesando...</p>
+                    </div>
+                }
+            </div>
+
+            <div class="sf-modal-footer">
+                @if (importPaso == 4)
+                {
+                    <button class="sf-btn sf-btn-primary" @onclick="FinalizarImport">Cerrar</button>
+                }
+                else
+                {
+                    <button class="sf-btn sf-btn-secondary" @onclick="CerrarModalImport" disabled="@importando">
+                        Cancelar
+                    </button>
+                    @if (importPaso == 1)
+                    {
+                        <button class="sf-btn sf-btn-primary" @onclick="SubirArchivo"
+                                disabled="@(archivoFile == null || importando)">
+                            Siguiente →
+                        </button>
+                    }
+                    else if (importPaso == 2)
+                    {
+                        <button class="sf-btn sf-btn-secondary" @onclick="() => importPaso = 1" disabled="@importando">
+                            ← Volver
+                        </button>
+                        <button class="sf-btn sf-btn-primary" @onclick="() => importPaso = 3" disabled="@importando">
+                            Continuar →
+                        </button>
+                    }
+                    else if (importPaso == 3)
+                    {
+                        <button class="sf-btn sf-btn-secondary" @onclick="() => importPaso = 2" disabled="@importando">
+                            ← Volver
+                        </button>
+                        <button class="sf-btn sf-btn-primary" @onclick="ConfirmarImport" disabled="@importando">
+                            ✅ Confirmar importación
+                        </button>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+}
+
 @code {
+    // ── Lista de servicios ────────────────────────────────────────────────────
     private bool loading = true;
     private int total = 0;
     private List<ServicioItem> items = new();
@@ -122,11 +338,10 @@ else
     {
         loading = true;
         var q = $"api/v1/servicios?pagina={filtros.Pagina}&porPagina={filtros.PorPagina}";
-        if (!string.IsNullOrWhiteSpace(filtros.Buscar)) q += $"&q={Uri.EscapeDataString(filtros.Buscar)}";
+        if (!string.IsNullOrWhiteSpace(filtros.Buscar))    q += $"&q={Uri.EscapeDataString(filtros.Buscar)}";
         if (!string.IsNullOrWhiteSpace(filtros.Localidad)) q += $"&localidad={Uri.EscapeDataString(filtros.Localidad)}";
-        if (!string.IsNullOrWhiteSpace(filtros.Ruta)) q += $"&ruta={Uri.EscapeDataString(filtros.Ruta)}";
-        if (!string.IsNullOrWhiteSpace(filtros.Lote)) q += $"&lote={Uri.EscapeDataString(filtros.Lote)}";
-
+        if (!string.IsNullOrWhiteSpace(filtros.Ruta))      q += $"&ruta={Uri.EscapeDataString(filtros.Ruta)}";
+        if (!string.IsNullOrWhiteSpace(filtros.Lote))      q += $"&lote={Uri.EscapeDataString(filtros.Lote)}";
         var result = await Api.GetAsync<ServiciosResponse>(q);
         items = result?.Items ?? new();
         total = result?.Total ?? 0;
@@ -143,11 +358,109 @@ else
 
     private async Task CambiarPagina(int p) { filtros.Pagina = p; await Cargar(); }
 
+    // ── Modal importación ─────────────────────────────────────────────────────
+    private bool mostrarModalImport = false;
+    private int importPaso = 1;
+    private string? importError;
+    private bool importando = false;
+    private string? archivoNombre;
+    private IBrowserFile? archivoFile;
+    private Guid? loteId;
+    private PreviewResponse? previewData;
+    private ResultadoImport? resultadoImport;
+
+    private void AbrirModalImport()
+    {
+        importPaso = 1; importError = null; archivoNombre = null;
+        archivoFile = null; loteId = null; previewData = null; resultadoImport = null;
+        mostrarModalImport = true;
+    }
+
+    private void CerrarModalImport() { mostrarModalImport = false; }
+
+    private async Task FinalizarImport()
+    {
+        mostrarModalImport = false;
+        await Cargar(); // refrescar tabla
+    }
+
+    private void TriggerFileInput()
+        => JS.InvokeVoidAsync("eval", "document.getElementById('importFileInput').click()");
+
+    private void OnFileSelected(InputFileChangeEventArgs e)
+    {
+        importError = null;
+        var f = e.File;
+        if (!f.Name.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+        { importError = "Solo se aceptan archivos .xlsx"; return; }
+        if (f.Size > 10_000_000)
+        { importError = "El archivo supera el límite de 10 MB"; return; }
+        archivoFile = f;
+        archivoNombre = f.Name;
+    }
+
+    private async Task SubirArchivo()
+    {
+        if (archivoFile == null) return;
+        importando = true; importError = null;
+        try
+        {
+            using var content = new MultipartFormDataContent();
+            using var stream = archivoFile.OpenReadStream(10_000_000);
+            using var fileContent = new StreamContent(stream);
+            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            content.Add(fileContent, "archivo", archivoFile.Name);
+
+            var r = await Api.PostMultipartAsync<UploadResponse>("api/v1/importaciones/upload", content);
+            if (!r.Success) { importError = r.Error; return; }
+
+            loteId = r.Data!.LoteId;
+            var preview = await Api.GetAsync<PreviewResponse>($"api/v1/importaciones/{loteId}/preview?porPagina=50");
+            if (preview == null) { importError = "No se pudo obtener la vista previa"; return; }
+            previewData = preview;
+            importPaso = 2;
+        }
+        catch (Exception ex) { importError = ex.Message; }
+        finally { importando = false; }
+    }
+
+    private async Task ConfirmarImport()
+    {
+        if (loteId == null) return;
+        importando = true; importError = null;
+        try
+        {
+            var r = await Api.PostAsync<ResultadoImport>($"api/v1/importaciones/{loteId}/confirmar", new { });
+            if (!r.Success) { importError = r.Error; return; }
+            resultadoImport = r.Data!;
+            importPaso = 4;
+        }
+        catch (Exception ex) { importError = ex.Message; }
+        finally { importando = false; }
+    }
+
+    private async Task DescargarPlantilla()
+    {
+        var apiBase = (Config["ApiBaseUrl"] ?? "http://localhost:5043").TrimEnd('/');
+        await JS.InvokeAsync<bool>("sgiDownloadFile",
+            $"{apiBase}/api/v1/importaciones/plantilla",
+            Auth.AccessToken,
+            "plantilla_importacion_servicios.xlsx");
+    }
+
+    // ── DTOs ──────────────────────────────────────────────────────────────────
     private record ServiciosResponse(int Total, List<ServicioItem>? Items);
     private record ServicioItem(
         Guid Id, string? IdServicio, string? NumeroMedidor, string? Marca,
         string? Diametro, string? Direccion, string? NombreCliente,
         string? Localidad, string? Ruta, string? Lote, bool TieneAsignacion);
+
+    private record UploadResponse(Guid LoteId, string? NombreOriginal, int TotalFilas);
+    private record PreviewResponse(int TotalFilas, int FilasConError, List<FilaPreview>? Filas, List<ErrorFila>? Errores);
+    private record FilaPreview(int Fila, string? IdServicio, string? IdMedidor, string? Cliente,
+        string? Localidad, string? Ruta, bool TieneError, string? Error);
+    private record ErrorFila(int Fila, string? Mensaje);
+    private record ResultadoImport(int FilasValidas, int FilasError, string? Estado, string? ErrorGeneral);
 
     private class FiltrosModel
     {

@@ -320,6 +320,81 @@ else
                         </label>
                     </div>
                 </div>
+
+                @* ── Opciones de respuesta (selección única/múltiple/lista/si_no) ── *@
+                @if (pregForm.TipoControl is "seleccion_unica" or "seleccion_multiple" or "lista" or "si_no")
+                {
+                    <div style="margin-top:12px">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                            <label style="font-weight:600;font-size:13px">Opciones de respuesta</label>
+                            @if (pregForm.TipoControl != "si_no")
+                            {
+                                <button type="button" class="sf-btn sf-btn-secondary sf-btn-sm"
+                                    @onclick="AgregarOpcion">+ Opción</button>
+                            }
+                        </div>
+                        @foreach (var op in pregForm.Opciones)
+                        {
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:6px;background:#f8f9fa;border-radius:4px">
+                                <input class="sf-input sf-input-sm" style="flex:1"
+                                    placeholder="Texto de la opción" @bind="op.Texto" />
+                                <input class="sf-input sf-input-sm" style="width:90px"
+                                    placeholder="Valor" @bind="op.Valor" />
+                                <label style="display:flex;align-items:center;gap:4px;white-space:nowrap;font-size:12px">
+                                    <input type="checkbox" @bind="op.LlevaFoto" /> Foto
+                                </label>
+                                @if (op.LlevaFoto)
+                                {
+                                    <label style="display:flex;align-items:center;gap:4px;white-space:nowrap;font-size:12px">
+                                        <input type="checkbox" @bind="op.FotoObligatoria" /> Obligatoria
+                                    </label>
+                                    <input class="sf-input sf-input-sm" style="width:110px"
+                                        placeholder="Nombre foto" @bind="op.FotoNombre" />
+                                }
+                                @if (pregForm.TipoControl != "si_no")
+                                {
+                                    <button type="button" class="sf-btn-icon sf-btn-icon-danger"
+                                        @onclick="() => pregForm.Opciones.Remove(op)">✕</button>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+
+                @* ── Campos foto directa (foto_unica / fotos_multiples) ── *@
+                @if (pregForm.TipoControl is "foto_unica" or "fotos_multiples")
+                {
+                    <div style="margin-top:12px;padding:12px;background:#f0f9ff;border-radius:6px">
+                        <div style="font-weight:600;font-size:13px;margin-bottom:8px">Configuración de foto</div>
+                        <div class="sf-form-grid">
+                            <div class="sf-form-group">
+                                <label>Nombre de la foto</label>
+                                <input class="sf-input sf-input-sm" @bind="pregForm.FotoNombre"
+                                       placeholder="foto_medidor" />
+                            </div>
+                            @if (pregForm.TipoControl == "fotos_multiples")
+                            {
+                                <div class="sf-form-group sf-form-group-full">
+                                    <label>Nombres de fotos (uno por línea)</label>
+                                    <textarea class="sf-input sf-input-sm" rows="3"
+                                        @bind="pregForm.FotoNombresTexto"
+                                        placeholder="foto_frente&#10;foto_detalle&#10;foto_sello"></textarea>
+                                    <span class="sf-text-xs sf-text-muted">Cada línea = una foto esperada</span>
+                                </div>
+                            }
+                            <div class="sf-form-group">
+                                <label style="display:flex;align-items:center;gap:8px">
+                                    <input type="checkbox" @bind="pregForm.FotoObligatoria" /> Foto obligatoria
+                                </label>
+                            </div>
+                            <div class="sf-form-group">
+                                <label style="display:flex;align-items:center;gap:8px">
+                                    <input type="checkbox" @bind="pregForm.FotoDepenDeRespuesta" /> Depende de respuesta anterior
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                }
             </div>
             <div class="sf-modal-footer">
                 <button class="sf-btn sf-btn-secondary" @onclick="() => mostrarModalPregunta = false">Cancelar</button>
@@ -409,13 +484,40 @@ else
         if (r.Success) await AbrirConstructor(flujoSeleccionado);
     }
 
-    private void AbrirNuevaPregunta() { pregForm = new(); formError = null; mostrarModalPregunta = true; }
+    private void AbrirNuevaPregunta()
+    {
+        pregForm = new();
+        // Precargar opciones Si/No por defecto
+        pregForm.Opciones = new List<OpcionForm>
+        {
+            new() { Texto = "Sí", Valor = "si" },
+            new() { Texto = "No", Valor = "no" }
+        };
+        formError = null;
+        mostrarModalPregunta = true;
+    }
+
+    private void AgregarOpcion() => pregForm.Opciones.Add(new OpcionForm());
 
     private async Task CrearPregunta()
     {
         if (seccionSeleccionada == null || versionActual == null || flujoSeleccionado == null) return;
         if (string.IsNullOrWhiteSpace(pregForm.Codigo) || string.IsNullOrWhiteSpace(pregForm.Texto))
         { formError = "Código y texto son obligatorios"; return; }
+
+        // Build opciones JSON
+        var opcionesJson = (pregForm.TipoControl is "seleccion_unica" or "seleccion_multiple" or "lista" or "si_no")
+            ? System.Text.Json.JsonSerializer.Serialize(pregForm.Opciones.Select(o => new
+                { texto = o.Texto, valor = o.Valor, lleva_foto = o.LlevaFoto,
+                  foto_obligatoria = o.FotoObligatoria, foto_nombre = o.FotoNombre }))
+            : null;
+
+        // Build foto names JSON for fotos_multiples
+        var fotoNombresJson = pregForm.TipoControl == "fotos_multiples" && !string.IsNullOrWhiteSpace(pregForm.FotoNombresTexto)
+            ? System.Text.Json.JsonSerializer.Serialize(
+                pregForm.FotoNombresTexto.Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => s.Trim()).Where(s => !string.IsNullOrEmpty(s)).ToList())
+            : null;
 
         guardando = true;
         var r = await Api.PostAsync<object>(
@@ -424,7 +526,12 @@ else
             {
                 codigo = pregForm.Codigo, texto = pregForm.Texto,
                 tipo_control = pregForm.TipoControl, ayuda = pregForm.Ayuda,
-                obligatorio = pregForm.Obligatorio
+                obligatorio = pregForm.Obligatorio,
+                foto_nombre = pregForm.FotoNombre,
+                foto_nombres_json = fotoNombresJson,
+                foto_obligatoria = pregForm.FotoObligatoria,
+                foto_depende_de_respuesta = pregForm.FotoDepenDeRespuesta,
+                opciones_respuesta_json = opcionesJson
             });
 
         if (r.Success) { mostrarModalPregunta = false; await AbrirConstructor(flujoSeleccionado); }
@@ -487,5 +594,21 @@ else
         public string TipoControl { get; set; } = "texto_corto";
         public string? Ayuda { get; set; }
         public bool Obligatorio { get; set; }
+        // Photo fields
+        public string? FotoNombre { get; set; }
+        public string? FotoNombresTexto { get; set; }
+        public bool FotoObligatoria { get; set; }
+        public bool FotoDepenDeRespuesta { get; set; }
+        // Options
+        public List<OpcionForm> Opciones { get; set; } = new();
+    }
+
+    private class OpcionForm
+    {
+        public string? Texto { get; set; }
+        public string? Valor { get; set; }
+        public bool LlevaFoto { get; set; }
+        public bool FotoObligatoria { get; set; }
+        public string? FotoNombre { get; set; }
     }
 }

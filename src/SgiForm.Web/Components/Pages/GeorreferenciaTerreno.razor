@@ -1,0 +1,237 @@
+@page "/georeferencia/terreno"
+@layout SgiForm.Web.Components.Layout.MainLayout
+@inject ApiClient Api
+@inject IJSRuntime JS
+@inject IConfiguration Config
+@implements IAsyncDisposable
+
+<PageTitle>Georreferencia en Terreno — SGI-FORM</PageTitle>
+
+<div class="sf-page-header">
+    <div>
+        <h2>Georreferencia en Terreno</h2>
+        <span class="sf-text-muted">Ubicación en tiempo real de operadores y servicios</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+        <span class="sf-text-xs sf-text-muted">Actualiza cada 30s</span>
+        <button class="sf-btn sf-btn-secondary sf-btn-sm" @onclick="RefrescarMapa" disabled="@cargando">
+            @(cargando ? "⏳" : "🔄") Refrescar
+        </button>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="sf-card" style="padding:16px;margin-bottom:16px">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+        <div class="sf-form-group" style="margin:0;min-width:160px">
+            <label>Zona</label>
+            <select class="sf-select sf-select-sm" @bind="filtroZona" @bind:after="OnZonaChanged">
+                <option value="">Todas</option>
+                @foreach (var z in zonas)
+                { <option value="@z.Id">@z.Nombre</option> }
+            </select>
+        </div>
+        <div class="sf-form-group" style="margin:0;min-width:160px">
+            <label>Localidad</label>
+            <select class="sf-select sf-select-sm" @bind="filtroLocalidad" @bind:after="RefrescarMapa">
+                <option value="">Todas</option>
+                @foreach (var l in localidades)
+                { <option value="@l.Nombre">@l.Nombre</option> }
+            </select>
+        </div>
+        <div class="sf-form-group" style="margin:0;min-width:160px">
+            <label>Operador</label>
+            <select class="sf-select sf-select-sm" @bind="filtroOperadorId" @bind:after="RefrescarMapa">
+                <option value="">Todos</option>
+                @foreach (var op in operadores)
+                { <option value="@op.Id">@op.Nombre</option> }
+            </select>
+        </div>
+        <div style="display:flex;gap:8px">
+            <label class="sf-text-xs" style="display:flex;align-items:center;gap:4px">
+                <input type="checkbox" @bind="mostrarServicios" @bind:after="RenderizarMarcadores" /> Servicios
+            </label>
+            <label class="sf-text-xs" style="display:flex;align-items:center;gap:4px">
+                <input type="checkbox" @bind="mostrarOperadores" @bind:after="RenderizarMarcadores" /> Operadores
+            </label>
+        </div>
+    </div>
+</div>
+
+<!-- Leyenda + mapa -->
+<div style="display:grid;grid-template-columns:220px 1fr;gap:16px">
+
+    <!-- Panel operadores -->
+    <div class="sf-card" style="padding:0;overflow:hidden">
+        <div style="padding:12px 16px;font-weight:600;font-size:13px;border-bottom:1px solid var(--sf-border)">
+            Operadores (@(operadoresData?.Count(o => o.TieneUbicacion) ?? 0) con ubicación)
+        </div>
+        <div style="max-height:400px;overflow-y:auto">
+            @if (operadoresData != null)
+            {
+                @foreach (var op in operadoresData)
+                {
+                    <div style="padding:8px 12px;border-bottom:1px solid #f0f0f0;cursor:pointer;font-size:12px"
+                         @onclick="() => CentrarEnOperador(op)">
+                        <div style="display:flex;align-items:center;gap:6px">
+                            <span style="font-size:16px">@(op.TieneUbicacion ? "🟢" : "⚫")</span>
+                            <div>
+                                <div style="font-weight:500">@op.Nombre</div>
+                                <div class="sf-text-muted" style="font-size:11px">@(op.Zona ?? "—") / @(op.Localidad ?? "—")</div>
+                                @if (op.UltimaActividad.HasValue)
+                                {
+                                    <div class="sf-text-muted" style="font-size:10px">
+                                        @op.UltimaActividad.Value.ToLocalTime().ToString("HH:mm")
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- Mapa -->
+    <div class="sf-card" style="padding:0;overflow:hidden">
+        <div id="mapa-terreno" style="height:500px;width:100%"></div>
+    </div>
+</div>
+
+@code {
+    private Timer? _timer;
+    private bool cargando = false;
+    private bool mapaListo = false;
+    private bool mostrarServicios = true;
+    private bool mostrarOperadores = true;
+
+    private string filtroZona = "";
+    private string filtroLocalidad = "";
+    private string filtroOperadorId = "";
+
+    private List<ZonaRef> zonas = new();
+    private List<LocalidadRef> localidades = new();
+    private List<OperadorRef> operadores = new();
+
+    private List<OperadorUbicacion>? operadoresData;
+    private List<ServicioGeo>? serviciosData;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarFiltros();
+        await RefrescarDatos();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("sgiInitMap", "mapa-terreno", -29.95, -71.34, 12);
+            mapaListo = true;
+            await RenderizarMarcadores();
+            _timer = new Timer(async _ =>
+            {
+                await InvokeAsync(async () =>
+                {
+                    await RefrescarDatos();
+                    StateHasChanged();
+                });
+            }, null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
+        }
+    }
+
+    private async Task CargarFiltros()
+    {
+        zonas = await Api.GetAsync<List<ZonaRef>>("api/v1/zonas?soloActivas=true") ?? new();
+        var ops = await Api.GetAsync<OperadoresResp>("api/v1/operadores?porPagina=100");
+        operadores = ops?.Items?.Select(o => new OperadorRef(o.Id, o.NombreCompleto)).ToList() ?? new();
+    }
+
+    private async Task OnZonaChanged()
+    {
+        filtroLocalidad = "";
+        localidades = new();
+        if (!string.IsNullOrEmpty(filtroZona) && Guid.TryParse(filtroZona, out var zid))
+        {
+            var locs = await Api.GetAsync<List<LocalidadRef>>($"api/v1/zonas/{zid}/localidades?soloActivas=true");
+            localidades = locs ?? new();
+        }
+        await RefrescarMapa();
+    }
+
+    private async Task RefrescarDatos()
+    {
+        var qs = "";
+        if (!string.IsNullOrEmpty(filtroLocalidad)) qs += $"localidad={Uri.EscapeDataString(filtroLocalidad)}&";
+        if (!string.IsNullOrEmpty(filtroOperadorId)) qs += $"operadorId={filtroOperadorId}&";
+
+        operadoresData = await Api.GetAsync<List<OperadorUbicacion>>($"api/v1/ubicacion/operadores?{qs}") ?? new();
+        serviciosData = await Api.GetAsync<List<ServicioGeo>>($"api/v1/ubicacion/servicios?{qs}") ?? new();
+    }
+
+    private async Task RefrescarMapa()
+    {
+        cargando = true;
+        StateHasChanged();
+        try
+        {
+            await RefrescarDatos();
+            if (mapaListo) await RenderizarMarcadores();
+        }
+        finally { cargando = false; }
+    }
+
+    private async Task RenderizarMarcadores()
+    {
+        if (!mapaListo) return;
+        await JS.InvokeVoidAsync("sgiClearMarkers", "mapa-terreno");
+
+        if (mostrarServicios && serviciosData != null)
+        {
+            foreach (var s in serviciosData.Where(x => x.Lat.HasValue && x.Lng.HasValue))
+            {
+                var color = s.TieneAsignacion ? "#22c55e" : "#94a3b8";
+                var label = $"<b>{s.IdServicio}</b><br>{s.Direccion}<br>{s.Localidad}";
+                await JS.InvokeVoidAsync("sgiAddMarker", "mapa-terreno",
+                    (double)s.Lat!.Value, (double)s.Lng!.Value, label, color);
+            }
+        }
+
+        if (mostrarOperadores && operadoresData != null)
+        {
+            foreach (var op in operadoresData.Where(x => x.TieneUbicacion && x.Lat.HasValue && x.Lng.HasValue))
+            {
+                var label = $"<b>👷 {op.Nombre}</b><br>{op.Zona} / {op.Localidad}";
+                await JS.InvokeVoidAsync("sgiAddMarker", "mapa-terreno",
+                    (double)op.Lat!.Value, (double)op.Lng!.Value, label, "#f97316");
+            }
+        }
+
+        await JS.InvokeVoidAsync("sgiFitBounds", "mapa-terreno");
+    }
+
+    private async Task CentrarEnOperador(OperadorUbicacion op)
+    {
+        if (!op.Lat.HasValue || !op.Lng.HasValue) return;
+        await JS.InvokeVoidAsync("eval",
+            $"window.sgiMaps['mapa-terreno'].setView([{op.Lat},{op.Lng}],16)");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _timer?.Dispose();
+        await Task.CompletedTask;
+    }
+
+    private record ZonaRef(Guid Id, string Nombre, int TotalLocalidades);
+    private record LocalidadRef(Guid Id, string Nombre, bool Activo, Guid? ZonaId);
+    private record OperadorRef(Guid Id, string? NombreCompleto);
+    private record OperadoresResp(int Total, List<OperadorItem>? Items);
+    private record OperadorItem(Guid Id, string? NombreCompleto);
+    private record OperadorUbicacion(Guid Id, string CodigoOperador, string Nombre,
+        string? Zona, string? Localidad, decimal? Lat, decimal? Lng,
+        bool TieneUbicacion, DateTimeOffset? UltimaActividad);
+    private record ServicioGeo(Guid Id, string IdServicio, string? NombreCliente,
+        string? Direccion, string? Localidad, string? Ruta,
+        decimal? Lat, decimal? Lng, bool TieneAsignacion);
+}

@@ -102,6 +102,62 @@ public class ReportesController : ControllerBase
             $"inspecciones_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
     }
 
+    /// <summary>Exportar productividad por operador a Excel (tabla visible en Reportes)</summary>
+    [HttpGet("productividad-excel")]
+    public async Task<IActionResult> ExportProductividadExcel(
+        [FromQuery] string? estado,
+        [FromQuery] Guid? operadorId,
+        [FromQuery] string? localidad,
+        [FromQuery] string? ruta)
+    {
+        var q = _db.Operadores
+            .Include(o => o.Asignaciones)
+            .Where(o => o.EmpresaId == EmpresaId && o.Activo && o.DeletedAt == null);
+
+        if (operadorId.HasValue) q = q.Where(o => o.Id == operadorId.Value);
+        if (!string.IsNullOrEmpty(localidad)) q = q.Where(o => o.Localidad == localidad);
+        if (!string.IsNullOrEmpty(ruta)) q = q.Where(o => o.Zona == ruta);
+
+        var operadores = await q.OrderBy(o => o.Nombre).ToListAsync();
+
+        using var wb = new XLWorkbook();
+        var ws = wb.AddWorksheet("Productividad");
+
+        var headers = new[] { "Código", "Operador", "Zona", "Pendientes", "En Ejecución", "Finalizadas", "Sincronizadas", "Total", "Última Sync" };
+        for (int i = 0; i < headers.Length; i++)
+        {
+            ws.Cell(1, i + 1).Value = headers[i];
+            ws.Cell(1, i + 1).Style.Font.Bold = true;
+            ws.Cell(1, i + 1).Style.Fill.BackgroundColor = XLColor.LightSteelBlue;
+        }
+
+        int row = 2;
+        foreach (var o in operadores)
+        {
+            var asigs = o.Asignaciones.Where(a => a.DeletedAt == null).ToList();
+            ws.Cell(row, 1).Value = o.CodigoOperador;
+            ws.Cell(row, 2).Value = o.Nombre + " " + o.Apellido;
+            ws.Cell(row, 3).Value = o.Zona ?? "";
+            ws.Cell(row, 4).Value = asigs.Count(a => a.Estado == EstadoAsignacion.Pendiente);
+            ws.Cell(row, 5).Value = asigs.Count(a => a.Estado == EstadoAsignacion.EnEjecucion);
+            ws.Cell(row, 6).Value = asigs.Count(a => a.Estado == EstadoAsignacion.Finalizada);
+            ws.Cell(row, 7).Value = asigs.Count(a => a.Estado == EstadoAsignacion.Sincronizada);
+            ws.Cell(row, 8).Value = asigs.Count;
+            ws.Cell(row, 9).Value = o.FechaUltimaSync?.ToString("dd-MM-yyyy HH:mm") ?? "Nunca";
+            row++;
+        }
+
+        ws.Columns().AdjustToContents();
+
+        using var ms = new MemoryStream();
+        wb.SaveAs(ms);
+        ms.Position = 0;
+
+        return File(ms.ToArray(),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            $"reporte_productividad_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
+    }
+
     /// <summary>Reporte por operador</summary>
     [HttpGet("por-operador")]
     public async Task<IActionResult> ReportePorOperador()
