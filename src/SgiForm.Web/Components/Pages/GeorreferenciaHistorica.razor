@@ -139,7 +139,7 @@
     private const int porPagina = 20;
     private int total = 0;
 
-    private List<OperadorItem>? operadores;
+    private List<OperadorItem> operadores = new();
     private List<InspeccionGeo>? inspecciones;
     private InspeccionGeo? inspeccionSeleccionada;
 
@@ -217,8 +217,8 @@
         inspeccionSeleccionada = insp;
         if (insp.Lat.HasValue && insp.Lng.HasValue && mapaInicializado)
         {
-            await JS.InvokeVoidAsync("eval",
-                $"window.sgiMaps['mapa-historico'].setView([{insp.Lat},{insp.Lng}],17)");
+            await JS.InvokeVoidAsync("sgiSetView", "mapa-historico",
+                (double)insp.Lat.Value, (double)insp.Lng.Value, 17);
         }
     }
 

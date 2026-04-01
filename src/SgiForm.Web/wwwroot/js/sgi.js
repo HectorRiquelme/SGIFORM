@@ -87,3 +87,13 @@ window.sgiFitBounds = function (elementId) {
     });
     if (markers.length > 0) map.fitBounds(L.latLngBounds(markers), { padding: [30, 30] });
 };
+
+/**
+ * Centra el mapa en las coordenadas indicadas.
+ * Se usa en lugar de eval para evitar problemas con separadores decimales.
+ */
+window.sgiSetView = function (elementId, lat, lng, zoom) {
+    const map = window.sgiMaps[elementId];
+    if (!map) return;
+    map.setView([lat, lng], zoom || 16);
+};

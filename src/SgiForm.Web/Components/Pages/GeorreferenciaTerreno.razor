@@ -44,7 +44,7 @@
             <select class="sf-select sf-select-sm" @bind="filtroOperadorId" @bind:after="RefrescarMapa">
                 <option value="">Todos</option>
                 @foreach (var op in operadores)
-                { <option value="@op.Id">@op.Nombre</option> }
+                { <option value="@op.Id">@op.NombreCompleto</option> }
             </select>
         </div>
         <div style="display:flex;gap:8px">
@@ -213,8 +213,8 @@
     private async Task CentrarEnOperador(OperadorUbicacion op)
     {
         if (!op.Lat.HasValue || !op.Lng.HasValue) return;
-        await JS.InvokeVoidAsync("eval",
-            $"window.sgiMaps['mapa-terreno'].setView([{op.Lat},{op.Lng}],16)");
+        await JS.InvokeVoidAsync("sgiSetView", "mapa-terreno",
+            (double)op.Lat.Value, (double)op.Lng.Value, 16);
     }
 
     public async ValueTask DisposeAsync()
