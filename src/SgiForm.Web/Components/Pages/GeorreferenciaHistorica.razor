@@ -38,8 +38,12 @@
             <select class="sf-select sf-select-sm" @bind="filtroEstado">
                 <option value="">Todos</option>
                 <option value="borrador">Borrador</option>
-                <option value="finalizada">Finalizada</option>
-                <option value="sincronizada">Sincronizada</option>
+                <option value="en_progreso">En progreso</option>
+                <option value="completada">Completada</option>
+                <option value="enviada">Enviada</option>
+                <option value="aprobada">Aprobada</option>
+                <option value="observada">Observada</option>
+                <option value="rechazada">Rechazada</option>
             </select>
         </div>
         <button class="sf-btn sf-btn-primary sf-btn-sm" @onclick="Buscar" disabled="@cargando">
@@ -54,77 +58,87 @@
     </div>
 </div>
 
-@if (inspecciones != null)
-{
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
 
-        <!-- Tabla -->
-        <div class="sf-card" style="overflow:hidden">
-            <div class="sf-card-header">
-                <h3>Inspecciones (@total)</h3>
+    <!-- Tabla -->
+    <div class="sf-card" style="overflow:hidden">
+        <div class="sf-card-header">
+            <h3>Inspecciones @(inspecciones != null ? $"({total})" : "")</h3>
+        </div>
+        @if (inspecciones == null)
+        {
+            <div style="padding:48px;text-align:center">
+                <div style="font-size:32px;margin-bottom:8px">🔍</div>
+                <p class="sf-text-muted">Selecciona un rango de fechas y pulsa Buscar</p>
             </div>
-            @if (!inspecciones.Any())
+        }
+        else if (!inspecciones.Any())
+        {
+            <div style="padding:24px;text-align:center">
+                <p class="sf-text-muted">No hay inspecciones para los filtros seleccionados.</p>
+            </div>
+        }
+        else
+        {
+            <table class="sf-table sf-table-sm">
+                <thead>
+                    <tr>
+                        <th>Servicio</th>
+                        <th>Operador</th>
+                        <th>Estado</th>
+                        <th>Fecha Fin</th>
+                        <th>GPS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var i in inspecciones)
+                    {
+                        <tr class="@(inspeccionSeleccionada?.Id == i.Id ? "sf-row-selected" : "")"
+                            style="cursor:pointer" @onclick="() => SeleccionarInspeccion(i)">
+                            <td><code style="font-size:11px">@i.Servicio</code></td>
+                            <td>@i.Operador</td>
+                            <td>
+                                <span class="sf-badge @GetEstadoBadge(i.Estado)">@i.Estado</span>
+                            </td>
+                            <td class="sf-text-xs sf-text-muted">
+                                @(i.FechaFin?.ToLocalTime().ToString("dd/MM HH:mm") ?? "—")
+                            </td>
+                            <td>
+                                @if (i.Lat.HasValue)
+                                { <span style="color:#22c55e">📍</span> }
+                                else
+                                { <span class="sf-text-muted">—</span> }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (total > porPagina)
             {
-                <div style="padding:24px;text-align:center">
-                    <p class="sf-text-muted">No hay inspecciones para los filtros seleccionados.</p>
+                <div style="display:flex;justify-content:center;gap:8px;padding:12px">
+                    <button class="sf-btn sf-btn-secondary sf-btn-sm"
+                        disabled="@(pagina == 1)" @onclick="() => CambiarPagina(pagina - 1)">←</button>
+                    <span class="sf-text-xs" style="line-height:2.5">@pagina / @((total + porPagina - 1) / porPagina)</span>
+                    <button class="sf-btn sf-btn-secondary sf-btn-sm"
+                        disabled="@(pagina * porPagina >= total)" @onclick="() => CambiarPagina(pagina + 1)">→</button>
                 </div>
             }
-            else
-            {
-                <table class="sf-table sf-table-sm">
-                    <thead>
-                        <tr>
-                            <th>Servicio</th>
-                            <th>Operador</th>
-                            <th>Estado</th>
-                            <th>Fecha Fin</th>
-                            <th>GPS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var i in inspecciones)
-                        {
-                            <tr class="@(inspeccionSeleccionada?.Id == i.Id ? "sf-row-selected" : "")"
-                                style="cursor:pointer" @onclick="() => SeleccionarInspeccion(i)">
-                                <td><code style="font-size:11px">@i.Servicio</code></td>
-                                <td>@i.Operador</td>
-                                <td>
-                                    <span class="sf-badge @GetEstadoBadge(i.Estado)">@i.Estado</span>
-                                </td>
-                                <td class="sf-text-xs sf-text-muted">
-                                    @(i.FechaFin?.ToLocalTime().ToString("dd/MM HH:mm") ?? "—")
-                                </td>
-                                <td>
-                                    @if (i.Lat.HasValue)
-                                    { <span style="color:#22c55e">📍</span> }
-                                    else
-                                    { <span class="sf-text-muted">—</span> }
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-
-                <!-- Paginación -->
-                @if (total > porPagina)
-                {
-                    <div style="display:flex;justify-content:center;gap:8px;padding:12px">
-                        <button class="sf-btn sf-btn-secondary sf-btn-sm"
-                            disabled="@(pagina == 1)" @onclick="() => CambiarPagina(pagina - 1)">←</button>
-                        <span class="sf-text-xs" style="line-height:2.5">@pagina / @((total + porPagina - 1) / porPagina)</span>
-                        <button class="sf-btn sf-btn-secondary sf-btn-sm"
-                            disabled="@(pagina * porPagina >= total)" @onclick="() => CambiarPagina(pagina + 1)">→</button>
-                    </div>
-                }
-            }
-        </div>
-
-        <!-- Mapa -->
-        <div class="sf-card" style="padding:0;overflow:hidden">
-            <div id="mapa-historico" style="height:450px;width:100%"></div>
-        </div>
+        }
     </div>
-}
+
+    <!-- Mapa — siempre presente para que sgiInitMap pueda encontrar el div -->
+    <div class="sf-card" style="padding:0;overflow:hidden;position:relative">
+        <div id="mapa-historico" style="height:450px;width:100%"></div>
+        @if (inspecciones == null)
+        {
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+                        background:rgba(255,255,255,.75);pointer-events:none;z-index:999">
+                <span class="sf-text-muted" style="font-size:13px">El mapa aparecerá tras buscar</span>
+            </div>
+        }
+    </div>
+</div>
 
 @code {
     private bool cargando = false;
@@ -201,9 +215,12 @@
         {
             var color = i.Estado switch
             {
-                "sincronizada" => "#22c55e",
-                "finalizada"  => "#3b82f6",
-                _             => "#94a3b8"
+                "aprobada"   => "#22c55e",
+                "completada" => "#3b82f6",
+                "enviada"    => "#6366f1",
+                "observada"  => "#f59e0b",
+                "rechazada"  => "#ef4444",
+                _            => "#94a3b8"
             };
             var label = $"<b>{i.Servicio}</b><br>👷 {i.Operador}<br>{i.Estado}";
             await JS.InvokeVoidAsync("sgiAddMarker", "mapa-historico",
@@ -236,10 +253,13 @@
 
     private static string GetEstadoBadge(string? estado) => estado switch
     {
-        "sincronizada" => "sf-badge-success",
-        "finalizada"   => "sf-badge-info",
-        "borrador"     => "sf-badge-warning",
-        _              => "sf-badge-secondary"
+        "aprobada"   => "sf-badge-success",
+        "completada" => "sf-badge-info",
+        "enviada"    => "sf-badge-info",
+        "observada"  => "sf-badge-warning",
+        "rechazada"  => "sf-badge-danger",
+        "borrador"   => "sf-badge-secondary",
+        _            => "sf-badge-secondary"
     };
 
     private record OperadorItem(Guid Id, string? NombreCompleto);

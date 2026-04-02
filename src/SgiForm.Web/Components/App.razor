@@ -10,17 +10,17 @@
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="SgiForm.Web.styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
+    <!-- Leaflet.js CSS (debe ir en head para evitar flash sin estilo) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
 <body>
     <Routes @rendermode="InteractiveServer" />
-    <script src="_framework/blazor.web.js"></script>
-    <!-- Leaflet.js para módulos de georreferencia -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet.js debe cargarse ANTES de blazor.web.js para que esté disponible en primer render -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Utilidades SGI-FORM -->
     <script src="js/sgi.js"></script>
+    <script src="_framework/blazor.web.js"></script>
 </body>
 
 </html>

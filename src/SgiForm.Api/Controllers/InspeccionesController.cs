@@ -159,11 +159,19 @@ public class InspeccionesController : ControllerBase
         var q = _db.Inspecciones
             .Where(i => i.EmpresaId == EmpresaId);
 
-        if (DateTimeOffset.TryParse(desde, out var d)) q = q.Where(i => i.CreatedAt >= d);
-        if (DateTimeOffset.TryParse(hasta, out var h)) q = q.Where(i => i.CreatedAt <= h);
+        if (DateTimeOffset.TryParse(desde, out var d))
+            q = q.Where(i => (i.FechaFin ?? i.FechaInicio ?? i.CreatedAt) >= d);
+        if (DateTimeOffset.TryParse(hasta, out var h))
+            q = q.Where(i => (i.FechaFin ?? i.FechaInicio ?? i.CreatedAt) <= h);
         if (operadorId.HasValue) q = q.Where(i => i.OperadorId == operadorId.Value);
-        if (!string.IsNullOrEmpty(estado) && Enum.TryParse<EstadoInspeccion>(estado, true, out var est))
-            q = q.Where(i => i.Estado == est);
+        if (!string.IsNullOrEmpty(estado))
+        {
+            // Convierte snake_case ("en_progreso") a PascalCase ("EnProgreso") para Enum.TryParse
+            var estadoNorm = System.Text.RegularExpressions.Regex.Replace(
+                estado, "(^|_)([a-z])", m => m.Groups[2].Value.ToUpper());
+            if (Enum.TryParse<EstadoInspeccion>(estadoNorm, true, out var est))
+                q = q.Where(i => i.Estado == est);
+        }
 
         var total = await q.CountAsync();
         var items = await q
