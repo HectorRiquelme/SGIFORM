@@ -62,7 +62,7 @@ else
                     @foreach (var i in items)
                     {
                         var pct = i.TotalPreguntas > 0
-                            ? (int)((double)i.TotalRespondidas / i.TotalPreguntas * 100)
+                            ? Math.Min(100, (int)((double)i.TotalRespondidas / i.TotalPreguntas * 100))
                             : 0;
                         <tr>
                             <td>
@@ -109,8 +109,10 @@ else
                                     @if (i.Estado == "completada" || i.Estado == "enviada")
                                     {
                                         <button class="sf-btn sf-btn-success sf-btn-sm"
+                                                disabled="@procesando"
                                                 @onclick="() => Aprobar(i.Id)">✅ Aprobar</button>
                                         <button class="sf-btn sf-btn-danger sf-btn-sm"
+                                                disabled="@procesando"
                                                 @onclick="() => AbrirObservacion(i)">⚠️ Observar</button>
                                     }
                                 </div>
@@ -144,6 +146,13 @@ else
     }
 }
 
+@if (!string.IsNullOrEmpty(mensajeExito))
+{
+    <div class="sf-alert sf-alert-success" style="position:fixed;bottom:20px;right:20px;z-index:300;max-width:400px;box-shadow:0 4px 12px rgba(0,0,0,.2)">
+        @mensajeExito
+    </div>
+}
+
 <!-- Modal observación -->
 @if (mostrarObservacion && inspeccionObservar != null)
 {
@@ -171,6 +180,8 @@ else
 @code {
     private bool loading = true;
     private bool mostrarObservacion = false;
+    private bool procesando = false;
+    private string? mensajeExito;
     private int total = 0;
     private string? motivoObservacion;
     private InspeccionItem? inspeccionObservar;
@@ -202,8 +213,15 @@ else
 
     private async Task Aprobar(Guid id)
     {
-        await Api.PostAsync<object>($"api/v1/inspecciones/{id}/aprobar", new { });
-        await Cargar();
+        procesando = true;
+        var r = await Api.PostAsync<object>($"api/v1/inspecciones/{id}/aprobar", new { });
+        procesando = false;
+        if (r.Success)
+        {
+            mensajeExito = "Inspección aprobada correctamente";
+            await Cargar();
+            _ = Task.Delay(3000).ContinueWith(_ => InvokeAsync(() => { mensajeExito = null; StateHasChanged(); }));
+        }
     }
 
     private void AbrirObservacion(InspeccionItem i)
@@ -216,10 +234,17 @@ else
     private async Task Observar()
     {
         if (inspeccionObservar == null || string.IsNullOrWhiteSpace(motivoObservacion)) return;
-        await Api.PostAsync<object>($"api/v1/inspecciones/{inspeccionObservar.Id}/observar",
+        procesando = true;
+        var r = await Api.PostAsync<object>($"api/v1/inspecciones/{inspeccionObservar.Id}/observar",
             new { observacion = motivoObservacion });
-        mostrarObservacion = false;
-        await Cargar();
+        procesando = false;
+        if (r.Success)
+        {
+            mostrarObservacion = false;
+            mensajeExito = "Observación registrada";
+            await Cargar();
+            _ = Task.Delay(3000).ContinueWith(_ => InvokeAsync(() => { mensajeExito = null; StateHasChanged(); }));
+        }
     }
 
     private static string GetEstadoBadge(string? e) => e switch

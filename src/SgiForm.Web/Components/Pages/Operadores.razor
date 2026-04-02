@@ -261,6 +261,12 @@ else
 
     private async Task GuardarOperador()
     {
+        if (operadorEditar == null && string.IsNullOrWhiteSpace(formModel.Password))
+        {
+            formError = "La contraseña es obligatoria para nuevos operadores";
+            return;
+        }
+
         guardando = true;
         formError = null;
 

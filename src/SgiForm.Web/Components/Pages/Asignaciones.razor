@@ -21,8 +21,9 @@
         <option value="descargada">Descargada</option>
         <option value="en_ejecucion">En ejecución</option>
         <option value="finalizada">Finalizada</option>
-        <option value="sincronizada">Sincronizada</option>
+        <option value="completada">Completada</option>
         <option value="observada">Observada</option>
+        <option value="rechazada">Rechazada</option>
     </select>
     <select class="sf-select sf-select-sm" @bind="filtros.OperadorId" @bind:after="Cargar">
         <option value="">Todos los operadores</option>
@@ -241,13 +242,18 @@ else
             string.IsNullOrEmpty(masivaForm.FlujoVersionId))
         { masivaError = "Operador, tipo de inspección y flujo son obligatorios"; return; }
 
+        if (!Guid.TryParse(masivaForm.OperadorId, out var opId) ||
+            !Guid.TryParse(masivaForm.TipoInspeccionId, out var tipoId) ||
+            !Guid.TryParse(masivaForm.FlujoVersionId, out var flujoId))
+        { masivaError = "Selección inválida. Recarga la página e intenta de nuevo."; return; }
+
         guardando = true;
         masivaError = null;
         var r = await Api.PostAsync<AsignacionMasivaResult>("api/v1/asignaciones/masiva", new
         {
-            operador_id       = Guid.Parse(masivaForm.OperadorId),
-            tipo_inspeccion_id = Guid.Parse(masivaForm.TipoInspeccionId),
-            flujo_version_id  = Guid.Parse(masivaForm.FlujoVersionId),
+            operador_id       = opId,
+            tipo_inspeccion_id = tipoId,
+            flujo_version_id  = flujoId,
             localidad         = masivaForm.Localidad,
             ruta              = masivaForm.Ruta,
             limite_maximo     = masivaForm.LimiteMaximo
@@ -266,10 +272,12 @@ else
     {
         "pendiente"    => "sf-badge-warning",
         "asignada"     => "sf-badge-info",
+        "descargada"   => "sf-badge-info",
         "en_ejecucion" => "sf-badge-info",
         "finalizada"   => "sf-badge-success",
-        "sincronizada" => "sf-badge-success",
-        "observada"    => "sf-badge-danger",
+        "completada"   => "sf-badge-success",
+        "observada"    => "sf-badge-warning",
+        "rechazada"    => "sf-badge-danger",
         _ => "sf-badge-secondary"
     };
 

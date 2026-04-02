@@ -33,7 +33,7 @@ else
 {
     @foreach (var i in items)
     {
-        var pct = i.TotalPreguntas > 0 ? (int)((double)i.TotalRespondidas / i.TotalPreguntas * 100) : 0;
+        var pct = i.TotalPreguntas > 0 ? Math.Min(100, (int)((double)i.TotalRespondidas / i.TotalPreguntas * 100)) : 0;
 
         <div class="sf-card" style="margin-bottom:12px">
             <div style="display:flex;gap:16px;padding:16px;align-items:start">
@@ -184,10 +184,20 @@ else
 
     private async Task Aprobar(Guid id)
     {
-        await Api.PostAsync<object>($"api/v1/inspecciones/{id}/aprobar", new { });
-        mensaje = "Inspección aprobada correctamente";
-        await Cargar();
-        _ = LimpiarMensaje();
+        procesando = true;
+        var r = await Api.PostAsync<object>($"api/v1/inspecciones/{id}/aprobar", new { });
+        procesando = false;
+        if (r.Success)
+        {
+            mensaje = "Inspección aprobada correctamente";
+            await Cargar();
+            _ = LimpiarMensaje();
+        }
+        else
+        {
+            mensaje = r.Error ?? "Error al aprobar";
+            _ = LimpiarMensaje();
+        }
     }
 
     private void AbrirObservacion(InspItem i)
@@ -209,12 +219,12 @@ else
             ? $"api/v1/inspecciones/{inspeccionActual.Id}/observar"
             : $"api/v1/inspecciones/{inspeccionActual.Id}/rechazar";
 
-        await Api.PostAsync<object>(endpoint, new { observacion = motivo });
-        mostrarModal = false;
-        mensaje = accionModal == "observar"
-            ? "Inspección observada correctamente"
-            : "Inspección rechazada";
+        var r = await Api.PostAsync<object>(endpoint, new { observacion = motivo });
         procesando = false;
+        mostrarModal = false;
+        mensaje = r.Success
+            ? (accionModal == "observar" ? "Inspección observada correctamente" : "Inspección rechazada")
+            : (r.Error ?? "Error al procesar");
         await Cargar();
         _ = LimpiarMensaje();
     }
