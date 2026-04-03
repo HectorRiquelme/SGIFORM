@@ -127,6 +127,7 @@ public class ImportacionController : ControllerBase
         [FromQuery] int pagina = 1,
         [FromQuery] int porPagina = 20)
     {
+        porPagina = Math.Clamp(porPagina, 1, 100);
         // Verificar que el lote pertenece a la empresa
         var loteExiste = await _db.ImportacionLotes.AnyAsync(l =>
             l.Id == loteId && l.EmpresaId == EmpresaId);
@@ -172,6 +173,7 @@ public class ImportacionController : ControllerBase
         [FromQuery] int pagina = 1,
         [FromQuery] int porPagina = 25)
     {
+        porPagina = Math.Clamp(porPagina, 1, 100);
         var q = _db.ImportacionLotes
             .Include(l => l.Usuario)
             .Where(l => l.EmpresaId == EmpresaId);
@@ -237,6 +239,7 @@ public class ImportacionController : ControllerBase
     [HttpGet("{loteId:guid}/errores")]
     public async Task<IActionResult> GetErrores(Guid loteId, [FromQuery] int pagina = 1, [FromQuery] int porPagina = 50)
     {
+        porPagina = Math.Clamp(porPagina, 1, 100);
         var loteExiste = await _db.ImportacionLotes.AnyAsync(l =>
             l.Id == loteId && l.EmpresaId == EmpresaId);
         if (!loteExiste) return NotFound();

@@ -25,6 +25,7 @@ public class InspeccionesController : ControllerBase
         [FromQuery] int pagina = 1,
         [FromQuery] int porPagina = 25)
     {
+        porPagina = Math.Clamp(porPagina, 1, 100);
         var q = _db.Inspecciones
             .Include(i => i.Operador)
             .Include(i => i.ServicioInspeccion)
@@ -68,6 +69,36 @@ public class InspeccionesController : ControllerBase
             .Include(x => x.Fotografias)
             .Include(x => x.Historial)
             .Where(x => x.Id == id && x.EmpresaId == EmpresaId)
+            .Select(x => new
+            {
+                x.Id, x.Estado, x.FechaInicio, x.FechaFin, x.DuracionSegundos,
+                x.TotalPreguntas, x.TotalRespondidas, x.TotalFotografias,
+                x.CoordXInicio, x.CoordYInicio, x.CoordXFin, x.CoordYFin, x.PrecisionGps,
+                x.DeviceId, x.AppVersion, x.SincronizadoEn,
+                x.RevisionPor, x.RevisionEn, x.RevisionObservacion,
+                x.CreatedAt,
+                operador = new { x.Operador.Id, x.Operador.Nombre, x.Operador.Apellido, x.Operador.CodigoOperador },
+                servicio = new { x.ServicioInspeccion.Id, x.ServicioInspeccion.IdServicio, x.ServicioInspeccion.Direccion, x.ServicioInspeccion.NombreCliente, x.ServicioInspeccion.Localidad },
+                respuestas = x.Respuestas.Select(r => new
+                {
+                    r.Id, r.PreguntaId, r.TipoControl,
+                    r.ValorTexto, r.ValorEntero, r.ValorDecimal,
+                    r.ValorFecha, r.ValorHora, r.ValorFechaHora,
+                    r.ValorBooleano, r.ValorJson,
+                    r.EsValido, r.RespondidaEn
+                }),
+                fotografias = x.Fotografias.OrderBy(f => f.Orden).Select(f => new
+                {
+                    f.Id, f.PreguntaId, f.NombreArchivo, f.UrlPublica,
+                    f.TamanioBytes, f.Ancho, f.Alto, f.Orden,
+                    f.CoordenadaX, f.CoordenadaY, f.TieneMarcaAgua
+                }),
+                historial = x.Historial.OrderByDescending(h => h.CreatedAt).Select(h => new
+                {
+                    h.Id, h.Accion, h.EstadoAnterior, h.EstadoNuevo,
+                    h.Observacion, h.CreatedAt, h.UsuarioId, h.OperadorId
+                })
+            })
             .FirstOrDefaultAsync();
         if (i == null) return NotFound();
         return Ok(i);
@@ -156,6 +187,7 @@ public class InspeccionesController : ControllerBase
         [FromQuery] int pagina = 1,
         [FromQuery] int porPagina = 20)
     {
+        porPagina = Math.Clamp(porPagina, 1, 100);
         var q = _db.Inspecciones
             .Where(i => i.EmpresaId == EmpresaId);
 

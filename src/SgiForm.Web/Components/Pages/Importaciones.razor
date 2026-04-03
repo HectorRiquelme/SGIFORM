@@ -1,6 +1,7 @@
 @page "/importaciones"
 @layout SgiForm.Web.Components.Layout.MainLayout
 @inject ApiClient Api
+@inject IJSRuntime JS
 @using System.Net.Http.Headers
 
 <PageTitle>Importar Excel — SGI-FORM</PageTitle>
@@ -253,9 +254,7 @@
     }
 
     private void TriggerFileInput()
-    {
-        // El InputFile se activa con el click en la zona de upload
-    }
+        => JS.InvokeVoidAsync("sgiClickFileInput", "fileInput");
 
     private void OnFileSelected(InputFileChangeEventArgs e)
     {
@@ -277,7 +276,7 @@
             fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             content.Add(fileContent, "archivo", archivoSeleccionado.Name);
 
-            var result = await Api.PostAsync<UploadResponse>("api/v1/importaciones/upload", content);
+            var result = await Api.PostMultipartAsync<UploadResponse>("api/v1/importaciones/upload", content);
 
             if (result.Success && result.Data != null)
             {

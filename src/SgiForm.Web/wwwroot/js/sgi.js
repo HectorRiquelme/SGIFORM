@@ -97,3 +97,12 @@ window.sgiSetView = function (elementId, lat, lng, zoom) {
     if (!map) return;
     map.setView([lat, lng], zoom || 16);
 };
+
+/**
+ * Dispara el click en un <input type="file"> por su id.
+ * Reemplaza el uso de eval("document.getElementById(id).click()").
+ */
+window.sgiClickFileInput = function (inputId) {
+    const el = document.getElementById(inputId);
+    if (el) el.click();
+};

@@ -19,6 +19,7 @@ public class UsuariosController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] int pagina = 1, [FromQuery] int porPagina = 25)
     {
+        porPagina = Math.Clamp(porPagina, 1, 100);
         var q = _db.Usuarios
             .Include(u => u.Rol)
             .Where(u => u.EmpresaId == EmpresaId && u.DeletedAt == null);
@@ -57,7 +58,6 @@ public class UsuariosController : ControllerBase
     }
 
     [HttpGet("roles")]
-    [AllowAnonymous]
     public async Task<IActionResult> GetRoles()
     {
         // Devuelve los roles disponibles para esta empresa (para los dropdowns)

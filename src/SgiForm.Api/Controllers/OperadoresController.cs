@@ -30,6 +30,7 @@ public class OperadoresController : ControllerBase
         [FromQuery] int pagina = 1,
         [FromQuery] int porPagina = 25)
     {
+        porPagina = Math.Clamp(porPagina, 1, 100);
         var q = _db.Operadores
             .Where(o => o.EmpresaId == EmpresaId && o.DeletedAt == null);
 

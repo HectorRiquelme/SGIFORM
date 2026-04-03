@@ -5,7 +5,7 @@
 
 ---
 
-## Estado del sistema — 2026-03-24 (última actualización)
+## Estado del sistema — 2026-04-02 (última actualización)
 
 | Check | Estado |
 |-------|--------|
@@ -18,6 +18,11 @@
 | README.md en raíz | OK Reescrito con arquitectura, build, IIS, PostgreSQL, troubleshooting |
 | deploy/rollback.ps1 | OK Script simplificado con modos restore y remove |
 | Fix ip_origen schema (tipo inet → text) | OK Documentado en README Troubleshooting y scripts SQL |
+| **Auditoría QA/Seguridad** | **OK — 9 categorías ejecutadas, 11 fixes aplicados** |
+| appsettings.json sin secretos reales | OK — desde 2026-04-02 solo placeholders |
+| Enum.Parse → Enum.TryParse (todos) | OK — FlujoController + SyncController |
+| [AllowAnonymous] en GetRoles | OK — eliminado |
+| Math.Clamp en todos los controllers | OK — 6 controllers corregidos |
 
 ---
 
@@ -211,7 +216,9 @@ Este fix se aplicó manualmente en el servidor de producción via ALTER TABLE, p
 | 2026-03-22 | `05dc347` | Contexto persistente: CLAUDE.md, AGENTS.md, PROJECT_CONTEXT.md, NEXT_STEPS.md |
 | 2026-03-22 | `e68a79f` | NEXT_STEPS.md actualizado con detalle completo de sesión y pendientes exactos |
 | 2026-03-23 | `fe0b21a` | Deploy producción completo, fix ip_origen, README y rollback.ps1 reescritos |
-| 2026-03-24 | *(pendiente commit)* | Deploy real ejecutado en servidor, validado login web+móvil, fix ip_origen aplicado en BD, schema SQL corregido |
+| 2026-03-24 | `3ee46c1` | fix(geo): NullRef en Histórica y error Leaflet setView por locale |
+| 2026-03-24 | `c5003cf` | feat: Zonas/Localidades, georreferencia, modal importación, fixes BUG-01/02/03/04 |
+| 2026-04-02 | *(pendiente commit)* | Auditoría QA/Seg completa: 11 fixes (ALTO/MEDIO/BAJO), appsettings sin secretos, PDF informes |
 
 ---
 

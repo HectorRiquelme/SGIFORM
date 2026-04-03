@@ -182,10 +182,61 @@ docker run -d --name sgiform_postgres -p 5434:5432 \
 
 | Archivo | Propósito | ¿Contiene secretos? |
 |---------|-----------|---------------------|
-| `src/SgiForm.Api/appsettings.json` | Config base desarrollo | Sí (credenciales dev) — NO usar en prod |
+| `src/SgiForm.Api/appsettings.json` | Config base | No (solo placeholders SGIFORM_* desde 2026-04-02) |
 | `src/SgiForm.Api/appsettings.Production.json` | Template producción | No (valores placeholder) |
-| `src/SgiForm.Api/appsettings.Development.json` | Override dev | Sí (dev only) |
+| `src/SgiForm.Api/appsettings.Development.json` | Override dev Docker | Sí (credenciales Docker local — no commitear a ramas de prod) |
 | `global.json` | Fija SDK .NET 8.0.319 | No |
+
+---
+
+### Fase 7 — Revisión QA/Seguridad completa (2026-04-02)
+
+Auditoría de 9 categorías de pruebas profesionales (SAST, SCA, DAST, pentest, funcional, rendimiento, regresión, E2E, accesibilidad). Resultados y fixes aplicados:
+
+#### Fixes ALTO (críticos)
+
+| Fix | Archivo | Cambio |
+|-----|---------|--------|
+| Enum.Parse sin validación | `FlujoController.cs` | `Enum.Parse` → `Enum.TryParse` + `return BadRequest(...)` |
+| Secretos en repo | `appsettings.json` | Reemplazados por placeholders `SGIFORM_*` |
+| AllowedHosts=* | `appsettings.json` | Placeholder `SGIFORM_ALLOWED_HOSTS`; dev fijado a `localhost` |
+
+#### Fixes MEDIO
+
+| Fix | Archivo | Cambio |
+|-----|---------|--------|
+| [AllowAnonymous] en GetRoles | `UsuariosController.cs` | Atributo eliminado; aplica [Authorize] de clase |
+
+#### Fixes BAJO (todos aplicados)
+
+| Fix | Archivo | Cambio |
+|-----|---------|--------|
+| Paginación sin límite | `AsignacionController`, `OperadoresController`, `ServiciosController`, `UsuariosController`, `ImportacionController`, `InspeccionesController` | `Math.Clamp(porPagina, 1, 100)` |
+| `return Ok(entity)` expone modelo EF | `InspeccionesController.GetById` | Reemplazado por proyección anónima completa |
+| Paquete obsoleto vulnerable | `SgiForm.Web.csproj` | Eliminado `Microsoft.AspNetCore.Authentication.Cookies 2.2.0` |
+| `eval()` en JavaScript | `sgi.js` | Reemplazado por `sgiClickFileInput(id)` helper |
+| Timer sin Dispose | `Servicios.razor` | Agregado `@implements IDisposable` + `Dispose()` |
+| Progress bar overflow | `Reportes.razor` | `Math.Min(100, pct)` para clamp |
+| Multipart mal tipado | `Importaciones.razor` | `PostAsync` → `PostMultipartAsync` |
+| Filtro ignorado | `Servicios.razor` | Agregado `conAsignacion` al query string |
+
+#### Estado appsettings tras fixes
+
+- `appsettings.json` — solo placeholders, sin secretos reales (seguro para commitear)
+- `appsettings.Development.json` — valores Docker local (SgiForm2024!, puerto 5434) — solo para dev
+- `appsettings.Production.json` — placeholders; secretos reales van en variables de entorno IIS AppPool
+
+#### Variables de entorno requeridas en producción
+
+```
+ConnectionStrings__Default = Host=...;Port=5432;Database=sgiform;Password=<real>;...
+Jwt__Key                   = <base64 64 bytes aleatorios>
+AllowedHosts               = apps.solucionescloud.cl
+```
+
+#### Archivos generados (no código)
+- `reporte_qa_seguridad_sgi.pdf` — informe de auditoría con 9 tests, 4 ALTO, 3 MEDIO, 4 BAJO
+- `reporte_correcciones_seguridad_sgi.pdf` — detalle de cada fix con explicación coloquial + formal
 
 ---
 
@@ -193,8 +244,9 @@ docker run -d --name sgiform_postgres -p 5434:5432 \
 
 | Commit | Descripción |
 |--------|-------------|
+| `3ee46c1` | fix(geo): corregir NullRef en Histórica y error Leaflet setView por locale |
+| `c5003cf` | feat: Zonas/Localidades, georreferencia, modal importación, fixes BUG-01/02/03/04 y UTF-8 |
+| `89a5ac4` | Mobile: implement dynamic form rendering and fix GPS/decimal/section-loading issues |
 | `ed7d51a` | refactor: renombrar SgiForm → SgiForm en todo el proyecto |
 | `c8fbde0` | feat(deploy): agregar documentación y scripts de despliegue completos |
 | `8995ae6` | feat(prod): implementar todos los requisitos de producción |
-| `5692c10` | feat(security): implementar rate limiting nativo ASP.NET Core 8 |
-| `b4b48cb` | fix(qa): corregir bugs detectados en análisis QA pre-producción |

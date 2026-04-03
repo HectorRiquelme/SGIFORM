@@ -36,6 +36,7 @@ public class AsignacionController : ControllerBase
         [FromQuery] int pagina = 1,
         [FromQuery] int porPagina = 25)
     {
+        porPagina = Math.Clamp(porPagina, 1, 100);
         var q = _db.AsignacionesInspeccion
             .Include(a => a.ServicioInspeccion)
             .Include(a => a.Operador)

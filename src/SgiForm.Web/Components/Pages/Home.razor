@@ -5,24 +5,45 @@
 
 <PageTitle>Dashboard — SGI-FORM</PageTitle>
 
+<!-- Header -->
 <div class="sf-page-header">
     <div>
         <h2>Dashboard</h2>
         <span class="sf-text-muted">Bienvenido, @Auth.Nombre</span>
     </div>
-    <span class="sf-badge sf-badge-info">@DateTime.Now.ToString("dddd dd/MM/yyyy")</span>
+    <span class="sf-badge sf-badge-info sf-badge-nodot" style="font-size:12px;padding:6px 14px">
+        @DateTime.Now.ToString("dddd dd 'de' MMMM yyyy", new System.Globalization.CultureInfo("es-CL"))
+    </span>
 </div>
 
 @if (loading)
 {
+    <!-- Skeleton KPIs -->
+    <div class="sf-kpi-grid" style="margin-bottom:24px">
+        @for (int i = 0; i < 7; i++)
+        {
+            <div class="sf-kpi-card" style="border-bottom-color:#e2e8f0">
+                <div class="sf-skeleton" style="width:46px;height:46px;border-radius:8px;flex-shrink:0"></div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+                    <div class="sf-skeleton" style="height:28px;width:60px;border-radius:4px"></div>
+                    <div class="sf-skeleton" style="height:12px;width:90px;border-radius:4px"></div>
+                </div>
+            </div>
+        }
+    </div>
     <div class="sf-loading-center"><div class="sf-spinner"></div></div>
 }
 else if (resumen != null)
 {
     <!-- KPI Cards -->
     <div class="sf-kpi-grid">
+
         <div class="sf-kpi-card sf-kpi-blue">
-            <div class="sf-kpi-icon">📍</div>
+            <div class="sf-kpi-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 018 8c0 5.25-8 14-8 14S4 15.25 4 10a8 8 0 018-8z"/>
+                </svg>
+            </div>
             <div class="sf-kpi-data">
                 <span class="sf-kpi-value">@resumen.TotalServicios.ToString("N0")</span>
                 <span class="sf-kpi-label">Servicios cargados</span>
@@ -30,7 +51,11 @@ else if (resumen != null)
         </div>
 
         <div class="sf-kpi-card sf-kpi-yellow">
-            <div class="sf-kpi-icon">⏳</div>
+            <div class="sf-kpi-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+            </div>
             <div class="sf-kpi-data">
                 <span class="sf-kpi-value">@GetEstadoCount("pendiente")</span>
                 <span class="sf-kpi-label">Pendientes</span>
@@ -38,7 +63,12 @@ else if (resumen != null)
         </div>
 
         <div class="sf-kpi-card sf-kpi-orange">
-            <div class="sf-kpi-icon">⚙️</div>
+            <div class="sf-kpi-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.07 4.93a10 10 0 010 14.14M4.93 19.07a10 10 0 010-14.14"/>
+                </svg>
+            </div>
             <div class="sf-kpi-data">
                 <span class="sf-kpi-value">@GetEstadoCount("en_ejecucion")</span>
                 <span class="sf-kpi-label">En ejecución</span>
@@ -46,7 +76,12 @@ else if (resumen != null)
         </div>
 
         <div class="sf-kpi-card sf-kpi-green">
-            <div class="sf-kpi-icon">✅</div>
+            <div class="sf-kpi-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+            </div>
             <div class="sf-kpi-data">
                 <span class="sf-kpi-value">@GetEstadoCount("finalizada")</span>
                 <span class="sf-kpi-label">Finalizadas</span>
@@ -54,7 +89,12 @@ else if (resumen != null)
         </div>
 
         <div class="sf-kpi-card sf-kpi-teal">
-            <div class="sf-kpi-icon">🔄</div>
+            <div class="sf-kpi-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="1 4 1 10 7 10"/>
+                    <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
+                </svg>
+            </div>
             <div class="sf-kpi-data">
                 <span class="sf-kpi-value">@GetEstadoCount("sincronizada")</span>
                 <span class="sf-kpi-label">Sincronizadas</span>
@@ -62,7 +102,12 @@ else if (resumen != null)
         </div>
 
         <div class="sf-kpi-card sf-kpi-purple">
-            <div class="sf-kpi-icon">📸</div>
+            <div class="sf-kpi-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                </svg>
+            </div>
             <div class="sf-kpi-data">
                 <span class="sf-kpi-value">@(resumen.TotalFotografias?.ToString("N0") ?? "0")</span>
                 <span class="sf-kpi-label">Fotografías</span>
@@ -70,12 +115,18 @@ else if (resumen != null)
         </div>
 
         <div class="sf-kpi-card sf-kpi-teal">
-            <div class="sf-kpi-icon">👷</div>
+            <div class="sf-kpi-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+            </div>
             <div class="sf-kpi-data">
                 <span class="sf-kpi-value">@(resumen.OperadoresActivos ?? 0)</span>
                 <span class="sf-kpi-label">Operadores activos</span>
             </div>
         </div>
+
     </div>
 
     <!-- Grillas de avance -->
@@ -83,19 +134,17 @@ else if (resumen != null)
         <div class="sf-card">
             <div class="sf-card-header">
                 <h3>Avance por localidad</h3>
+                <a href="/servicios" class="sf-link-sm">Ver servicios</a>
             </div>
-            <div style="padding:0">
-                <AvanceLocalidad />
-            </div>
+            <AvanceLocalidad />
         </div>
 
         <div class="sf-card">
             <div class="sf-card-header">
                 <h3>Productividad por operador</h3>
+                <a href="/operadores" class="sf-link-sm">Ver operadores</a>
             </div>
-            <div style="padding:0">
-                <ResumenOperadores />
-            </div>
+            <ResumenOperadores />
         </div>
     </div>
 }
@@ -119,7 +168,6 @@ else
     private int GetEstadoCount(string estado) =>
         resumen?.Asignaciones?.FirstOrDefault(a => a.Estado == estado)?.Total ?? 0;
 
-    // DTOs locales
     private record DashboardResumen(
         int TotalServicios,
         List<EstadoCount>? Asignaciones,

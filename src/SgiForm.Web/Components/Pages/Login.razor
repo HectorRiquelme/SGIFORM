@@ -5,17 +5,55 @@
 @inject NavigationManager Nav
 @inject IConfiguration Config
 
-<PageTitle>Iniciar sesi&#243;n — SGI-FORM</PageTitle>
+<PageTitle>Iniciar sesión — SGI-FORM</PageTitle>
 
 <div class="sf-login-container">
-    <div class="sf-login-card">
 
-        <div class="sf-login-header">
-            <div class="sf-login-logo">
-                <span style="font-size:2.2rem;font-weight:800;letter-spacing:-1px;color:#1a56db">SGI</span><span style="font-size:2.2rem;font-weight:300;color:#374151">-FORM</span>
+    <!-- Panel izquierdo — decorativo -->
+    <div class="sf-login-left">
+        <div class="sf-login-left-content">
+            <h1>Gestión inteligente de inspecciones en terreno</h1>
+            <p>Digitaliza y controla el ciclo completo de inspecciones de campo desde un solo lugar.</p>
+
+            <div class="sf-login-features">
+                <div class="sf-login-feature">
+                    <div class="sf-login-feature-dot"></div>
+                    <span>Formularios dinámicos sin conexión</span>
+                </div>
+                <div class="sf-login-feature">
+                    <div class="sf-login-feature-dot"></div>
+                    <span>Georreferencia y trazabilidad GPS</span>
+                </div>
+                <div class="sf-login-feature">
+                    <div class="sf-login-feature-dot"></div>
+                    <span>Sincronización automática con la nube</span>
+                </div>
+                <div class="sf-login-feature">
+                    <div class="sf-login-feature-dot"></div>
+                    <span>Reportes y control de calidad integrado</span>
+                </div>
             </div>
-            <p style="font-size:0.95rem;color:#6b7280;margin-top:4px;letter-spacing:0.5px">Gesti&#243;n inteligente de inspecciones en terreno</p>
         </div>
+    </div>
+
+    <!-- Panel derecho — formulario -->
+    <div class="sf-login-right">
+
+        <div class="sf-login-logo-mark">
+            <div class="sf-login-logo-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 11l3 3L22 4"/>
+                    <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                </svg>
+            </div>
+            <div>
+                <div class="sf-login-app-name">SGI-FORM</div>
+                <div class="sf-login-app-sub">Sistema de inspecciones</div>
+            </div>
+        </div>
+
+        <h2 class="sf-login-title">Bienvenido de vuelta</h2>
+        <p class="sf-login-subtitle">Ingresa tus credenciales para continuar</p>
 
         @if (!string.IsNullOrEmpty(errorMsg))
         {
@@ -26,41 +64,64 @@
             <DataAnnotationsValidator />
 
             <div class="sf-form-group">
-                <label for="email">Email</label>
-                <InputText id="email"
-                           @bind-Value="loginModel.Email"
-                           class="sf-input"
-                           placeholder="usuario@empresa.cl"
-                           autocomplete="email" />
+                <label for="email">Correo electrónico</label>
+                <div class="sf-input-with-icon">
+                    <span class="sf-input-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                    </span>
+                    <InputText id="email"
+                               @bind-Value="loginModel.Email"
+                               class="sf-input"
+                               placeholder="usuario@empresa.cl"
+                               autocomplete="email" />
+                </div>
                 <ValidationMessage For="@(() => loginModel.Email)" />
             </div>
 
             <div class="sf-form-group">
                 <label for="password">Contraseña</label>
-                <InputText id="password"
-                           @bind-Value="loginModel.Password"
-                           type="password"
-                           class="sf-input"
-                           placeholder="••••••••"
-                           autocomplete="current-password" />
+                <div class="sf-input-with-icon">
+                    <span class="sf-input-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0110 0v4"/>
+                        </svg>
+                    </span>
+                    <InputText id="password"
+                               @bind-Value="loginModel.Password"
+                               type="password"
+                               class="sf-input"
+                               placeholder="••••••••"
+                               autocomplete="current-password" />
+                </div>
                 <ValidationMessage For="@(() => loginModel.Password)" />
             </div>
 
             <button type="submit"
-                    class="sf-btn sf-btn-primary sf-btn-full"
+                    class="sf-btn sf-btn-primary sf-btn-full sf-btn-lg"
+                    style="margin-top:8px"
                     disabled="@loading">
                 @if (loading)
                 {
+                    <span class="sf-spinner-sm"></span>
                     <span>Iniciando sesión...</span>
                 }
                 else
                 {
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
+                        <polyline points="10 17 15 12 10 7"/>
+                        <line x1="15" y1="12" x2="3" y2="12"/>
+                    </svg>
                     <span>Iniciar sesión</span>
                 }
             </button>
         </EditForm>
 
-        <p class="sf-login-footer">v1.0.0 — SGI-FORM</p>
+        <p class="sf-login-footer">SGI-FORM v1.0.0 &nbsp;·&nbsp; Inspecciones sanitarias en terreno</p>
     </div>
 </div>
 
@@ -69,11 +130,6 @@
     private string? errorMsg;
     private bool loading = false;
 
-    // Construye la URL raíz respetando el PathBase configurado.
-    // Ejemplo: PathBase="/sgiform" → "/sgiform/"
-    // Sin PathBase (dev local) → "/"
-    // NavigateTo con ruta que empieza en "/" se resuelve desde la raíz del host,
-    // por eso incluimos el PathBase explícito en la ruta.
     private string RootUrl()
     {
         var pb = (Config["PathBase"] ?? "").TrimEnd('/');

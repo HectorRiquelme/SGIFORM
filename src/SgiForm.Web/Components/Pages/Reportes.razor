@@ -163,7 +163,7 @@
             <tbody>
                 @foreach (var r in reporteLocalidad)
                 {
-                    var pct = r.TotalServicios > 0 ? (int)((double)r.ConAsignacion / r.TotalServicios * 100) : 0;
+                    var pct = r.TotalServicios > 0 ? Math.Min(100, (int)((double)r.ConAsignacion / r.TotalServicios * 100)) : 0;
                     <tr>
                         <td>@r.Localidad</td>
                         <td>@r.Ruta</td>

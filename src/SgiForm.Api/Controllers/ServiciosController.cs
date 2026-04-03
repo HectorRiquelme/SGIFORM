@@ -24,6 +24,7 @@ public class ServiciosController : ControllerBase
         [FromQuery] int pagina = 1,
         [FromQuery] int porPagina = 30)
     {
+        porPagina = Math.Clamp(porPagina, 1, 100);
         var query = _db.ServiciosInspeccion
             .Where(s => s.EmpresaId == EmpresaId && s.Activo);
 

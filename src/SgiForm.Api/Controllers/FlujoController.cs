@@ -380,16 +380,22 @@ public class FlujoController : ControllerBase
         var version = await GetVersionEditable(id, versionId);
         if (version == null) return NotFound();
 
+        if (!Enum.TryParse<OperadorRegla>(req.Operador, ignoreCase: true, out var operadorRegla))
+            return BadRequest(new { error = $"Valor de operador no válido: '{req.Operador}'" });
+
+        if (!Enum.TryParse<AccionRegla>(req.Accion, ignoreCase: true, out var accionRegla))
+            return BadRequest(new { error = $"Valor de accion no válido: '{req.Accion}'" });
+
         var regla = new FlujoRegla
         {
             FlujoVersionId = versionId,
             Codigo = req.Codigo,
             Descripcion = req.Descripcion,
             PreguntaOrigenId = req.PreguntaOrigenId,
-            Operador = Enum.Parse<OperadorRegla>(req.Operador, true),
+            Operador = operadorRegla,
             ValorComparacion = req.ValorComparacion,
             ValorComparacionJson = req.ValorComparacionJson,
-            Accion = Enum.Parse<AccionRegla>(req.Accion, true),
+            Accion = accionRegla,
             PreguntaDestinoId = req.PreguntaDestinoId,
             SeccionDestinoId = req.SeccionDestinoId,
             ParametrosJson = req.ParametrosJson ?? "{}",

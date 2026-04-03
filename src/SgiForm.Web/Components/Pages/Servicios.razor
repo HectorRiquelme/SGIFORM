@@ -1,5 +1,6 @@
 @page "/servicios"
 @layout SgiForm.Web.Components.Layout.MainLayout
+@implements IDisposable
 @inject ApiClient Api
 @inject AuthStateService Auth
 @inject IJSRuntime JS
@@ -342,6 +343,7 @@ else
         if (!string.IsNullOrWhiteSpace(filtros.Localidad)) q += $"&localidad={Uri.EscapeDataString(filtros.Localidad)}";
         if (!string.IsNullOrWhiteSpace(filtros.Ruta))      q += $"&ruta={Uri.EscapeDataString(filtros.Ruta)}";
         if (!string.IsNullOrWhiteSpace(filtros.Lote))      q += $"&lote={Uri.EscapeDataString(filtros.Lote)}";
+        if (!string.IsNullOrWhiteSpace(filtros.ConAsignacion)) q += $"&conAsignacion={filtros.ConAsignacion}";
         var result = await Api.GetAsync<ServiciosResponse>(q);
         items = result?.Items ?? new();
         total = result?.Total ?? 0;
@@ -357,6 +359,8 @@ else
     }
 
     private async Task CambiarPagina(int p) { filtros.Pagina = p; await Cargar(); }
+
+    public void Dispose() => debounce?.Dispose();
 
     // ── Modal importación ─────────────────────────────────────────────────────
     private bool mostrarModalImport = false;
@@ -385,7 +389,7 @@ else
     }
 
     private void TriggerFileInput()
-        => JS.InvokeVoidAsync("eval", "document.getElementById('importFileInput').click()");
+        => JS.InvokeVoidAsync("sgiClickFileInput", "importFileInput");
 
     private void OnFileSelected(InputFileChangeEventArgs e)
     {
