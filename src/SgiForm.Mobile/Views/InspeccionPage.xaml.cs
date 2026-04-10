@@ -282,14 +282,33 @@ public partial class InspeccionPage : ContentPage
     private View BuildFotoControl(PreguntaLocal p, bool multiple)
     {
         var existing = _vm.GetRespuesta(p.Id);
-        var stack = new VerticalStackLayout { Spacing = 6 };
+        var stack = new VerticalStackLayout { Spacing = 8 };
+
+        // For single photo: path stored in ValorTexto
+        // For multiple photos: paths stored in ValorJson (JSON array)
+        var existingPath = multiple ? existing?.ValorJson : existing?.ValorTexto;
+        var hasFoto = !string.IsNullOrEmpty(existingPath);
 
         var statusLabel = new Label
         {
-            Text = string.IsNullOrEmpty(existing?.ValorJson) ? "Sin foto" : "Foto(s) capturadas ✓",
+            Text = hasFoto ? (multiple ? "Foto(s) capturadas ✓" : "Foto capturada ✓") : "Sin foto",
             FontSize = 12,
-            TextColor = string.IsNullOrEmpty(existing?.ValorJson) ? Colors.Gray : Color.FromArgb("#16a34a")
+            TextColor = hasFoto ? Color.FromArgb("#16a34a") : Colors.Gray
         };
+
+        // Thumbnail image (single photo only — shown when path exists)
+        Image? thumbnail = null;
+        if (!multiple)
+        {
+            thumbnail = new Image
+            {
+                HeightRequest = 120,
+                Aspect = Aspect.AspectFill,
+                IsVisible = hasFoto && File.Exists(existingPath)
+            };
+            if (thumbnail.IsVisible)
+                thumbnail.Source = ImageSource.FromFile(existingPath);
+        }
 
         var btn = new Button
         {
@@ -328,6 +347,11 @@ public partial class InspeccionPage : ContentPage
                         _vm.ResponderPregunta(p.Id, photo.FullPath);
                         statusLabel.Text = "Foto capturada ✓";
                         statusLabel.TextColor = Color.FromArgb("#16a34a");
+                        if (thumbnail != null)
+                        {
+                            thumbnail.Source = ImageSource.FromFile(photo.FullPath);
+                            thumbnail.IsVisible = true;
+                        }
                     }
                 }
             }
@@ -339,6 +363,8 @@ public partial class InspeccionPage : ContentPage
 
         stack.Children.Add(btn);
         stack.Children.Add(statusLabel);
+        if (thumbnail != null)
+            stack.Children.Add(thumbnail);
         return stack;
     }
 
