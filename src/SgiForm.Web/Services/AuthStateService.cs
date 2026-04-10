@@ -9,10 +9,15 @@ namespace SgiForm.Web.Services;
 public class AuthStateService
 {
     public string? AccessToken { get; private set; }
+    public string? RefreshToken { get; private set; }
+    public DateTimeOffset? TokenExpiry { get; private set; }
     public string? Nombre { get; private set; }
     public string? Rol { get; private set; }
     public Guid? EmpresaId { get; private set; }
     public string? TenantSlug { get; private set; }
+
+    /// <summary>Semáforo para serializar intentos de refresh concurrentes dentro del mismo circuito.</summary>
+    public SemaphoreSlim RefreshLock { get; } = new(1, 1);
 
     public bool EsAutenticado => !string.IsNullOrEmpty(AccessToken);
 
@@ -21,10 +26,13 @@ public class AuthStateService
     /// </summary>
     public event Action? OnChange;
 
-    public void SetSession(string accessToken, string nombre, string rol,
+    public void SetSession(string accessToken, string? refreshToken,
+        DateTimeOffset? tokenExpiry, string nombre, string rol,
         Guid empresaId, string tenantSlug)
     {
         AccessToken = accessToken;
+        RefreshToken = refreshToken;
+        TokenExpiry = tokenExpiry;
         Nombre = nombre;
         Rol = rol;
         EmpresaId = empresaId;
@@ -32,9 +40,20 @@ public class AuthStateService
         NotifyStateChanged();
     }
 
+    /// <summary>Actualiza sólo los tokens tras un refresh exitoso (mantiene datos del usuario).</summary>
+    public void UpdateTokens(string accessToken, string? refreshToken, DateTimeOffset? tokenExpiry)
+    {
+        AccessToken = accessToken;
+        RefreshToken = refreshToken;
+        TokenExpiry = tokenExpiry;
+        NotifyStateChanged();
+    }
+
     public void ClearSession()
     {
         AccessToken = null;
+        RefreshToken = null;
+        TokenExpiry = null;
         Nombre = null;
         Rol = null;
         EmpresaId = null;
