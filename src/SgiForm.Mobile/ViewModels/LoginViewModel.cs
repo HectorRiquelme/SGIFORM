@@ -15,8 +15,14 @@ public partial class LoginViewModel : ObservableObject
         _auth = auth;
         _sync = sync;
         _releaseNotes = releaseNotes;
-        // Leer URL guardada
         ApiUrl = Preferences.Get("api_url", "https://apps.solucionescloud.cl/sgiformapi");
+        CodigoOperador = Preferences.Get("last_codigo_operador", "");
+        EmpresaSlug = Preferences.Get("last_empresa_slug", "");
+#if DEBUG
+        if (string.IsNullOrEmpty(CodigoOperador)) CodigoOperador = "OP001";
+        if (string.IsNullOrEmpty(EmpresaSlug)) EmpresaSlug = "sanitaria-demo";
+        Password = "Op@123";
+#endif
     }
 
     [ObservableProperty] private string codigoOperador = "";
@@ -41,9 +47,10 @@ public partial class LoginViewModel : ObservableObject
         IniciandoSesion = true;
         ErrorMsg = null;
 
-        // Guardar y aplicar URL de API
         var url = ApiUrl.TrimEnd('/') + "/";
         Preferences.Set("api_url", ApiUrl);
+        Preferences.Set("last_codigo_operador", CodigoOperador);
+        Preferences.Set("last_empresa_slug", EmpresaSlug);
         _auth.ActualizarBaseUrl(url);
 
         var result = await _auth.LoginAsync(CodigoOperador, EmpresaSlug, Password);
