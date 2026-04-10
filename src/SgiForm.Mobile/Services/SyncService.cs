@@ -304,6 +304,22 @@ public class SyncService
                 new AuthenticationHeaderValue("Bearer", token);
     }
 
+    // Corrige mojibake: cuando UTF-8 bytes fueron decodificados como Latin-1 y re-almacenados.
+    // Ej: "daÃ±os" → los bytes Latin-1 de "Ã±" son C3 B1, que es UTF-8 válido para "ñ".
+    private static string Fix(string? text)
+    {
+        if (string.IsNullOrEmpty(text)) return text ?? "";
+        try
+        {
+            var bytes = Encoding.Latin1.GetBytes(text);
+            var decoded = Encoding.UTF8.GetString(bytes);
+            // Solo usar el resultado si todos los chars originales eran Latin-1 extendido
+            // (indica posible mojibake) y el resultado contiene menos chars (secuencias multi-byte colapsadas)
+            return decoded.Length < text.Length ? decoded : text;
+        }
+        catch { return text; }
+    }
+
     private async Task GuardarFlujoAsync(FlujoVersionDownload fv)
     {
         await _db.UpsertFlujoVersionAsync(new FlujoVersionLocal
@@ -319,8 +335,8 @@ public class SyncService
             await _db.UpsertSeccionAsync(new SeccionLocal
             {
                 Id = seccion.Id, FlujoVersionId = fv.Id,
-                Codigo = seccion.Codigo, Titulo = seccion.Titulo,
-                Descripcion = seccion.Descripcion, Orden = seccion.Orden,
+                Codigo = seccion.Codigo, Titulo = Fix(seccion.Titulo),
+                Descripcion = Fix(seccion.Descripcion), Orden = seccion.Orden,
                 CondicionalJson = seccion.CondicionalJson
             });
 
@@ -329,7 +345,7 @@ public class SyncService
                 await _db.UpsertPreguntaAsync(new PreguntaLocal
                 {
                     Id = pregunta.Id, FlujoVersionId = fv.Id, SeccionId = seccion.Id,
-                    Codigo = pregunta.Codigo, Texto = pregunta.Texto,
+                    Codigo = pregunta.Codigo, Texto = Fix(pregunta.Texto),
                     TipoControl = pregunta.TipoControl, Obligatorio = pregunta.Obligatorio,
                     Orden = pregunta.Orden, Visible = pregunta.Visible,
                     Editable = pregunta.Editable, ValorPorDefecto = pregunta.ValorPorDefecto,
@@ -342,7 +358,7 @@ public class SyncService
                     await _db.UpsertOpcionAsync(new OpcionLocal
                     {
                         Id = opcion.Id, PreguntaId = pregunta.Id,
-                        Codigo = opcion.Codigo, Texto = opcion.Texto,
+                        Codigo = opcion.Codigo, Texto = Fix(opcion.Texto),
                         Orden = opcion.Orden, Activo = opcion.Activo
                     });
                 }

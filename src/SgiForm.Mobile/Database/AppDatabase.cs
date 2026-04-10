@@ -221,30 +221,25 @@ public class AppDatabase
     public async Task UpsertFlujoVersionAsync(FlujoVersionLocal version)
     {
         var db = await GetConnectionAsync();
-        var existente = await db.Table<FlujoVersionLocal>().FirstOrDefaultAsync(v => v.Id == version.Id);
-        if (existente == null) await db.InsertAsync(version);
-        // flujos publicados son inmutables; no se actualiza si ya existe
+        await db.InsertOrReplaceAsync(version);
     }
 
     public async Task UpsertSeccionAsync(SeccionLocal seccion)
     {
         var db = await GetConnectionAsync();
-        var existente = await db.Table<SeccionLocal>().FirstOrDefaultAsync(s => s.Id == seccion.Id);
-        if (existente == null) await db.InsertAsync(seccion);
+        await db.InsertOrReplaceAsync(seccion);
     }
 
     public async Task UpsertPreguntaAsync(PreguntaLocal pregunta)
     {
         var db = await GetConnectionAsync();
-        var existente = await db.Table<PreguntaLocal>().FirstOrDefaultAsync(p => p.Id == pregunta.Id);
-        if (existente == null) await db.InsertAsync(pregunta);
+        await db.InsertOrReplaceAsync(pregunta);
     }
 
     public async Task UpsertOpcionAsync(OpcionLocal opcion)
     {
         var db = await GetConnectionAsync();
-        var existente = await db.Table<OpcionLocal>().FirstOrDefaultAsync(o => o.Id == opcion.Id);
-        if (existente == null) await db.InsertAsync(opcion);
+        await db.InsertOrReplaceAsync(opcion);
     }
 
     public async Task UpsertReglaAsync(ReglaLocal regla)
