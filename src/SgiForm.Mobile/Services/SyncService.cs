@@ -64,7 +64,8 @@ public class SyncService
                 return SyncResult.Error($"Error del servidor: {(int)response.StatusCode}");
 
             progreso?.Report("Procesando datos descargados...");
-            var json = await response.Content.ReadAsStringAsync();
+            var bytes = await response.Content.ReadAsByteArrayAsync();
+            var json = Encoding.UTF8.GetString(bytes);
             var paquete = JsonSerializer.Deserialize<DownloadPackage>(json, JsonOpts);
 
             if (paquete == null) return SyncResult.Error("Respuesta vacía del servidor");

@@ -141,7 +141,8 @@ public class AuthService
                 return new LoginResult(false, $"Error del servidor ({(int)response.StatusCode})");
             }
 
-            var json = await response.Content.ReadAsStringAsync();
+            var bytes = await response.Content.ReadAsByteArrayAsync();
+            var json = System.Text.Encoding.UTF8.GetString(bytes);
             var data = JsonSerializer.Deserialize<LoginResponse>(json, JsonOpts);
 
             if (data?.AccessToken == null)
