@@ -47,6 +47,12 @@ public class DashboardController : ControllerBase
         var totalConGps = await _db.Inspecciones
             .CountAsync(i => i.EmpresaId == empresa && i.CoordXFin != null);
 
+        // Inspecciones realmente sincronizadas (SincronizadoEn != null).
+        // El KPI "Sincronizadas" de UI debe reflejar esto, no el enum
+        // EstadoAsignacion.Sincronizada que casi nunca se usa en el flujo real.
+        var totalSincronizadas = await _db.Inspecciones
+            .CountAsync(i => i.EmpresaId == empresa && i.SincronizadoEn != null);
+
         var operadoresActivos = await _db.Operadores
             .CountAsync(o => o.EmpresaId == empresa && o.Activo && o.DeletedAt == null);
 
@@ -57,6 +63,7 @@ public class DashboardController : ControllerBase
             inspecciones = inspeccionesPorEstado,
             total_fotografias = totalFotografias,
             inspecciones_con_gps = totalConGps,
+            inspecciones_sincronizadas = totalSincronizadas,
             operadores_activos = operadoresActivos,
             fecha_actualizacion = DateTimeOffset.UtcNow
         });

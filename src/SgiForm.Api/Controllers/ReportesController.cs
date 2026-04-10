@@ -16,19 +16,26 @@ public class ReportesController : ControllerBase
     public ReportesController(AppDbContext db) => _db = db;
     private Guid EmpresaId => Guid.Parse(User.FindFirst("empresa_id")!.Value);
 
-    /// <summary>Exportar asignaciones/inspecciones a Excel</summary>
+    /// <summary>
+    /// Exportar asignaciones/inspecciones a Excel con columnas dinámicas por
+    /// pregunta del flujo (pivota respuestas de cada inspección).
+    /// </summary>
     [HttpGet("excel")]
     public async Task<IActionResult> ExportExcel(
         [FromQuery] string? estado,
         [FromQuery] Guid? operadorId,
         [FromQuery] string? localidad,
-        [FromQuery] string? ruta)
+        [FromQuery] string? ruta,
+        [FromQuery] Guid? tipoInspeccionId,
+        [FromQuery] DateTime? desdeFecha,
+        [FromQuery] DateTime? hastaFecha)
     {
         var q = _db.AsignacionesInspeccion
             .Include(a => a.ServicioInspeccion)
             .Include(a => a.Operador)
             .Include(a => a.TipoInspeccion)
             .Include(a => a.Inspeccion)
+                .ThenInclude(i => i!.Respuestas)
             .Where(a => a.EmpresaId == EmpresaId && a.DeletedAt == null);
 
         if (!string.IsNullOrEmpty(estado) && Enum.TryParse<EstadoAsignacion>(estado, true, out var est))
@@ -39,29 +46,90 @@ public class ReportesController : ControllerBase
             q = q.Where(a => a.ServicioInspeccion.Localidad == localidad);
         if (!string.IsNullOrEmpty(ruta))
             q = q.Where(a => a.ServicioInspeccion.Ruta == ruta);
+        if (tipoInspeccionId.HasValue)
+            q = q.Where(a => a.TipoInspeccionId == tipoInspeccionId.Value);
+        if (desdeFecha.HasValue)
+        {
+            var desde = DateTime.SpecifyKind(desdeFecha.Value.Date, DateTimeKind.Utc);
+            q = q.Where(a => a.FechaAsignacion >= desde);
+        }
+        if (hastaFecha.HasValue)
+        {
+            var hasta = DateTime.SpecifyKind(hastaFecha.Value.Date.AddDays(1), DateTimeKind.Utc);
+            q = q.Where(a => a.FechaAsignacion < hasta);
+        }
 
         var datos = await q.OrderBy(a => a.ServicioInspeccion.Localidad)
             .ThenBy(a => a.ServicioInspeccion.Ruta)
             .ThenBy(a => a.ServicioInspeccion.IdServicio)
             .ToListAsync();
 
+        // Preguntas dinámicas de los flujos involucrados (excluye fotos)
+        var flujoVersionIds = datos.Select(a => a.FlujoVersionId).Distinct().ToList();
+        var preguntas = await _db.FlujoPreguntas
+            .Where(p => flujoVersionIds.Contains(p.FlujoVersionId)
+                        && p.TipoControl != TipoControl.FotoUnica
+                        && p.TipoControl != TipoControl.FotosMultiples
+                        && p.TipoControl != TipoControl.Etiqueta)
+            .OrderBy(p => p.Orden)
+            .ThenBy(p => p.Codigo)
+            .Select(p => new PreguntaColumna
+            {
+                Id = p.Id,
+                Codigo = p.Codigo,
+                Texto = p.Texto,
+                TipoControl = p.TipoControl,
+                Orden = p.Orden
+            })
+            .ToListAsync();
+
+        // Deduplicar por código (distintas versiones del mismo flujo pueden repetir código)
+        var preguntasUnicas = preguntas
+            .GroupBy(p => p.Codigo)
+            .Select(g => g.First())
+            .OrderBy(p => p.Orden)
+            .ThenBy(p => p.Codigo)
+            .ToList();
+
         using var wb = new XLWorkbook();
         var ws = wb.AddWorksheet("Inspecciones");
 
-        // Headers
-        var headers = new[] {
+        var headersFijos = new[] {
             "ID Servicio", "Nro Medidor", "Marca", "Diámetro",
             "Dirección", "Cliente", "Localidad", "Ruta", "Lote",
             "Operador", "Tipo Inspección", "Estado Asignación",
             "Estado Inspección", "Fecha Asignación", "Fecha Inicio",
             "Fecha Fin", "GPS Lat", "GPS Lon", "Fotos", "Observaciones"
         };
-        for (int i = 0; i < headers.Length; i++)
+
+        for (int i = 0; i < headersFijos.Length; i++)
         {
-            ws.Cell(1, i + 1).Value = headers[i];
+            ws.Cell(1, i + 1).Value = headersFijos[i];
             ws.Cell(1, i + 1).Style.Font.Bold = true;
             ws.Cell(1, i + 1).Style.Fill.BackgroundColor = XLColor.LightSteelBlue;
         }
+
+        // Headers dinámicos de preguntas
+        int colBase = headersFijos.Length;
+        for (int i = 0; i < preguntasUnicas.Count; i++)
+        {
+            var p = preguntasUnicas[i];
+            var col = colBase + i + 1;
+            ws.Cell(1, col).Value = string.IsNullOrWhiteSpace(p.Texto) ? p.Codigo : p.Texto;
+            ws.Cell(1, col).Style.Font.Bold = true;
+            ws.Cell(1, col).Style.Fill.BackgroundColor = XLColor.LightGreen;
+            ws.Cell(1, col).GetComment().AddText($"Código: {p.Codigo}\nTipo: {p.TipoControl}");
+        }
+
+        // Índice para mapear rápidamente código -> col
+        var codigoToCol = preguntasUnicas
+            .Select((p, idx) => new { p.Codigo, Col = colBase + idx + 1 })
+            .ToDictionary(x => x.Codigo, x => x.Col);
+
+        // Índice pregunta_id -> código (para resolver respuestas)
+        var preguntaIdToCodigo = preguntas
+            .GroupBy(p => p.Id)
+            .ToDictionary(g => g.Key, g => g.First().Codigo);
 
         int row = 2;
         foreach (var a in datos)
@@ -88,10 +156,23 @@ public class ReportesController : ControllerBase
             ws.Cell(row, 18).Value = insp?.CoordXFin?.ToString() ?? "";
             ws.Cell(row, 19).Value = insp?.TotalFotografias ?? 0;
             ws.Cell(row, 20).Value = a.Observaciones ?? "";
+
+            // Respuestas dinámicas
+            if (insp?.Respuestas != null)
+            {
+                foreach (var r in insp.Respuestas)
+                {
+                    if (!preguntaIdToCodigo.TryGetValue(r.PreguntaId, out var codigo)) continue;
+                    if (!codigoToCol.TryGetValue(codigo, out var col)) continue;
+                    ws.Cell(row, col).Value = FormatearValorRespuesta(r);
+                }
+            }
+
             row++;
         }
 
         ws.Columns().AdjustToContents();
+        ws.SheetView.FreezeRows(1);
 
         using var ms = new MemoryStream();
         wb.SaveAs(ms);
@@ -100,6 +181,37 @@ public class ReportesController : ControllerBase
         return File(ms.ToArray(),
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             $"inspecciones_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
+    }
+
+    /// <summary>Convierte una respuesta al formato string más apropiado según su TipoControl.</summary>
+    private static string FormatearValorRespuesta(Domain.Entities.InspeccionRespuesta r)
+    {
+        return r.TipoControl switch
+        {
+            TipoControl.TextoCorto or TipoControl.TextoLargo or TipoControl.Lista
+                or TipoControl.SeleccionUnica or TipoControl.QrCodigo or TipoControl.Firma
+                or TipoControl.Archivo or TipoControl.Calculado
+                => r.ValorTexto ?? "",
+            TipoControl.Entero       => r.ValorEntero?.ToString() ?? "",
+            TipoControl.Decimal      => r.ValorDecimal?.ToString("0.##") ?? "",
+            TipoControl.Fecha        => r.ValorFecha?.ToString("dd/MM/yyyy") ?? "",
+            TipoControl.Hora         => r.ValorHora?.ToString("HH:mm") ?? "",
+            TipoControl.FechaHora    => r.ValorFechaHora?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "",
+            TipoControl.SiNo or TipoControl.Checkbox
+                => r.ValorBooleano.HasValue ? (r.ValorBooleano.Value ? "Sí" : "No") : "",
+            TipoControl.SeleccionMultiple => r.ValorJson ?? "",
+            TipoControl.Coordenadas       => r.ValorJson ?? (r.ValorTexto ?? ""),
+            _ => r.ValorTexto ?? r.ValorJson ?? ""
+        };
+    }
+
+    private class PreguntaColumna
+    {
+        public Guid Id { get; set; }
+        public string Codigo { get; set; } = "";
+        public string Texto { get; set; } = "";
+        public TipoControl TipoControl { get; set; }
+        public int Orden { get; set; }
     }
 
     /// <summary>Exportar productividad por operador a Excel (tabla visible en Reportes)</summary>

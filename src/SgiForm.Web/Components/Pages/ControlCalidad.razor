@@ -1,5 +1,6 @@
 @page "/control-calidad"
 @layout SgiForm.Web.Components.Layout.MainLayout
+@using SgiForm.Web.Components.Shared
 @inject ApiClient Api
 
 <PageTitle>Control de Calidad — SGI-FORM</PageTitle>
@@ -79,6 +80,10 @@ else
 
                 <!-- Columna derecha: acciones -->
                 <div style="display:flex;flex-direction:column;gap:6px;min-width:130px">
+                    <button class="sf-btn sf-btn-secondary sf-btn-sm" style="width:100%"
+                            @onclick="() => detalleId = i.Id">
+                        🔍 Ver detalle
+                    </button>
                     @if (i.Estado == "completada" || i.Estado == "enviada")
                     {
                         <button class="sf-btn sf-btn-success sf-btn-sm" style="width:100%"
@@ -159,6 +164,8 @@ else
     </div>
 }
 
+<InspeccionDetalleModal InspeccionId="@detalleId" OnClose="() => detalleId = Guid.Empty" />
+
 @code {
     private bool loading = true, mostrarModal = false, procesando = false;
     private string filtroEstado = "completada";
@@ -167,6 +174,7 @@ else
     private int total = 0;
     private List<InspItem> items = new();
     private InspItem? inspeccionActual;
+    private Guid detalleId = Guid.Empty;
 
     protected override async Task OnInitializedAsync() => await Cargar();
 

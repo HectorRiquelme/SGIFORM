@@ -129,18 +129,28 @@ else
                     <div class="sf-alert sf-alert-success">@masivaExito</div>
                 }
                 <p class="sf-text-muted" style="margin-bottom:16px;font-size:13px">
-                    Asigna masivamente todos los servicios sin asignar que coincidan con los filtros.
+                    Asigna masivamente los servicios sin asignar que coincidan con los filtros.
+                    Selecciona uno o varios operadores para distribuir <strong>round-robin</strong>.
                 </p>
                 <div class="sf-form-grid">
-                    <div class="sf-form-group">
-                        <label>Operador *</label>
-                        <select class="sf-select" @bind="masivaForm.OperadorId">
-                            <option value="">— Selecciona —</option>
+                    <div class="sf-form-group" style="grid-column:1 / -1">
+                        <label>Operadores * <span class="sf-text-muted sf-text-xs">(selecciona 1 o varios)</span></label>
+                        <div style="max-height:140px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:6px;padding:8px;background:#fafafa">
                             @foreach (var op in operadores)
                             {
-                                <option value="@op.Id">@op.NombreCompleto</option>
+                                var id = op.Id;
+                                <label style="display:flex;align-items:center;gap:6px;padding:4px 6px;font-size:13px;cursor:pointer">
+                                    <input type="checkbox"
+                                           checked="@masivaForm.OperadoresIds.Contains(id)"
+                                           @onchange="e => ToggleOperador(id, (bool)e.Value!)" />
+                                    <span>@op.NombreCompleto</span>
+                                    <span class="sf-text-muted sf-text-xs">@op.CodigoOperador</span>
+                                </label>
                             }
-                        </select>
+                        </div>
+                        <span class="sf-text-xs sf-text-muted">
+                            @masivaForm.OperadoresIds.Count operador(es) seleccionado(s)
+                        </span>
                     </div>
                     <div class="sf-form-group">
                         <label>Tipo de inspección *</label>
@@ -235,15 +245,27 @@ else
 
     private void AbrirMasiva() { masivaForm = new(); masivaError = null; masivaExito = null; mostrarMasiva = true; }
 
+    private void ToggleOperador(Guid id, bool chk)
+    {
+        if (chk)
+        {
+            if (!masivaForm.OperadoresIds.Contains(id))
+                masivaForm.OperadoresIds.Add(id);
+        }
+        else
+        {
+            masivaForm.OperadoresIds.Remove(id);
+        }
+    }
+
     private async Task EjecutarMasiva()
     {
-        if (string.IsNullOrEmpty(masivaForm.OperadorId) ||
+        if (masivaForm.OperadoresIds.Count == 0 ||
             string.IsNullOrEmpty(masivaForm.TipoInspeccionId) ||
             string.IsNullOrEmpty(masivaForm.FlujoVersionId))
-        { masivaError = "Operador, tipo de inspección y flujo son obligatorios"; return; }
+        { masivaError = "Debes seleccionar al menos un operador, tipo de inspección y flujo"; return; }
 
-        if (!Guid.TryParse(masivaForm.OperadorId, out var opId) ||
-            !Guid.TryParse(masivaForm.TipoInspeccionId, out var tipoId) ||
+        if (!Guid.TryParse(masivaForm.TipoInspeccionId, out var tipoId) ||
             !Guid.TryParse(masivaForm.FlujoVersionId, out var flujoId))
         { masivaError = "Selección inválida. Recarga la página e intenta de nuevo."; return; }
 
@@ -251,7 +273,7 @@ else
         masivaError = null;
         var r = await Api.PostAsync<AsignacionMasivaResult>("api/v1/asignaciones/masiva", new
         {
-            operador_id       = opId,
+            operador_ids      = masivaForm.OperadoresIds,
             tipo_inspeccion_id = tipoId,
             flujo_version_id  = flujoId,
             localidad         = masivaForm.Localidad,
@@ -261,7 +283,11 @@ else
 
         if (r.Success)
         {
-            masivaExito = $"✅ Se crearon {r.Data?.Asignadas} asignaciones exitosamente";
+            var ops = r.Data?.Operadores;
+            var detalle = (ops != null && ops.Count > 1)
+                ? " (" + string.Join(", ", ops.Select(o => $"{o.Codigo}: {o.Asignadas}")) + ")"
+                : "";
+            masivaExito = $"✅ Se crearon {r.Data?.Asignadas} asignaciones{detalle}";
             await Cargar();
         }
         else masivaError = r.Error;
@@ -301,7 +327,8 @@ else
     private record FlujoItem(Guid Id, string? Nombre, List<VersionRef>? Versiones);
     private record VersionRef(Guid Id, int NumeroVersion, string? Estado);
     private record FlujoVersionRef(Guid Id, string Nombre, int Version);
-    private record AsignacionMasivaResult(int Asignadas);
+    private record AsignacionMasivaResult(int Asignadas, List<OperadorDistribucion>? Operadores);
+    private record OperadorDistribucion(Guid Id, string Nombre, string Codigo, int Asignadas);
 
     private class FiltrosModel
     {
@@ -315,7 +342,7 @@ else
 
     private class MasivaForm
     {
-        public string? OperadorId { get; set; }
+        public List<Guid> OperadoresIds { get; set; } = new();
         public string? TipoInspeccionId { get; set; }
         public string? FlujoVersionId { get; set; }
         public string? Localidad { get; set; }

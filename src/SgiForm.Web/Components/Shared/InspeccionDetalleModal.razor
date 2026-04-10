@@ -1,0 +1,241 @@
+@inject ApiClient Api
+
+@*
+ * Modal compartido para ver el detalle de una inspección:
+ * datos del servicio/operador, respuestas, fotografías e historial.
+ * Uso: <InspeccionDetalleModal InspeccionId="@id" OnClose="Cerrar" />
+ *@
+
+@if (InspeccionId != Guid.Empty)
+{
+    <div class="sf-modal-overlay" @onclick="Cerrar">
+        <div class="sf-modal" style="max-width:900px;max-height:90vh;display:flex;flex-direction:column"
+             @onclick:stopPropagation="true">
+            <div class="sf-modal-header">
+                <h3>🔍 Detalle de inspección</h3>
+                <button class="sf-btn-close" @onclick="Cerrar">✕</button>
+            </div>
+            <div class="sf-modal-body" style="overflow-y:auto">
+                @if (cargando)
+                {
+                    <div class="sf-loading-center"><div class="sf-spinner"></div></div>
+                }
+                else if (detalle == null)
+                {
+                    <div class="sf-alert sf-alert-danger">No se pudo cargar el detalle de la inspección.</div>
+                }
+                else
+                {
+                    <div class="sf-form-grid" style="margin-bottom:16px">
+                        <div>
+                            <label class="sf-text-xs sf-text-muted">Servicio</label>
+                            <div><code>@detalle.Servicio?.IdServicio</code></div>
+                            <div class="sf-text-xs">@detalle.Servicio?.Direccion</div>
+                            <div class="sf-text-xs sf-text-muted">@detalle.Servicio?.Localidad</div>
+                        </div>
+                        <div>
+                            <label class="sf-text-xs sf-text-muted">Operador</label>
+                            <div>@detalle.Operador?.Nombre @detalle.Operador?.Apellido</div>
+                            <div class="sf-text-xs sf-text-muted">@detalle.Operador?.CodigoOperador</div>
+                        </div>
+                        <div>
+                            <label class="sf-text-xs sf-text-muted">Estado</label>
+                            <div><span class="sf-badge @GetBadge(detalle.Estado)">@detalle.Estado</span></div>
+                        </div>
+                        <div>
+                            <label class="sf-text-xs sf-text-muted">Avance</label>
+                            <div>@detalle.TotalRespondidas / @detalle.TotalPreguntas preguntas</div>
+                        </div>
+                        <div>
+                            <label class="sf-text-xs sf-text-muted">Fecha inicio</label>
+                            <div class="sf-text-xs">@(detalle.FechaInicio?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "—")</div>
+                        </div>
+                        <div>
+                            <label class="sf-text-xs sf-text-muted">Fecha fin</label>
+                            <div class="sf-text-xs">@(detalle.FechaFin?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "—")</div>
+                        </div>
+                        <div>
+                            <label class="sf-text-xs sf-text-muted">Sincronizado</label>
+                            <div class="sf-text-xs">@(detalle.SincronizadoEn?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "Pendiente")</div>
+                        </div>
+                        <div>
+                            <label class="sf-text-xs sf-text-muted">GPS fin</label>
+                            <div class="sf-text-xs">
+                                @(detalle.CoordYFin.HasValue ? $"{detalle.CoordYFin:0.000000}, {detalle.CoordXFin:0.000000}" : "—")
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 style="margin-top:20px;margin-bottom:8px;font-size:14px">📝 Respuestas (@(detalle.Respuestas?.Count ?? 0))</h4>
+                    @if (detalle.Respuestas != null && detalle.Respuestas.Any())
+                    {
+                        <table class="sf-table sf-table-xs">
+                            <thead>
+                                <tr>
+                                    <th style="width:30%">Pregunta</th>
+                                    <th>Valor</th>
+                                    <th style="width:120px">Respondida</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var r in detalle.Respuestas)
+                                {
+                                    <tr>
+                                        <td class="sf-text-xs">
+                                            <code>@r.PreguntaId.ToString().Substring(0, 8)</code>
+                                            <span class="sf-text-muted">(@r.TipoControl)</span>
+                                        </td>
+                                        <td class="sf-text-xs" style="word-break:break-word;max-width:360px">@FormatRespuesta(r)</td>
+                                        <td class="sf-text-xs sf-text-muted">@r.RespondidaEn.ToLocalTime().ToString("dd/MM HH:mm")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="sf-text-muted sf-text-xs">Sin respuestas registradas.</div>
+                    }
+
+                    <h4 style="margin-top:20px;margin-bottom:8px;font-size:14px">📷 Fotografías (@(detalle.Fotografias?.Count ?? 0))</h4>
+                    @if (detalle.Fotografias != null && detalle.Fotografias.Any())
+                    {
+                        <div style="display:flex;flex-wrap:wrap;gap:8px">
+                            @foreach (var f in detalle.Fotografias)
+                            {
+                                <div style="border:1px solid #e5e7eb;border-radius:6px;padding:8px;font-size:11px;min-width:180px">
+                                    <div style="font-weight:600">@f.NombreArchivo</div>
+                                    <div class="sf-text-muted">#@f.Orden · @((f.TamanioBytes ?? 0) / 1024) KB</div>
+                                    @if (f.CoordenadaY.HasValue)
+                                    {
+                                        <div class="sf-text-muted">📍 @f.CoordenadaY.Value.ToString("0.0000"), @f.CoordenadaX?.ToString("0.0000")</div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(f.UrlPublica))
+                                    {
+                                        <a href="@f.UrlPublica" target="_blank" class="sf-link-sm">Ver</a>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="sf-text-muted sf-text-xs">Sin fotografías.</div>
+                    }
+
+                    <h4 style="margin-top:20px;margin-bottom:8px;font-size:14px">📋 Historial (@(detalle.Historial?.Count ?? 0))</h4>
+                    @if (detalle.Historial != null && detalle.Historial.Any())
+                    {
+                        <ul style="font-size:12px;padding-left:18px;margin:0">
+                            @foreach (var h in detalle.Historial)
+                            {
+                                <li>
+                                    <strong>@h.Accion</strong> — @h.CreatedAt.ToLocalTime().ToString("dd/MM HH:mm")
+                                    @if (!string.IsNullOrEmpty(h.Observacion))
+                                    {
+                                        <span class="sf-text-muted">· @h.Observacion</span>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="sf-text-muted sf-text-xs">Sin historial.</div>
+                    }
+                }
+            </div>
+            <div class="sf-modal-footer">
+                <button class="sf-btn sf-btn-secondary" @onclick="Cerrar">Cerrar</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Guid InspeccionId { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private bool cargando = true;
+    private DetalleInspeccion? detalle;
+    private Guid inspeccionCargada = Guid.Empty;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (InspeccionId == Guid.Empty || InspeccionId == inspeccionCargada) return;
+
+        inspeccionCargada = InspeccionId;
+        cargando = true;
+        detalle = null;
+        StateHasChanged();
+
+        detalle = await Api.GetAsync<DetalleInspeccion>($"api/v1/inspecciones/{InspeccionId}");
+        cargando = false;
+    }
+
+    private async Task Cerrar()
+    {
+        inspeccionCargada = Guid.Empty;
+        detalle = null;
+        if (OnClose.HasDelegate) await OnClose.InvokeAsync();
+    }
+
+    private static string FormatRespuesta(RespuestaItem r)
+    {
+        return r.TipoControl switch
+        {
+            "texto_corto" or "texto_largo" or "lista" or "seleccion_unica"
+                or "qr_codigo" or "firma" or "archivo" or "calculado" => r.ValorTexto ?? "",
+            "entero"       => r.ValorEntero?.ToString() ?? "",
+            "decimal"      => r.ValorDecimal?.ToString("0.##") ?? "",
+            "fecha"        => r.ValorFecha?.ToString("dd/MM/yyyy") ?? "",
+            "hora"         => r.ValorHora ?? "",
+            "fecha_hora"   => r.ValorFechaHora?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "",
+            "si_no" or "checkbox"
+                => r.ValorBooleano.HasValue ? (r.ValorBooleano.Value ? "Sí" : "No") : "",
+            "seleccion_multiple" or "coordenadas" => r.ValorJson ?? r.ValorTexto ?? "",
+            _ => r.ValorTexto ?? r.ValorJson ?? ""
+        };
+    }
+
+    private static string GetBadge(string? e) => e switch
+    {
+        "aprobada"   => "sf-badge-success",
+        "completada" => "sf-badge-info",
+        "enviada"    => "sf-badge-info",
+        "en_progreso"=> "sf-badge-info",
+        "observada"  => "sf-badge-warning",
+        "rechazada"  => "sf-badge-danger",
+        _ => "sf-badge-secondary"
+    };
+
+    private record DetalleInspeccion(
+        Guid Id, string? Estado,
+        DateTimeOffset? FechaInicio, DateTimeOffset? FechaFin,
+        int TotalPreguntas, int TotalRespondidas, int TotalFotografias,
+        decimal? CoordXInicio, decimal? CoordYInicio,
+        decimal? CoordXFin, decimal? CoordYFin,
+        DateTimeOffset? SincronizadoEn,
+        ServicioRef? Servicio, OperadorRef? Operador,
+        List<RespuestaItem>? Respuestas, List<FotoItem>? Fotografias,
+        List<HistorialItem>? Historial);
+
+    private record ServicioRef(Guid Id, string? IdServicio, string? Direccion, string? NombreCliente, string? Localidad);
+    private record OperadorRef(Guid Id, string? Nombre, string? Apellido, string? CodigoOperador);
+
+    private record RespuestaItem(
+        Guid Id, Guid PreguntaId, string? TipoControl,
+        string? ValorTexto, long? ValorEntero, decimal? ValorDecimal,
+        DateOnly? ValorFecha, string? ValorHora, DateTimeOffset? ValorFechaHora,
+        bool? ValorBooleano, string? ValorJson,
+        bool EsValido, DateTimeOffset RespondidaEn);
+
+    private record FotoItem(
+        Guid Id, Guid? PreguntaId, string? NombreArchivo, string? UrlPublica,
+        int? TamanioBytes, int? Ancho, int? Alto, int Orden,
+        decimal? CoordenadaX, decimal? CoordenadaY, bool TieneMarcaAgua);
+
+    private record HistorialItem(
+        Guid Id, string? Accion, string? EstadoAnterior, string? EstadoNuevo,
+        string? Observacion, DateTimeOffset CreatedAt);
+}

@@ -399,6 +399,14 @@ public class SyncController : ControllerBase
         var fotosGuardadas = new List<object>();
         var maxMb = int.Parse(_config["Storage:MaxPhotoMb"] ?? "10");
 
+        // Snapshot del orden base y contador propio — NO consultar CountAsync
+        // dentro del bucle: las entidades agregadas al change tracker aún no están
+        // en la BD, así que Count() devolvería el mismo valor y varias fotos
+        // terminarían con el mismo Orden y el total quedaría desactualizado.
+        int ordenBase = await _db.InspeccionFotografias
+            .CountAsync(f => f.InspeccionId == inspeccionId);
+        int agregadas = 0;
+
         foreach (var foto in fotos)
         {
             if (foto.Length > maxMb * 1_000_000)
@@ -452,20 +460,28 @@ public class SyncController : ControllerBase
                 CoordenadaY = coordY,
                 HashSha256 = hash,
                 Formato = extension.TrimStart('.'),
-                Orden = await _db.InspeccionFotografias.CountAsync(f => f.InspeccionId == inspeccionId)
+                Orden = ordenBase + agregadas
             };
 
             _db.InspeccionFotografias.Add(fotografia);
+            agregadas++;
             fotosGuardadas.Add(new { nombre = foto.FileName, id = fotografia.Id, hash });
         }
 
-        // Actualizar contador en inspección
-        inspeccion.TotalFotografias = await _db.InspeccionFotografias
-            .CountAsync(f => f.InspeccionId == inspeccionId);
-
+        // Guardar primero las fotos para poder recontar desde la BD con datos frescos
         await _db.SaveChangesAsync();
 
-        return Ok(new { fotos_procesadas = fotosGuardadas.Count, detalle = fotosGuardadas });
+        inspeccion.TotalFotografias = await _db.InspeccionFotografias
+            .CountAsync(f => f.InspeccionId == inspeccionId);
+        await _db.SaveChangesAsync();
+
+        return Ok(new
+        {
+            fotos_procesadas = fotosGuardadas.Count,
+            agregadas,
+            total = inspeccion.TotalFotografias,
+            detalle = fotosGuardadas
+        });
     }
 
     // ──────────────────────────────────────────────────────────────────────────

@@ -39,6 +39,13 @@ public class TestFixture : WebApplicationFactory<Program>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
+        // El appsettings base tiene AllowedHosts="SGIFORM_ALLOWED_HOSTS" (placeholder),
+        // lo cual provoca que HostFilteringMiddleware rechace todos los requests
+        // con 400. En Testing no hay dominio — aceptar cualquier host.
+        builder.UseSetting("AllowedHosts", "*");
+        // Jwt:Key en appsettings.json es un placeholder corto que no cumple los 128 bits
+        // mínimos de HS256. Sobrescribir con una clave fija suficientemente larga.
+        builder.UseSetting("Jwt:Key", "testing-secret-key-with-enough-entropy-for-hs256-must-be-at-least-32-bytes-long-xxxxx");
 
         builder.ConfigureServices(services =>
         {

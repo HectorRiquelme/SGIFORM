@@ -34,35 +34,76 @@ public class ExcelImportService : IExcelImportService
     // Columnas obligatorias (lowercase)
     private static readonly HashSet<string> ColsObligatorias = new() { "id_servicio" };
 
-    // Mapeo de nombres de columna posibles → nombre interno
+    // Mapeo de nombres de columna posibles → nombre interno.
+    // Las claves se normalizan (lowercase, sin acentos, sin espacios ni guiones/_)
+    // antes de comparar en NormalizeHeader, así que aquí basta con incluir
+    // variantes "canónicas" ya normalizadas.
     private static readonly Dictionary<string, string> MapeoColumnas = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["id_servicio"]       = "id_servicio",
-        ["idservicio"]        = "id_servicio",
-        ["numero_medidor"]    = "numero_medidor",
-        ["nro_medidor"]       = "numero_medidor",
-        ["n_medidor"]         = "numero_medidor",
-        ["marca"]             = "marca",
-        ["diametro"]          = "diametro",
-        ["diámetro"]          = "diametro",
-        ["direccion"]         = "direccion",
-        ["dirección"]         = "direccion",
-        ["nombre"]            = "nombre",
-        ["nombre_cliente"]    = "nombre",
-        ["coordenadax"]       = "coordenadax",
-        ["coordenada_x"]      = "coordenadax",
-        ["x"]                 = "coordenadax",
-        ["coordenaday"]       = "coordenaday",
-        ["coordenada_y"]      = "coordenaday",
-        ["y"]                 = "coordenaday",
-        ["lote"]              = "lote",
-        ["localidad"]         = "localidad",
-        ["ruta"]              = "ruta",
-        ["libreta"]           = "libreta",
-        ["observacion_libre"] = "observacion_libre",
-        ["observación_libre"] = "observacion_libre",
-        ["obs"]               = "observacion_libre",
+        ["idservicio"]       = "id_servicio",
+        ["idsrv"]            = "id_servicio",
+        ["servicio"]         = "id_servicio",
+        ["codigoservicio"]   = "id_servicio",
+        ["numeromedidor"]    = "numero_medidor",
+        ["nromedidor"]       = "numero_medidor",
+        ["nmedidor"]         = "numero_medidor",
+        ["medidor"]          = "numero_medidor",
+        ["idmedidor"]        = "numero_medidor",
+        ["marca"]            = "marca",
+        ["marcamedidor"]     = "marca",
+        ["diametro"]         = "diametro",
+        ["diam"]             = "diametro",
+        ["direccion"]        = "direccion",
+        ["domicilio"]        = "direccion",
+        ["calle"]            = "direccion",
+        ["nombre"]           = "nombre",
+        ["nombrecliente"]    = "nombre",
+        ["cliente"]          = "nombre",
+        ["titular"]          = "nombre",
+        ["coordenadax"]      = "coordenadax",
+        ["x"]                = "coordenadax",
+        ["longitud"]         = "coordenadax",
+        ["lng"]              = "coordenadax",
+        ["lon"]              = "coordenadax",
+        ["coordenaday"]      = "coordenaday",
+        ["y"]                = "coordenaday",
+        ["latitud"]          = "coordenaday",
+        ["lat"]              = "coordenaday",
+        ["lote"]             = "lote",
+        ["localidad"]        = "localidad",
+        ["ciudad"]           = "localidad",
+        ["comuna"]           = "localidad",
+        ["ruta"]             = "ruta",
+        ["zona"]             = "ruta",
+        ["libreta"]          = "libreta",
+        ["observacionlibre"] = "observacion_libre",
+        ["observacion"]      = "observacion_libre",
+        ["observaciones"]    = "observacion_libre",
+        ["obs"]              = "observacion_libre",
+        ["nota"]             = "observacion_libre",
+        ["notas"]            = "observacion_libre",
     };
+
+    /// <summary>Normaliza una cabecera: lowercase, sin acentos, sin espacios/guiones/puntos.</summary>
+    private static string NormalizeHeader(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return "";
+        var s = raw.Trim().ToLowerInvariant();
+        // Quitar acentos
+        var normalized = s.Normalize(System.Text.NormalizationForm.FormD);
+        var sb = new System.Text.StringBuilder(normalized.Length);
+        foreach (var c in normalized)
+        {
+            var uc = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+            if (uc != System.Globalization.UnicodeCategory.NonSpacingMark)
+                sb.Append(c);
+        }
+        // Quitar caracteres no alfanuméricos
+        var filtrada = new System.Text.StringBuilder(sb.Length);
+        foreach (var c in sb.ToString())
+            if (char.IsLetterOrDigit(c)) filtrada.Append(c);
+        return filtrada.ToString();
+    }
 
     public ExcelImportService(AppDbContext db, IConfiguration config)
     {
@@ -141,14 +182,16 @@ public class ExcelImportService : IExcelImportService
                 return lote;
             }
 
-            // Mapear cabeceras
+            // Mapear cabeceras (normalizando para tolerar mayúsculas, acentos y espacios)
             var headerRow = rows[0];
             var colMap = new Dictionary<string, int>(); // nombre_interno → col index
 
             foreach (var cell in headerRow.CellsUsed())
             {
-                var header = cell.GetString().Trim();
-                if (MapeoColumnas.TryGetValue(header, out var nombreInterno))
+                var headerNormalizado = NormalizeHeader(cell.GetString());
+                if (string.IsNullOrEmpty(headerNormalizado)) continue;
+                if (MapeoColumnas.TryGetValue(headerNormalizado, out var nombreInterno)
+                    && !colMap.ContainsKey(nombreInterno))
                     colMap[nombreInterno] = cell.Address.ColumnNumber;
             }
 
@@ -163,48 +206,75 @@ public class ExcelImportService : IExcelImportService
             }
 
             // Procesar filas de datos
+            var idsVistosEnArchivo = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
             for (int i = 1; i < rows.Count; i++)
             {
                 var row = rows[i];
                 var rowErrors = new List<string>();
                 var datosOriginales = new Dictionary<string, string>();
 
-                // Extraer valores
-                string Get(string col) =>
-                    colMap.TryGetValue(col, out var idx)
-                        ? row.Cell(idx).GetString().Trim()
-                        : "";
+                // Extraer valores — tolerante a celdas vacías, tipo numérico, espacios
+                string Get(string col)
+                {
+                    if (!colMap.TryGetValue(col, out var idx)) return "";
+                    try
+                    {
+                        var cell = row.Cell(idx);
+                        if (cell == null || cell.IsEmpty()) return "";
+                        // GetString funciona para casi todo; para números preserva formato
+                        var raw = cell.GetString();
+                        return raw?.Trim() ?? "";
+                    }
+                    catch
+                    {
+                        return "";
+                    }
+                }
+
+                // Si todas las celdas están vacías, saltar la fila silenciosamente (filas trailing)
+                bool filaVacia = !colMap.Values.Any(idx =>
+                {
+                    try { var c = row.Cell(idx); return c != null && !c.IsEmpty() && !string.IsNullOrWhiteSpace(c.GetString()); }
+                    catch { return false; }
+                });
+                if (filaVacia) continue;
 
                 var idServicio = Get("id_servicio");
                 datosOriginales["id_servicio"] = idServicio;
 
                 if (string.IsNullOrWhiteSpace(idServicio))
                     rowErrors.Add("id_servicio es obligatorio");
+                else if (!idsVistosEnArchivo.Add(idServicio))
+                    rowErrors.Add($"id_servicio '{idServicio}' duplicado dentro del archivo");
 
-                // Validar coordenadas si se proveen
+                // Validar coordenadas si se proveen (acepta coma o punto decimal, con/sin signo)
                 decimal? coordX = null, coordY = null;
                 var sCoordX = Get("coordenadax");
                 var sCoordY = Get("coordenaday");
+                datosOriginales["coordenadax"] = sCoordX;
+                datosOriginales["coordenaday"] = sCoordY;
 
-                if (!string.IsNullOrWhiteSpace(sCoordX))
+                decimal? ParseCoord(string raw, string nombre)
                 {
-                    if (decimal.TryParse(sCoordX.Replace(",", "."),
+                    if (string.IsNullOrWhiteSpace(raw)) return null;
+                    var limpio = raw.Replace(" ", "").Replace(",", ".");
+                    if (decimal.TryParse(limpio,
                         System.Globalization.NumberStyles.Float,
-                        System.Globalization.CultureInfo.InvariantCulture, out var cx))
-                        coordX = cx;
-                    else
-                        rowErrors.Add($"coordenadax inválida: '{sCoordX}'");
+                        System.Globalization.CultureInfo.InvariantCulture, out var v))
+                        return v;
+                    rowErrors.Add($"{nombre} inválida: '{raw}'");
+                    return null;
                 }
 
-                if (!string.IsNullOrWhiteSpace(sCoordY))
-                {
-                    if (decimal.TryParse(sCoordY.Replace(",", "."),
-                        System.Globalization.NumberStyles.Float,
-                        System.Globalization.CultureInfo.InvariantCulture, out var cy))
-                        coordY = cy;
-                    else
-                        rowErrors.Add($"coordenaday inválida: '{sCoordY}'");
-                }
+                coordX = ParseCoord(sCoordX, "coordenadax");
+                coordY = ParseCoord(sCoordY, "coordenaday");
+
+                // Validar rango geográfico razonable (lat ±90, lng ±180)
+                if (coordY.HasValue && (coordY < -90 || coordY > 90))
+                    rowErrors.Add($"coordenaday (latitud) fuera de rango: {coordY}");
+                if (coordX.HasValue && (coordX < -180 || coordX > 180))
+                    rowErrors.Add($"coordenadax (longitud) fuera de rango: {coordX}");
 
                 if (rowErrors.Any())
                 {
@@ -269,9 +339,13 @@ public class ExcelImportService : IExcelImportService
 
             lote.FilasValidas = filasOk;
             lote.FilasError = filasError;
-            lote.Estado = filasError == 0
-                ? EstadoImportacion.Completado
-                : EstadoImportacion.CompletadoConErrores;
+            // Si no hay filas válidas, marcamos "Fallido" aunque haya detalles con
+            // error — nada se insertó, no tiene sentido decir "Completado".
+            lote.Estado = filasOk == 0
+                ? EstadoImportacion.Fallido
+                : (filasError == 0
+                    ? EstadoImportacion.Completado
+                    : EstadoImportacion.CompletadoConErrores);
 
             await _db.SaveChangesAsync();
         }

@@ -151,6 +151,8 @@
 
         if (result.Success)
         {
+            // Persistir sesión en ProtectedLocalStorage para sobrevivir F5/nueva pestaña
+            await Auth.PersistAsync();
             Nav.NavigateTo(RootUrl(), forceLoad: false);
         }
         else

@@ -4,6 +4,12 @@
 @inject IConfiguration Config
 @implements IDisposable
 
+@if (hidratando)
+{
+    <div class="sf-loading-center" style="min-height:100vh"><div class="sf-spinner"></div></div>
+    return;
+}
+
 @if (!Auth.EsAutenticado)
 {
     <RedirectToLogin />
@@ -276,10 +282,21 @@
 
 @code {
     private bool sidebarColapsado = false;
+    private bool hidratando = true;
 
     protected override void OnInitialized()
     {
         Auth.OnChange += StateHasChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        // Solo intentar hidratar si todavía no hay sesión en memoria.
+        if (!Auth.EsAutenticado)
+            await Auth.HydrateAsync();
+        hidratando = false;
+        StateHasChanged();
     }
 
     private void ToggleSidebar() => sidebarColapsado = !sidebarColapsado;
@@ -293,8 +310,9 @@
             : parts[0][0].ToString().ToUpper();
     }
 
-    private void Logout()
+    private async Task Logout()
     {
+        await Auth.ClearPersistedAsync();
         Auth.ClearSession();
         var pb = (Config["PathBase"] ?? "").TrimEnd('/');
         Nav.NavigateTo(pb + "/login", forceLoad: true);

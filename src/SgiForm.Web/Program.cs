@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using SgiForm.Web.Components;
 using SgiForm.Web.Services;
 
@@ -6,6 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 // ─── Blazor Server ────────────────────────────────────────────────────────────
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// ProtectedLocalStorage se usa para persistir la sesión web entre F5 / pestañas
+builder.Services.AddScoped<ProtectedLocalStorage>();
 
 // ─── Estado de autenticación (Scoped = por circuito Blazor) ──────────────────
 // AuthStateService reemplaza Session/IHttpContextAccessor en componentes Blazor.

@@ -55,11 +55,28 @@
                 <label>Ruta</label>
                 <input class="sf-input sf-input-sm" @bind="excelFiltros.Ruta" placeholder="R01" />
             </div>
+            <div class="sf-form-group">
+                <label>Desde</label>
+                <input type="date" class="sf-input sf-input-sm" @bind="excelFiltros.DesdeFecha" />
+            </div>
+            <div class="sf-form-group">
+                <label>Hasta</label>
+                <input type="date" class="sf-input sf-input-sm" @bind="excelFiltros.HastaFecha" />
+            </div>
         </div>
 
-        <button class="sf-btn sf-btn-primary" @onclick="() => DescargarExcel()" disabled="@descargando">
-            @(descargando ? "Generando..." : "⬇️ Descargar Excel")
-        </button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="sf-btn sf-btn-primary" @onclick="() => DescargarExcel(false)" disabled="@descargando">
+                @(descargando ? "Generando..." : "⬇️ Inspecciones detalladas")
+            </button>
+            <button class="sf-btn sf-btn-secondary" @onclick="() => DescargarExcel(true)" disabled="@descargando">
+                @(descargando ? "Generando..." : "📊 Productividad")
+            </button>
+        </div>
+        <p class="sf-text-xs sf-text-muted" style="margin-top:8px;margin-bottom:0">
+            <strong>Inspecciones detalladas</strong>: una fila por asignación con respuestas dinámicas del formulario.<br />
+            <strong>Productividad</strong>: resumen agregado por operador.
+        </p>
     </div>
 
     <!-- Card: Estadísticas rápidas -->
@@ -209,21 +226,27 @@
         await Task.WhenAll(tasks);
     }
 
-    private async Task DescargarExcel()
+    private async Task DescargarExcel(bool productividad)
     {
         descargando = true;
         StateHasChanged();
         try
         {
             var apiBase = (Config["ApiBaseUrl"] ?? "http://localhost:5043").TrimEnd('/');
-            var qs = "api/v1/reportes/productividad-excel?";
+            var endpoint = productividad ? "productividad-excel" : "excel";
+            var nombreArchivo = productividad ? "reporte_productividad.xlsx" : "inspecciones_detalladas.xlsx";
+            var qs = $"api/v1/reportes/{endpoint}?";
             if (!string.IsNullOrEmpty(excelFiltros.Estado))    qs += $"estado={excelFiltros.Estado}&";
             if (!string.IsNullOrEmpty(excelFiltros.OperadorId)) qs += $"operadorId={excelFiltros.OperadorId}&";
             if (!string.IsNullOrEmpty(excelFiltros.Localidad)) qs += $"localidad={Uri.EscapeDataString(excelFiltros.Localidad)}&";
             if (!string.IsNullOrEmpty(excelFiltros.Ruta))      qs += $"ruta={Uri.EscapeDataString(excelFiltros.Ruta)}&";
+            if (excelFiltros.DesdeFecha.HasValue)
+                qs += $"desdeFecha={excelFiltros.DesdeFecha.Value:yyyy-MM-dd}&";
+            if (excelFiltros.HastaFecha.HasValue)
+                qs += $"hastaFecha={excelFiltros.HastaFecha.Value:yyyy-MM-dd}&";
 
             var url = $"{apiBase}/{qs.TrimEnd('&')}";
-            await JS.InvokeAsync<bool>("sgiDownloadFile", url, Auth.AccessToken, "reporte_productividad.xlsx");
+            await JS.InvokeAsync<bool>("sgiDownloadFile", url, Auth.AccessToken, nombreArchivo);
         }
         finally
         {
@@ -251,5 +274,7 @@
         public string? OperadorId { get; set; }
         public string? Localidad { get; set; }
         public string? Ruta { get; set; }
+        public DateTime? DesdeFecha { get; set; }
+        public DateTime? HastaFecha { get; set; }
     }
 }

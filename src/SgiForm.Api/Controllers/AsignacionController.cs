@@ -184,15 +184,29 @@ public class AsignacionController : ControllerBase
 
     // ──────────────────────────────────────────────────────────────────────────
     // POST /asignaciones/masiva — asignación masiva por filtros
+    //
+    // Soporta uno o varios operadores:
+    //   - `operadorIds` (List<Guid>): distribuye round-robin entre todos
+    //   - `operadorId` (Guid): compatibilidad retro, un solo operador
     // ──────────────────────────────────────────────────────────────────────────
     [HttpPost("masiva")]
     [Authorize(Roles = "admin,supervisor")]
     public async Task<IActionResult> AsignacionMasiva([FromBody] AsignacionMasivaRequest req)
     {
-        var operador = await _db.Operadores.FirstOrDefaultAsync(o =>
-            o.Id == req.OperadorId && o.EmpresaId == EmpresaId && o.Activo);
-        if (operador == null)
-            return BadRequest(new { error = "Operador no encontrado" });
+        // Normalizar lista de operadores (OperadorIds tiene prioridad)
+        var operadorIds = (req.OperadorIds != null && req.OperadorIds.Count > 0)
+            ? req.OperadorIds.Distinct().ToList()
+            : (req.OperadorId != Guid.Empty ? new List<Guid> { req.OperadorId } : new List<Guid>());
+
+        if (operadorIds.Count == 0)
+            return BadRequest(new { error = "Debe indicar al menos un operador" });
+
+        var operadores = await _db.Operadores
+            .Where(o => operadorIds.Contains(o.Id) && o.EmpresaId == EmpresaId && o.Activo)
+            .ToListAsync();
+
+        if (operadores.Count != operadorIds.Count)
+            return BadRequest(new { error = "Uno o más operadores no existen o están inactivos" });
 
         var flujoVersion = await _db.FlujoVersiones.FirstOrDefaultAsync(v =>
             v.Id == req.FlujoVersionId && v.Estado == EstadoFlujoVersion.Publicado);
@@ -210,21 +224,34 @@ public class AsignacionController : ControllerBase
         if (!string.IsNullOrWhiteSpace(req.Lote))
             q = q.Where(s => s.Lote == req.Lote);
 
-        var servicios = await q.Take(req.LimiteMaximo ?? 500).ToListAsync();
+        var servicios = await q
+            .OrderBy(s => s.Localidad).ThenBy(s => s.Ruta).ThenBy(s => s.IdServicio)
+            .Take(req.LimiteMaximo ?? 500)
+            .ToListAsync();
 
         if (!servicios.Any())
             return Ok(new { asignadas = 0, mensaje = "No se encontraron servicios disponibles con los filtros especificados" });
 
-        var asignaciones = servicios.Select(s => new AsignacionInspeccion
+        // Distribución round-robin entre operadores
+        var ordenOps = operadores.OrderBy(o => o.CodigoOperador).ToList();
+        var asignaciones = new List<AsignacionInspeccion>(servicios.Count);
+        var distribucion = ordenOps.ToDictionary(o => o.Id, _ => 0);
+
+        for (int i = 0; i < servicios.Count; i++)
         {
-            EmpresaId = EmpresaId,
-            ServicioInspeccionId = s.Id,
-            OperadorId = req.OperadorId,
-            TipoInspeccionId = req.TipoInspeccionId,
-            FlujoVersionId = req.FlujoVersionId,
-            Prioridad = Prioridad.Normal,
-            AsignadoPor = UsuarioId
-        }).ToList();
+            var op = ordenOps[i % ordenOps.Count];
+            distribucion[op.Id]++;
+            asignaciones.Add(new AsignacionInspeccion
+            {
+                EmpresaId = EmpresaId,
+                ServicioInspeccionId = servicios[i].Id,
+                OperadorId = op.Id,
+                TipoInspeccionId = req.TipoInspeccionId,
+                FlujoVersionId = req.FlujoVersionId,
+                Prioridad = Prioridad.Normal,
+                AsignadoPor = UsuarioId
+            });
+        }
 
         await _db.AsignacionesInspeccion.AddRangeAsync(asignaciones);
 
@@ -233,7 +260,17 @@ public class AsignacionController : ControllerBase
 
         await _db.SaveChangesAsync();
 
-        return Ok(new { asignadas = asignaciones.Count });
+        return Ok(new
+        {
+            asignadas = asignaciones.Count,
+            operadores = ordenOps.Select(o => new
+            {
+                id = o.Id,
+                nombre = o.Nombre + " " + o.Apellido,
+                codigo = o.CodigoOperador,
+                asignadas = distribucion[o.Id]
+            })
+        });
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -268,8 +305,13 @@ public record CreateAsignacionRequest(
     DateOnly? FechaInicioEsperada, DateOnly? FechaFinEsperada);
 
 public record AsignacionMasivaRequest(
-    Guid OperadorId, Guid TipoInspeccionId, Guid FlujoVersionId,
-    string? Localidad, string? Ruta, string? Lote,
-    int? LimiteMaximo);
+    Guid OperadorId,
+    Guid TipoInspeccionId,
+    Guid FlujoVersionId,
+    string? Localidad,
+    string? Ruta,
+    string? Lote,
+    int? LimiteMaximo,
+    List<Guid>? OperadorIds = null);
 
 public record CambiarEstadoRequest(string Estado);

@@ -1,5 +1,6 @@
 @page "/inspecciones"
 @layout SgiForm.Web.Components.Layout.MainLayout
+@using SgiForm.Web.Components.Shared
 @inject ApiClient Api
 
 <PageTitle>Inspecciones — SGI-FORM</PageTitle>
@@ -106,6 +107,8 @@ else
                             </td>
                             <td>
                                 <div class="sf-action-btns">
+                                    <button class="sf-btn sf-btn-secondary sf-btn-sm"
+                                            @onclick="() => detalleId = i.Id">👁️ Ver</button>
                                     @if (i.Estado == "completada" || i.Estado == "enviada")
                                     {
                                         <button class="sf-btn sf-btn-success sf-btn-sm"
@@ -153,6 +156,8 @@ else
     </div>
 }
 
+<InspeccionDetalleModal InspeccionId="@detalleId" OnClose="() => detalleId = Guid.Empty" />
+
 <!-- Modal observación -->
 @if (mostrarObservacion && inspeccionObservar != null)
 {
@@ -185,6 +190,7 @@ else
     private int total = 0;
     private string? motivoObservacion;
     private InspeccionItem? inspeccionObservar;
+    private Guid detalleId = Guid.Empty;
     private List<InspeccionItem> items = new();
     private List<OperadorRef> operadores = new();
     private FiltrosModel filtros = new();
