@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -228,10 +229,14 @@ public class SyncService
                     content.Add(new StringContent(foto.InspeccionId!), "inspeccionId");
                     if (foto.PreguntaId != null)
                         content.Add(new StringContent(foto.PreguntaId), "preguntaId");
+                    // CultureInfo.InvariantCulture es obligatorio: en dispositivos con locale
+                    // es-CL el separador decimal es coma ("-33,4569"), y el model binder del
+                    // API parsea decimals como invariant donde la coma es separador de miles,
+                    // resultando en -334569. Hasta 2026-04 había registros corruptos por esto.
                     if (foto.CoordenadaX.HasValue)
-                        content.Add(new StringContent(foto.CoordenadaX.Value.ToString()), "coordX");
+                        content.Add(new StringContent(foto.CoordenadaX.Value.ToString(CultureInfo.InvariantCulture)), "coordX");
                     if (foto.CoordenadaY.HasValue)
-                        content.Add(new StringContent(foto.CoordenadaY.Value.ToString()), "coordY");
+                        content.Add(new StringContent(foto.CoordenadaY.Value.ToString(CultureInfo.InvariantCulture)), "coordY");
 
                     var fileContent = new StreamContent(fs);
                     fileContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");

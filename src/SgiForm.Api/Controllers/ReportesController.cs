@@ -223,7 +223,7 @@ public class ReportesController : ControllerBase
         [FromQuery] string? ruta)
     {
         var q = _db.Operadores
-            .Include(o => o.Asignaciones)
+            .Include(o => o.Asignaciones).ThenInclude(a => a.Inspeccion)
             .Where(o => o.EmpresaId == EmpresaId && o.Activo && o.DeletedAt == null);
 
         if (operadorId.HasValue) q = q.Where(o => o.Id == operadorId.Value);
@@ -253,7 +253,9 @@ public class ReportesController : ControllerBase
             ws.Cell(row, 4).Value = asigs.Count(a => a.Estado == EstadoAsignacion.Pendiente);
             ws.Cell(row, 5).Value = asigs.Count(a => a.Estado == EstadoAsignacion.EnEjecucion);
             ws.Cell(row, 6).Value = asigs.Count(a => a.Estado == EstadoAsignacion.Finalizada);
-            ws.Cell(row, 7).Value = asigs.Count(a => a.Estado == EstadoAsignacion.Sincronizada);
+            // Ver comentario en DashboardController.PorOperador — EstadoAsignacion.Sincronizada
+            // nunca se setea en el flujo real. Usamos Inspeccion.SincronizadoEn como señal.
+            ws.Cell(row, 7).Value = asigs.Count(a => a.Inspeccion != null && a.Inspeccion.SincronizadoEn != null);
             ws.Cell(row, 8).Value = asigs.Count;
             ws.Cell(row, 9).Value = o.FechaUltimaSync?.ToString("dd-MM-yyyy HH:mm") ?? "Nunca";
             row++;
@@ -284,7 +286,9 @@ public class ReportesController : ControllerBase
                 pendientes    = o.Asignaciones.Count(a => a.Estado == EstadoAsignacion.Pendiente && a.DeletedAt == null),
                 en_ejecucion  = o.Asignaciones.Count(a => a.Estado == EstadoAsignacion.EnEjecucion && a.DeletedAt == null),
                 finalizadas   = o.Asignaciones.Count(a => a.Estado == EstadoAsignacion.Finalizada && a.DeletedAt == null),
-                sincronizadas = o.Asignaciones.Count(a => a.Estado == EstadoAsignacion.Sincronizada && a.DeletedAt == null),
+                // Ver comentario en DashboardController.PorOperador.
+                sincronizadas = o.Asignaciones.Count(a => a.DeletedAt == null
+                    && a.Inspeccion != null && a.Inspeccion.SincronizadoEn != null),
                 total         = o.Asignaciones.Count(a => a.DeletedAt == null),
                 o.FechaUltimaSync
             })

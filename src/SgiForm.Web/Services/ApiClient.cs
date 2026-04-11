@@ -181,6 +181,27 @@ public class ApiClient
         }
     }
 
+    // ── GET BYTES (binario) ──────────────────────────────────────────────────
+    /// <summary>
+    /// Descarga un recurso binario (imagen, PDF, etc.) con JWT. Se usa para
+    /// servir fotos de inspección desde /inspecciones/{id}/fotografias/{fotoId}
+    /// y convertirlas a data-URI en el cliente Blazor.
+    /// </summary>
+    public async Task<byte[]?> GetBytesAsync(string url)
+    {
+        try
+        {
+            using var response = await SendWithAuthAsync(() => _http.GetAsync(url));
+            if (!response.IsSuccessStatusCode) return null;
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "GET bytes {Url} failed", url);
+            return null;
+        }
+    }
+
     // ── POST ─────────────────────────────────────────────────────────────────
     public async Task<ApiResult<T>> PostAsync<T>(string url, object data)
     {

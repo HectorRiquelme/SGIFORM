@@ -104,6 +104,36 @@ public class InspeccionesController : ControllerBase
         return Ok(i);
     }
 
+    // ── Servir archivo físico de una fotografía ─────────────────────────────
+    // Autenticado con JWT y filtrado por empresa_id. Se usa desde el modal
+    // de detalle (G2) y desde cualquier cliente autorizado. La foto se
+    // descarga como blob vía ApiClient y se convierte a data-URI en el
+    // cliente Blazor, evitando problemas con <img src> sin header Authorization.
+    [HttpGet("{id:guid}/fotografias/{fotoId:guid}")]
+    public async Task<IActionResult> GetFotografia(Guid id, Guid fotoId)
+    {
+        var foto = await _db.InspeccionFotografias
+            .Where(f => f.Id == fotoId && f.InspeccionId == id
+                     && f.Inspeccion!.EmpresaId == EmpresaId)
+            .Select(f => new { f.RutaAlmacenamiento, f.Formato, f.NombreArchivo })
+            .FirstOrDefaultAsync();
+
+        if (foto == null) return NotFound();
+        if (string.IsNullOrEmpty(foto.RutaAlmacenamiento) || !System.IO.File.Exists(foto.RutaAlmacenamiento))
+            return NotFound(new { error = "archivo_no_encontrado" });
+
+        var contentType = (foto.Formato?.ToLower()) switch
+        {
+            "png"  => "image/png",
+            "jpg" or "jpeg" => "image/jpeg",
+            "webp" => "image/webp",
+            _ => "application/octet-stream"
+        };
+
+        var stream = System.IO.File.OpenRead(foto.RutaAlmacenamiento);
+        return File(stream, contentType, foto.NombreArchivo);
+    }
+
     [HttpPost("{id:guid}/aprobar")]
     [Authorize(Roles = "admin,supervisor")]
     public async Task<IActionResult> Aprobar(Guid id, [FromBody] RevisionRequest? req)

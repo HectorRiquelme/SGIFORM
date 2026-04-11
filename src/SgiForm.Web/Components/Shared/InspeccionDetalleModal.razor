@@ -1,4 +1,5 @@
 @inject ApiClient Api
+@inject IJSRuntime JS
 
 @*
  * Modal compartido para ver el detalle de una inspección:
@@ -100,19 +101,34 @@
                     <h4 style="margin-top:20px;margin-bottom:8px;font-size:14px">📷 Fotografías (@(detalle.Fotografias?.Count ?? 0))</h4>
                     @if (detalle.Fotografias != null && detalle.Fotografias.Any())
                     {
-                        <div style="display:flex;flex-wrap:wrap;gap:8px">
+                        <div style="display:flex;flex-wrap:wrap;gap:12px">
                             @foreach (var f in detalle.Fotografias)
                             {
-                                <div style="border:1px solid #e5e7eb;border-radius:6px;padding:8px;font-size:11px;min-width:180px">
-                                    <div style="font-weight:600">@f.NombreArchivo</div>
+                                <div style="border:1px solid #e5e7eb;border-radius:6px;padding:8px;font-size:11px;width:200px">
+                                    <div style="width:184px;height:140px;background:#f3f4f6;border-radius:4px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:6px">
+                                        @if (fotoDataUris.TryGetValue(f.Id, out var dataUri))
+                                        {
+                                            @if (dataUri == "ERROR")
+                                            {
+                                                <div class="sf-text-xs sf-text-muted" style="text-align:center">⚠️<br/>no disponible</div>
+                                            }
+                                            else
+                                            {
+                                                <img src="@dataUri" alt="@f.NombreArchivo"
+                                                     style="max-width:100%;max-height:100%;cursor:pointer"
+                                                     @onclick="() => AbrirEnNuevaPestania(dataUri)" />
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <div class="sf-spinner" style="width:20px;height:20px"></div>
+                                        }
+                                    </div>
+                                    <div style="font-weight:600;word-break:break-all">@f.NombreArchivo</div>
                                     <div class="sf-text-muted">#@f.Orden · @((f.TamanioBytes ?? 0) / 1024) KB</div>
                                     @if (f.CoordenadaY.HasValue)
                                     {
-                                        <div class="sf-text-muted">📍 @f.CoordenadaY.Value.ToString("0.0000"), @f.CoordenadaX?.ToString("0.0000")</div>
-                                    }
-                                    @if (!string.IsNullOrEmpty(f.UrlPublica))
-                                    {
-                                        <a href="@f.UrlPublica" target="_blank" class="sf-link-sm">Ver</a>
+                                        <div class="sf-text-muted">📍 @f.CoordenadaY.Value.ToString("0.000000"), @f.CoordenadaX?.ToString("0.000000")</div>
                                     }
                                 </div>
                             }
@@ -159,6 +175,9 @@
     private bool cargando = true;
     private DetalleInspeccion? detalle;
     private Guid inspeccionCargada = Guid.Empty;
+    // Cache por foto.Id del data-URI ya descargado. Clave existente = descargada
+    // (o marcada como "ERROR" si falló). Clave ausente = aún cargando.
+    private readonly Dictionary<Guid, string> fotoDataUris = new();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -167,16 +186,56 @@
         inspeccionCargada = InspeccionId;
         cargando = true;
         detalle = null;
+        fotoDataUris.Clear();
         StateHasChanged();
 
         detalle = await Api.GetAsync<DetalleInspeccion>($"api/v1/inspecciones/{InspeccionId}");
         cargando = false;
+        StateHasChanged();
+
+        // Descargar fotos en background (una por una para no saturar). Cada una
+        // actualiza el UI al completarse para dar feedback progresivo.
+        if (detalle?.Fotografias != null)
+        {
+            foreach (var f in detalle.Fotografias)
+            {
+                var bytes = await Api.GetBytesAsync($"api/v1/inspecciones/{InspeccionId}/fotografias/{f.Id}");
+                if (bytes == null || bytes.Length == 0)
+                {
+                    fotoDataUris[f.Id] = "ERROR";
+                }
+                else
+                {
+                    var mime = GuessMimeFromName(f.NombreArchivo);
+                    fotoDataUris[f.Id] = $"data:{mime};base64,{Convert.ToBase64String(bytes)}";
+                }
+                StateHasChanged();
+            }
+        }
+    }
+
+    private static string GuessMimeFromName(string? nombre)
+    {
+        if (string.IsNullOrEmpty(nombre)) return "image/jpeg";
+        var lower = nombre.ToLowerInvariant();
+        if (lower.EndsWith(".png")) return "image/png";
+        if (lower.EndsWith(".webp")) return "image/webp";
+        return "image/jpeg";
+    }
+
+    private async Task AbrirEnNuevaPestania(string dataUri)
+    {
+        // window.open con data: URI queda bloqueado por algunos navegadores,
+        // así que usamos un helper que abre la imagen dentro de un <img> en
+        // una ventana blanca.
+        await JS.InvokeVoidAsync("sgiformOpenImage", dataUri);
     }
 
     private async Task Cerrar()
     {
         inspeccionCargada = Guid.Empty;
         detalle = null;
+        fotoDataUris.Clear();
         if (OnClose.HasDelegate) await OnClose.InvokeAsync();
     }
 

@@ -106,3 +106,20 @@ window.sgiClickFileInput = function (inputId) {
     const el = document.getElementById(inputId);
     if (el) el.click();
 };
+
+/**
+ * Abre una imagen (data:URI o URL) en una nueva ventana del navegador.
+ * window.open() con data: está bloqueado en varios navegadores, así que
+ * se abre una ventana en blanco y se inyecta un <img> centrado.
+ */
+window.sgiformOpenImage = function (dataUri) {
+    const w = window.open('', '_blank');
+    if (!w) return;
+    w.document.write(
+        '<html><head><title>Fotografía</title></head>' +
+        '<body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh">' +
+        '<img src="' + dataUri + '" style="max-width:100%;max-height:100vh" />' +
+        '</body></html>'
+    );
+    w.document.close();
+};

@@ -30,7 +30,7 @@
                       ContentTemplate="{DataTemplate views:InspeccionesListPage}" />
 
         <ShellContent Route="sincronizacion"
-                      Title="Sincronizar"
+                      Title="Configuración"
                       Icon="sync.png"
                       ContentTemplate="{DataTemplate views:SincronizacionPage}" />
     </TabBar>

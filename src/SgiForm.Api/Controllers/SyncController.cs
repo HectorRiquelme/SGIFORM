@@ -286,15 +286,19 @@ public class SyncController : ControllerBase
                     }
                 }
 
-                // Actualizar contadores de respuestas
-                if (inspReq.Respuestas.Any())
-                {
-                    inspeccion.TotalRespondidas = inspeccion.Respuestas.Count;
-                    inspeccion.TotalPreguntas = await _db.FlujoPreguntas
-                        .CountAsync(p => p.FlujoVersionId == inspeccion.FlujoVersionId
-                                      && p.TipoControl != TipoControl.FotoUnica
-                                      && p.TipoControl != TipoControl.FotosMultiples);
-                }
+                // Guardar cambios ANTES de recontar: las respuestas recién agregadas vía
+                // _db.InspeccionRespuestas.Add(...) no aparecen en inspeccion.Respuestas
+                // (navigation collection) hasta que se guardan. Sin este SaveChangesAsync
+                // intermedio, TotalRespondidas quedaba en 0 aunque hubiera respuestas reales.
+                // Mismo patrón que el fix del contador de fotos en UploadPhotos.
+                await _db.SaveChangesAsync();
+
+                inspeccion.TotalRespondidas = await _db.InspeccionRespuestas
+                    .CountAsync(r => r.InspeccionId == inspeccion.Id);
+                inspeccion.TotalPreguntas = await _db.FlujoPreguntas
+                    .CountAsync(p => p.FlujoVersionId == inspeccion.FlujoVersionId
+                                  && p.TipoControl != TipoControl.FotoUnica
+                                  && p.TipoControl != TipoControl.FotosMultiples);
 
                 // Validación server-side del flujo
                 var validacion = await _flowValidator.ValidarAsync(

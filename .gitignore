@@ -54,6 +54,9 @@ desktop.ini
 *.swp
 *.swo
 
+# Claude Code — permisos locales del harness, launch.json SÍ se trackea
+.claude/settings.local.json
+
 # Misc
 nul
 B

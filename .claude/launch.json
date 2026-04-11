@@ -1,0 +1,36 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web-prod-api",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "src/SgiForm.Web", "--launch-profile", "http"],
+      "port": 5054,
+      "env": {
+        "ApiBaseUrl": "https://apps.solucionescloud.cl/sgiformapi"
+      }
+    },
+    {
+      "name": "api-local-proddb",
+      "_comment": "API local apuntando a la DB de PROD (Server 2, 10.10.100.22:5432). Antes de lanzar, exportar en la shell: $env:ConnectionStrings__Default='Host=10.10.100.22;Port=5432;Database=sgiform;Username=sgiform;Password=<prod-pwd>;Timeout=10'. NO commitear la password aquí — es el DB de producción.",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "src/SgiForm.Api", "--no-launch-profile", "--no-build"],
+      "port": 5043,
+      "env": {
+        "ASPNETCORE_URLS": "http://localhost:5043",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": "web-local-api",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "src/SgiForm.Web", "--no-launch-profile", "--no-build"],
+      "port": 5054,
+      "env": {
+        "ASPNETCORE_URLS": "http://localhost:5054",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ApiBaseUrl": "http://localhost:5043"
+      }
+    }
+  ]
+}

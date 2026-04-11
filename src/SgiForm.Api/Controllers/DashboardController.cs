@@ -86,7 +86,12 @@ public class DashboardController : ControllerBase
                 pendientes = o.Asignaciones.Count(a => a.Estado == EstadoAsignacion.Pendiente && a.DeletedAt == null),
                 en_ejecucion = o.Asignaciones.Count(a => a.Estado == EstadoAsignacion.EnEjecucion && a.DeletedAt == null),
                 finalizadas = o.Asignaciones.Count(a => a.Estado == EstadoAsignacion.Finalizada && a.DeletedAt == null),
-                sincronizadas = o.Asignaciones.Count(a => a.Estado == EstadoAsignacion.Sincronizada && a.DeletedAt == null),
+                // Sincronizadas = asignaciones cuya inspección ya fue subida al servidor.
+                // El enum EstadoAsignacion.Sincronizada nunca se usa en el flujo real
+                // (SyncController solo transiciona hasta Finalizada), por eso se cuenta
+                // por la existencia de Inspeccion.SincronizadoEn != null.
+                sincronizadas = o.Asignaciones.Count(a => a.DeletedAt == null
+                    && a.Inspeccion != null && a.Inspeccion.SincronizadoEn != null),
                 total = o.Asignaciones.Count(a => a.DeletedAt == null),
                 ultima_sync = o.FechaUltimaSync
             })
