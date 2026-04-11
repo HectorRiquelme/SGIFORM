@@ -143,7 +143,14 @@ public class UbicacionController : ControllerBase
         [FromQuery] Guid? operadorId,
         [FromQuery] string? localidad)
     {
-        var hoy = DateTimeOffset.UtcNow.Date;
+        // "Hoy" en el timezone local del servidor (Chile) convertido a UTC.
+        // Npgsql 8+ exige que los DateTimeOffset enviados a columnas
+        // `timestamp with time zone` tengan offset +00:00 (UTC). Usar
+        // DateTimeOffset.UtcNow.Date devuelve un DateTime Kind=Unspecified
+        // que EF/Npgsql interpreta con el offset local del server
+        // (-04:00 en Chile) y la query falla con ArgumentException.
+        var nowLocal = DateTimeOffset.Now;
+        var hoy = new DateTimeOffset(nowLocal.Date, nowLocal.Offset).ToUniversalTime();
         var q = _db.Inspecciones
             .Where(i => i.EmpresaId == EmpresaId
                      && i.CreatedAt >= hoy
