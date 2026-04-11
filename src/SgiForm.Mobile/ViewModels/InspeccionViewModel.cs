@@ -199,11 +199,45 @@ public partial class InspeccionViewModel : ObservableObject
             Inspeccion.Estado = "en_progreso";
             Inspeccion.TotalRespondidas = _engine.GetTodasLasRespuestas().Count;
             await _db.SaveInspeccionAsync(Inspeccion);
+
+            // Encolar la inspección para sync aunque esté en_progreso. Sin esto,
+            // las fotos capturadas no pueden subirse al server (el endpoint
+            // /sync/photos requiere que la inspección exista en el server) hasta
+            // que el usuario finalice toda la inspección. Permitir sync parcial
+            // del borrador desbloquea el flujo de fotos progresivo.
+            await _db.EnqueueAsync(new SyncQueueItem
+            {
+                EntityType = "inspeccion",
+                EntityId = Inspeccion.Id,
+                Operation = "UPDATE",
+                PayloadJson = Inspeccion.Id
+            });
         }
         finally
         {
             Guardando = false;
         }
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // GUARDAR FOTOGRAFÍA (captura desde BuildFotoControl del form dinámico)
+    // ──────────────────────────────────────────────────────────────────────────
+    /// <summary>
+    /// Persiste una FotografiaLocal en la BD del dispositivo y la encola para
+    /// upload a /sync/photos. Usado por InspeccionPage.BuildFotoControl cuando
+    /// el usuario captura una foto desde una pregunta tipo foto_unica o
+    /// fotos_multiples del formulario dinámico.
+    /// </summary>
+    public async Task GuardarFotografiaAsync(FotografiaLocal foto)
+    {
+        await _db.SaveFotografiaAsync(foto);
+        await _db.EnqueueAsync(new SyncQueueItem
+        {
+            EntityType = "fotografia",
+            EntityId = foto.Id,
+            Operation = "INSERT"
+        });
+        TieneFotografiasPendientes = true;
     }
 
     // ──────────────────────────────────────────────────────────────────────────

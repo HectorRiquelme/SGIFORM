@@ -284,10 +284,12 @@ public partial class InspeccionPage : ContentPage
         var existing = _vm.GetRespuesta(p.Id);
         var stack = new VerticalStackLayout { Spacing = 8 };
 
-        // For single photo: path stored in ValorTexto
-        // For multiple photos: paths stored in ValorJson (JSON array)
-        var existingPath = multiple ? existing?.ValorJson : existing?.ValorTexto;
-        var hasFoto = !string.IsNullOrEmpty(existingPath);
+        // Tras el fix de captura persistente:
+        //  - foto_unica:     ValorTexto contiene el Id (GUID) de la FotografiaLocal
+        //  - fotos_multiples:ValorJson  contiene un JSON array de Ids
+        // Valores antiguos podían tener paths locales — se ignoran al renderizar.
+        var existingValue = multiple ? existing?.ValorJson : existing?.ValorTexto;
+        var hasFoto = !string.IsNullOrEmpty(existingValue);
 
         var statusLabel = new Label
         {
@@ -296,7 +298,7 @@ public partial class InspeccionPage : ContentPage
             TextColor = hasFoto ? Color.FromArgb("#16a34a") : Colors.Gray
         };
 
-        // Thumbnail image (single photo only — shown when path exists)
+        // Thumbnail image (single photo only) — visible tras captura
         Image? thumbnail = null;
         if (!multiple)
         {
@@ -304,10 +306,8 @@ public partial class InspeccionPage : ContentPage
             {
                 HeightRequest = 120,
                 Aspect = Aspect.AspectFill,
-                IsVisible = hasFoto && File.Exists(existingPath)
+                IsVisible = false
             };
-            if (thumbnail.IsVisible)
-                thumbnail.Source = ImageSource.FromFile(existingPath);
         }
 
         var btn = new Button
@@ -321,21 +321,24 @@ public partial class InspeccionPage : ContentPage
 
         btn.Clicked += async (_, _) =>
         {
+            if (_vm.Inspeccion == null) return;
             try
             {
                 if (multiple)
                 {
-                    var photos = new List<string>();
+                    var fotoIds = new List<string>();
                     for (int i = 0; i < 2; i++)
                     {
                         var photo = await MediaPicker.CapturePhotoAsync();
-                        if (photo != null) photos.Add(photo.FullPath);
-                        else break;
+                        if (photo == null) break;
+                        var persisted = await PersistirFotoCapturadaAsync(photo, p.Id);
+                        if (persisted != null) fotoIds.Add(persisted.Id);
                     }
-                    if (photos.Any())
+                    if (fotoIds.Any())
                     {
-                        _vm.ResponderPregunta(p.Id, photos);
-                        statusLabel.Text = $"{photos.Count} foto(s) capturadas ✓";
+                        var json = System.Text.Json.JsonSerializer.Serialize(fotoIds);
+                        _vm.ResponderPregunta(p.Id, json);
+                        statusLabel.Text = $"{fotoIds.Count} foto(s) capturadas ✓";
                         statusLabel.TextColor = Color.FromArgb("#16a34a");
                     }
                 }
@@ -344,13 +347,17 @@ public partial class InspeccionPage : ContentPage
                     var photo = await MediaPicker.CapturePhotoAsync();
                     if (photo != null)
                     {
-                        _vm.ResponderPregunta(p.Id, photo.FullPath);
-                        statusLabel.Text = "Foto capturada ✓";
-                        statusLabel.TextColor = Color.FromArgb("#16a34a");
-                        if (thumbnail != null)
+                        var persisted = await PersistirFotoCapturadaAsync(photo, p.Id);
+                        if (persisted != null)
                         {
-                            thumbnail.Source = ImageSource.FromFile(photo.FullPath);
-                            thumbnail.IsVisible = true;
+                            _vm.ResponderPregunta(p.Id, persisted.Id);
+                            statusLabel.Text = "Foto capturada ✓";
+                            statusLabel.TextColor = Color.FromArgb("#16a34a");
+                            if (thumbnail != null && !string.IsNullOrEmpty(persisted.RutaLocal))
+                            {
+                                thumbnail.Source = ImageSource.FromFile(persisted.RutaLocal);
+                                thumbnail.IsVisible = true;
+                            }
                         }
                     }
                 }
@@ -366,6 +373,69 @@ public partial class InspeccionPage : ContentPage
         if (thumbnail != null)
             stack.Children.Add(thumbnail);
         return stack;
+    }
+
+    /// <summary>
+    /// Copia la foto capturada desde la cache temporal de MediaPicker al
+    /// storage persistente de la app (FileSystem.AppDataDirectory/fotos/...),
+    /// crea la FotografiaLocal en SQLite y la encola para upload vía
+    /// /sync/photos. Intenta capturar GPS de forma best-effort. Devuelve la
+    /// FotografiaLocal creada, o null si algo falló.
+    /// </summary>
+    private async Task<FotografiaLocal?> PersistirFotoCapturadaAsync(FileResult photo, string preguntaId)
+    {
+        if (_vm.Inspeccion == null) return null;
+
+        var inspeccionId = _vm.Inspeccion.Id;
+        var fotoId = Guid.NewGuid().ToString();
+        var destDir = Path.Combine(FileSystem.AppDataDirectory, "fotos", inspeccionId);
+        Directory.CreateDirectory(destDir);
+        var destPath = Path.Combine(destDir, $"{fotoId}.jpg");
+
+        // Copiar bytes desde el stream de MediaPicker al destino persistente.
+        // MediaPicker mantiene la foto en cache temporal que puede ser limpiada
+        // por el OS — necesitamos una copia en AppDataDirectory para que la
+        // sync pueda encontrarla más tarde.
+        await using (var src = await photo.OpenReadAsync())
+        await using (var dst = File.Create(destPath))
+            await src.CopyToAsync(dst);
+
+        // Best-effort GPS con timeout de 2s. Si no hay fix, o si el servicio
+        // de location está degradado (p.ej. GoogleLocationManagerService
+        // crasheado por mem pressure — visto en Samsung durante testing),
+        // la foto queda sin coords y el server las guarda como NULL.
+        // Sin timeout, Geolocation.GetLastKnownLocationAsync puede colgar
+        // indefinidamente dejando la captura en un estado irrecuperable.
+        double? lat = null, lng = null;
+        try
+        {
+            var locTask = Geolocation.GetLastKnownLocationAsync();
+            var winner = await Task.WhenAny(locTask, Task.Delay(2000));
+            if (winner == locTask && locTask.Result is { } loc)
+            {
+                lat = loc.Latitude;
+                lng = loc.Longitude;
+            }
+        }
+        catch { /* GPS no disponible */ }
+
+        var fileInfo = new FileInfo(destPath);
+        var fotoLocal = new FotografiaLocal
+        {
+            Id = fotoId,
+            InspeccionId = inspeccionId,
+            PreguntaId = preguntaId,
+            RutaLocal = destPath,
+            NombreArchivo = $"{fotoId}.jpg",
+            TamanioBytes = fileInfo.Length,
+            // Convención del codebase: X = longitud, Y = latitud
+            CoordenadaX = lng,
+            CoordenadaY = lat,
+            Orden = 0
+        };
+
+        await _vm.GuardarFotografiaAsync(fotoLocal);
+        return fotoLocal;
     }
 
     // ── COORDENADAS ────────────────────────────────────────────────────────────

@@ -226,6 +226,16 @@ public class SyncService
 
                     await using var fs = File.OpenRead(foto.RutaLocal!);
                     var content = new MultipartFormDataContent();
+                    // El inspeccionId local del mobile NO coincide con el id que
+                    // asigna el server al crear la inspección (son Guids generados
+                    // de forma independiente). Para asociar la foto al registro
+                    // correcto, enviamos asignacion_id que es el identificador
+                    // compartido entre cliente y server. El server lo acepta vía
+                    // el parámetro `asignacionId` (fallback a inspeccionId para
+                    // backwards compat con scripts como test_full_cycle.py).
+                    var inspLocal = await _db.GetInspeccionAsync(foto.InspeccionId!);
+                    if (inspLocal?.AsignacionId != null)
+                        content.Add(new StringContent(inspLocal.AsignacionId), "asignacionId");
                     content.Add(new StringContent(foto.InspeccionId!), "inspeccionId");
                     if (foto.PreguntaId != null)
                         content.Add(new StringContent(foto.PreguntaId), "preguntaId");
