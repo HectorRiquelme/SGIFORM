@@ -249,8 +249,14 @@ public class SyncController : ControllerBase
                     continue;
                 }
                 inspeccion.Estado = estadoParsed;
-                inspeccion.FechaInicio = inspReq.FechaInicio;
-                inspeccion.FechaFin = inspReq.FechaFin;
+                // Normalizar a UTC antes de persistir. Npgsql 8+ exige offset +00:00
+                // en columnas `timestamp with time zone`. Si el MAUI manda el timestamp
+                // sin offset explícito (p.ej. DateTime.UtcNow serializado sin 'Z'),
+                // el deserializer le pone el offset local del server (-03:00/-04:00
+                // en Chile) y el SaveChanges tira ArgumentException. Ver también
+                // UbicacionController.GetInspeccionesHoy (mismo bug, fix b46cea6).
+                inspeccion.FechaInicio = inspReq.FechaInicio?.ToUniversalTime();
+                inspeccion.FechaFin = inspReq.FechaFin?.ToUniversalTime();
                 inspeccion.CoordXInicio = inspReq.CoordXInicio;
                 inspeccion.CoordYInicio = inspReq.CoordYInicio;
                 inspeccion.CoordXFin = inspReq.CoordXFin;
@@ -381,7 +387,8 @@ public class SyncController : ControllerBase
     [HttpPost("photos")]
     [RequestSizeLimit(100_000_000)] // 100 MB por request
     public async Task<IActionResult> UploadPhotos(
-        [FromForm] Guid inspeccionId,
+        [FromForm] Guid? inspeccionId,
+        [FromForm] Guid? asignacionId,
         [FromForm] Guid? preguntaId,
         [FromForm] decimal? coordX,
         [FromForm] decimal? coordY,
@@ -390,14 +397,34 @@ public class SyncController : ControllerBase
         if (fotos == null || !fotos.Any())
             return BadRequest(new { error = "No se enviaron fotos" });
 
-        // Verificar que la inspección pertenece al operador
-        var inspeccion = await _db.Inspecciones.FirstOrDefaultAsync(i =>
-            i.Id == inspeccionId && i.OperadorId == OperadorId);
+        // Buscar la inspección por asignacionId primero (shared identifier entre
+        // cliente y server), luego por inspeccionId como fallback para scripts
+        // que conocen el id del server (p.ej. test_full_cycle.py).
+        //
+        // El MAUI local genera su propio Guid para InspeccionLocal.Id que NO
+        // coincide con el Guid que el server asigna al crear el registro en
+        // /sync/upload. Por eso el cliente no puede usar su id local para
+        // subir fotos — debe usar asignacion_id como llave compartida.
+        Inspeccion? inspeccion = null;
+        if (asignacionId.HasValue)
+        {
+            inspeccion = await _db.Inspecciones.FirstOrDefaultAsync(i =>
+                i.AsignacionId == asignacionId.Value && i.OperadorId == OperadorId);
+        }
+        if (inspeccion == null && inspeccionId.HasValue)
+        {
+            inspeccion = await _db.Inspecciones.FirstOrDefaultAsync(i =>
+                i.Id == inspeccionId.Value && i.OperadorId == OperadorId);
+        }
+        if (inspeccion == null)
+            return NotFound(new { error = "Inspección no encontrada" });
 
-        if (inspeccion == null) return NotFound(new { error = "Inspección no encontrada" });
+        // A partir de aquí usamos SIEMPRE inspeccion.Id (el id del server),
+        // no el parámetro inspeccionId (que puede ser el id local del mobile).
+        var serverInspeccionId = inspeccion.Id;
 
         var uploadPath = Path.Combine(_config["Storage:UploadPath"] ?? "uploads", "fotos",
-            EmpresaId.ToString(), inspeccionId.ToString());
+            EmpresaId.ToString(), serverInspeccionId.ToString());
         Directory.CreateDirectory(uploadPath);
 
         var fotosGuardadas = new List<object>();
@@ -408,7 +435,7 @@ public class SyncController : ControllerBase
         // en la BD, así que Count() devolvería el mismo valor y varias fotos
         // terminarían con el mismo Orden y el total quedaría desactualizado.
         int ordenBase = await _db.InspeccionFotografias
-            .CountAsync(f => f.InspeccionId == inspeccionId);
+            .CountAsync(f => f.InspeccionId == serverInspeccionId);
         int agregadas = 0;
 
         foreach (var foto in fotos)
@@ -437,7 +464,7 @@ public class SyncController : ControllerBase
 
             // Verificar duplicado
             var existe = await _db.InspeccionFotografias
-                .AnyAsync(f => f.HashSha256 == hash && f.InspeccionId == inspeccionId);
+                .AnyAsync(f => f.HashSha256 == hash && f.InspeccionId == serverInspeccionId);
 
             if (existe)
             {
@@ -455,7 +482,7 @@ public class SyncController : ControllerBase
 
             var fotografia = new InspeccionFotografia
             {
-                InspeccionId = inspeccionId,
+                InspeccionId = serverInspeccionId,
                 PreguntaId = preguntaId,
                 NombreArchivo = nombreArchivo,
                 RutaAlmacenamiento = rutaCompleta,
@@ -476,7 +503,7 @@ public class SyncController : ControllerBase
         await _db.SaveChangesAsync();
 
         inspeccion.TotalFotografias = await _db.InspeccionFotografias
-            .CountAsync(f => f.InspeccionId == inspeccionId);
+            .CountAsync(f => f.InspeccionId == serverInspeccionId);
         await _db.SaveChangesAsync();
 
         return Ok(new
@@ -536,7 +563,8 @@ public class SyncController : ControllerBase
         if (req.ValorEntero.HasValue) resp.ValorEntero = req.ValorEntero;
         if (req.ValorDecimal.HasValue) resp.ValorDecimal = req.ValorDecimal;
         if (req.ValorFecha.HasValue) resp.ValorFecha = DateOnly.FromDateTime(req.ValorFecha.Value.DateTime);
-        if (req.ValorFechaHora.HasValue) resp.ValorFechaHora = req.ValorFechaHora;
+        // Normalizar a UTC — ver comentario en Upload() sobre Npgsql 8+ strict.
+        if (req.ValorFechaHora.HasValue) resp.ValorFechaHora = req.ValorFechaHora?.ToUniversalTime();
         resp.RespondidaEn = DateTimeOffset.UtcNow;
     }
 }
