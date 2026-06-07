@@ -281,34 +281,108 @@ public partial class InspeccionPage : ContentPage
     // ── FOTO ──────────────────────────────────────────────────────────────────
     private View BuildFotoControl(PreguntaLocal p, bool multiple)
     {
-        var existing = _vm.GetRespuesta(p.Id);
         var stack = new VerticalStackLayout { Spacing = 8 };
 
-        // Tras el fix de captura persistente:
-        //  - foto_unica:     ValorTexto contiene el Id (GUID) de la FotografiaLocal
-        //  - fotos_multiples:ValorJson  contiene un JSON array de Ids
-        // Valores antiguos podían tener paths locales — se ignoran al renderizar.
-        var existingValue = multiple ? existing?.ValorJson : existing?.ValorTexto;
-        var hasFoto = !string.IsNullOrEmpty(existingValue);
+        // Contenedor horizontal con scroll para miniaturas.
+        // Se puebla al cargar (fotos existentes) y tras cada captura.
+        var thumbsStack = new HorizontalStackLayout { Spacing = 6 };
+        var thumbsScroll = new ScrollView
+        {
+            Orientation = ScrollOrientation.Horizontal,
+            Content = thumbsStack,
+            HeightRequest = 96,
+            IsVisible = false
+        };
 
         var statusLabel = new Label
         {
-            Text = hasFoto ? (multiple ? "Foto(s) capturadas ✓" : "Foto capturada ✓") : "Sin foto",
+            Text = "Sin foto",
             FontSize = 12,
-            TextColor = hasFoto ? Color.FromArgb("#16a34a") : Colors.Gray
+            TextColor = Colors.Gray
         };
 
-        // Thumbnail image (single photo only) — visible tras captura
-        Image? thumbnail = null;
-        if (!multiple)
+        void RefreshStatus()
         {
-            thumbnail = new Image
+            var count = thumbsStack.Children.Count;
+            thumbsScroll.IsVisible = count > 0;
+            if (count == 0)
             {
-                HeightRequest = 120,
-                Aspect = Aspect.AspectFill,
-                IsVisible = false
-            };
+                statusLabel.Text = "Sin foto";
+                statusLabel.TextColor = Colors.Gray;
+            }
+            else
+            {
+                statusLabel.Text = multiple
+                    ? $"{count} foto(s) capturada(s) ✓"
+                    : "Foto capturada ✓";
+                statusLabel.TextColor = Color.FromArgb("#16a34a");
+            }
         }
+
+        void AgregarMiniatura(string rutaLocal)
+        {
+            if (string.IsNullOrEmpty(rutaLocal) || !File.Exists(rutaLocal)) return;
+            var border = new Border
+            {
+                StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 6 },
+                Stroke = Color.FromArgb("#d1d5db"),
+                StrokeThickness = 1,
+                WidthRequest = 90,
+                HeightRequest = 90,
+                Padding = 0,
+                Content = new Image
+                {
+                    Source = ImageSource.FromFile(rutaLocal),
+                    Aspect = Aspect.AspectFill,
+                    WidthRequest = 90,
+                    HeightRequest = 90
+                }
+            };
+            thumbsStack.Children.Add(border);
+            RefreshStatus();
+        }
+
+        // Cargar miniaturas existentes (si el operador ya capturó fotos para esta pregunta).
+        // Tras el fix de captura persistente:
+        //  - foto_unica:      ValorTexto contiene el Id (GUID) de la FotografiaLocal
+        //  - fotos_multiples: ValorJson  contiene un JSON array de Ids
+        _ = MainThread.InvokeOnMainThreadAsync(async () =>
+        {
+            try
+            {
+                var existing = _vm.GetRespuesta(p.Id);
+                var db = Handler?.MauiContext?.Services.GetService<SgiForm.Mobile.Database.AppDatabase>();
+                if (db == null) return;
+
+                var ids = new List<string>();
+                if (multiple)
+                {
+                    if (!string.IsNullOrEmpty(existing?.ValorJson))
+                    {
+                        try
+                        {
+                            var arr = System.Text.Json.JsonSerializer.Deserialize<List<string>>(existing.ValorJson);
+                            if (arr != null) ids.AddRange(arr);
+                        }
+                        catch { /* JSON corrupto — ignorar */ }
+                    }
+                }
+                else if (!string.IsNullOrEmpty(existing?.ValorTexto))
+                {
+                    ids.Add(existing.ValorTexto);
+                }
+
+                foreach (var id in ids)
+                {
+                    var foto = await db.GetFotografiaByIdAsync(id);
+                    if (foto?.RutaLocal != null) AgregarMiniatura(foto.RutaLocal);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error cargando miniaturas: {ex.Message}");
+            }
+        });
 
         var btn = new Button
         {
@@ -332,14 +406,29 @@ public partial class InspeccionPage : ContentPage
                         var photo = await MediaPicker.CapturePhotoAsync();
                         if (photo == null) break;
                         var persisted = await PersistirFotoCapturadaAsync(photo, p.Id);
-                        if (persisted != null) fotoIds.Add(persisted.Id);
+                        if (persisted != null)
+                        {
+                            fotoIds.Add(persisted.Id);
+                            if (!string.IsNullOrEmpty(persisted.RutaLocal))
+                                AgregarMiniatura(persisted.RutaLocal);
+                        }
                     }
                     if (fotoIds.Any())
                     {
-                        var json = System.Text.Json.JsonSerializer.Serialize(fotoIds);
-                        _vm.ResponderPregunta(p.Id, json);
-                        statusLabel.Text = $"{fotoIds.Count} foto(s) capturadas ✓";
-                        statusLabel.TextColor = Color.FromArgb("#16a34a");
+                        // Mergear con Ids previos para no perder fotos ya tomadas.
+                        var prev = _vm.GetRespuesta(p.Id)?.ValorJson;
+                        var all = new List<string>();
+                        if (!string.IsNullOrEmpty(prev))
+                        {
+                            try
+                            {
+                                var arr = System.Text.Json.JsonSerializer.Deserialize<List<string>>(prev);
+                                if (arr != null) all.AddRange(arr);
+                            }
+                            catch { }
+                        }
+                        all.AddRange(fotoIds);
+                        _vm.ResponderPregunta(p.Id, System.Text.Json.JsonSerializer.Serialize(all));
                     }
                 }
                 else
@@ -350,14 +439,11 @@ public partial class InspeccionPage : ContentPage
                         var persisted = await PersistirFotoCapturadaAsync(photo, p.Id);
                         if (persisted != null)
                         {
+                            // Reemplaza la foto única: limpiar miniaturas previas.
+                            thumbsStack.Children.Clear();
+                            if (!string.IsNullOrEmpty(persisted.RutaLocal))
+                                AgregarMiniatura(persisted.RutaLocal);
                             _vm.ResponderPregunta(p.Id, persisted.Id);
-                            statusLabel.Text = "Foto capturada ✓";
-                            statusLabel.TextColor = Color.FromArgb("#16a34a");
-                            if (thumbnail != null && !string.IsNullOrEmpty(persisted.RutaLocal))
-                            {
-                                thumbnail.Source = ImageSource.FromFile(persisted.RutaLocal);
-                                thumbnail.IsVisible = true;
-                            }
                         }
                     }
                 }
@@ -365,13 +451,13 @@ public partial class InspeccionPage : ContentPage
             catch (Exception ex)
             {
                 statusLabel.Text = $"Error: {ex.Message}";
+                statusLabel.TextColor = Color.FromArgb("#dc2626");
             }
         };
 
         stack.Children.Add(btn);
         stack.Children.Add(statusLabel);
-        if (thumbnail != null)
-            stack.Children.Add(thumbnail);
+        stack.Children.Add(thumbsScroll);
         return stack;
     }
 
@@ -575,6 +661,32 @@ public partial class InspeccionPage : ContentPage
         else
         {
             _vm.SiguienteSeccionCommand.Execute(null);
+        }
+    }
+
+    // ── VER MAPA ─────────────────────────────────────────────────────────────
+    // Abre Google Maps con las coordenadas de la orden asignada.
+    // Convención del codebase: X=longitud, Y=latitud. Google Maps espera lat,lng.
+    private async void OnVerMapaTapped(object? sender, TappedEventArgs e)
+    {
+        var a = _vm.Asignacion;
+        if (a?.CoordenadaY == null || a?.CoordenadaX == null)
+        {
+            await DisplayAlert("Mapa", "Esta orden no tiene coordenadas asignadas.", "OK");
+            return;
+        }
+        var lat = a.CoordenadaY.Value.ToString("F6", System.Globalization.CultureInfo.InvariantCulture);
+        var lng = a.CoordenadaX.Value.ToString("F6", System.Globalization.CultureInfo.InvariantCulture);
+        try
+        {
+            var location = new Location(a.CoordenadaY.Value, a.CoordenadaX.Value);
+            var options = new MapLaunchOptions { Name = a.Direccion ?? a.IdServicio ?? "Destino" };
+            await Map.Default.OpenAsync(location, options);
+        }
+        catch
+        {
+            // Fallback si el launcher nativo de mapa no está disponible
+            await Launcher.OpenAsync(new Uri($"https://www.google.com/maps/?q={lat},{lng}"));
         }
     }
 

@@ -6,15 +6,30 @@
              x:DataType="vm:InspeccionViewModel">
 
     <Shell.TitleView>
-        <Grid ColumnDefinitions="*,Auto" Padding="0,0,8,0">
-            <VerticalStackLayout VerticalOptions="Center">
-                <Label Text="{Binding Asignacion.IdServicio}" FontSize="15" FontAttributes="Bold" TextColor="White" />
+        <Grid ColumnDefinitions="*,Auto,Auto" Padding="0,0,8,0" ColumnSpacing="6">
+            <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                <Label FontSize="14" FontAttributes="Bold" TextColor="White" LineBreakMode="TailTruncation">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="{Binding Asignacion.IdServicio}" />
+                            <Span Text=" · " TextColor="#93c5fd" />
+                            <Span Text="{Binding Asignacion.NombreCliente}" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
                 <Label Text="{Binding Asignacion.Direccion}" FontSize="11" TextColor="#bfdbfe"
                        LineBreakMode="TailTruncation" />
             </VerticalStackLayout>
-            <Label Grid.Column="1"
+            <Label Grid.Column="1" Text="&#x1F5FA;"
+                   FontSize="22" TextColor="White"
+                   VerticalOptions="Center" Padding="6,0">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnVerMapaTapped" />
+                </Label.GestureRecognizers>
+            </Label>
+            <Label Grid.Column="2"
                    Text="{Binding PorcentajeAvance, StringFormat='{0}%'}"
-                   TextColor="White" FontSize="18" FontAttributes="Bold"
+                   TextColor="White" FontSize="16" FontAttributes="Bold"
                    VerticalOptions="Center" />
         </Grid>
     </Shell.TitleView>
@@ -51,19 +66,21 @@
         </ScrollView>
 
         <!-- Navegación -->
-        <Grid Grid.Row="3" ColumnDefinitions="Auto,*,Auto" Padding="8" ColumnSpacing="8">
+        <Grid Grid.Row="3" ColumnDefinitions="*,*,*" Padding="8" ColumnSpacing="8">
             <Button Grid.Column="0" Text="← Atrás"
                     Command="{Binding AnteriorSeccionCommand}"
                     IsVisible="{Binding EsPrimeraSeccion, Converter={StaticResource InvertBoolConverter}}"
-                    BackgroundColor="#f3f4f6" TextColor="#374151" CornerRadius="8" HeightRequest="44" />
+                    BackgroundColor="#f3f4f6" TextColor="#374151" CornerRadius="8"
+                    HeightRequest="44" HorizontalOptions="Fill" FontSize="13" Padding="0" />
             <Button Grid.Column="1" Text="Guardar"
                     Command="{Binding GuardarBorradorCommand}"
-                    BackgroundColor="#f3f4f6" TextColor="#374151" CornerRadius="8" HeightRequest="44" />
+                    BackgroundColor="#f3f4f6" TextColor="#374151" CornerRadius="8"
+                    HeightRequest="44" HorizontalOptions="Fill" FontSize="13" Padding="0" />
             <Button Grid.Column="2"
                     Text="{Binding EsUltimaSeccion, Converter={StaticResource BoolToNavTextConverter}}"
                     Clicked="OnSiguienteClicked"
-                    BackgroundColor="#1a56db" TextColor="White"
-                    CornerRadius="8" HeightRequest="44" MinimumWidthRequest="100" />
+                    BackgroundColor="#1a56db" TextColor="White" CornerRadius="8"
+                    HeightRequest="44" HorizontalOptions="Fill" FontSize="13" Padding="0" />
         </Grid>
 
     </Grid>

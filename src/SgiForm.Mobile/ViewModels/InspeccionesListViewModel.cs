@@ -108,4 +108,28 @@ public partial class InspeccionesListViewModel : ObservableObject
         await Shell.Current.GoToAsync(
             $"inspeccion?asignacion_id={asignacion.Id}");
     }
+
+    // Abre Google Maps con las coordenadas de la orden.
+    // Convención del codebase: X=longitud, Y=latitud. Map.Default espera (lat, lng).
+    [RelayCommand]
+    public async Task VerMapaAsync(AsignacionLocal asignacion)
+    {
+        if (asignacion?.CoordenadaY == null || asignacion?.CoordenadaX == null)
+        {
+            await Shell.Current.DisplayAlert("Mapa", "Esta orden no tiene coordenadas asignadas.", "OK");
+            return;
+        }
+        try
+        {
+            var location = new Location(asignacion.CoordenadaY.Value, asignacion.CoordenadaX.Value);
+            var options = new MapLaunchOptions { Name = asignacion.Direccion ?? asignacion.IdServicio ?? "Destino" };
+            await Map.Default.OpenAsync(location, options);
+        }
+        catch
+        {
+            var lat = asignacion.CoordenadaY.Value.ToString("F6", System.Globalization.CultureInfo.InvariantCulture);
+            var lng = asignacion.CoordenadaX.Value.ToString("F6", System.Globalization.CultureInfo.InvariantCulture);
+            await Launcher.OpenAsync(new Uri($"https://www.google.com/maps/?q={lat},{lng}"));
+        }
+    }
 }

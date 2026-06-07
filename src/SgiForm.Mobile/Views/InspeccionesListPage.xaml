@@ -97,7 +97,8 @@
                             <SwipeView.RightItems>
                                 <SwipeItems>
                                     <SwipeItem Text="Ver mapa" BackgroundColor="#3b82f6"
-                                               IconImageSource="map.png" />
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:InspeccionesListViewModel}}, Path=VerMapaCommand}"
+                                               CommandParameter="{Binding .}" />
                                 </SwipeItems>
                             </SwipeView.RightItems>
 
@@ -109,30 +110,48 @@
                                         CommandParameter="{Binding .}" />
                                 </Frame.GestureRecognizers>
 
-                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+                                <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="6">
 
-                                    <!-- ID Servicio -->
+                                    <!-- ID Servicio (código de negocio útil para el operador) -->
                                     <Label Grid.Row="0" Grid.Column="0"
                                            Text="{Binding IdServicio}"
                                            FontSize="15" FontAttributes="Bold"
                                            TextColor="#111827" />
 
+                                    <!-- Botón Ver en mapa -->
+                                    <Label Grid.Row="0" Grid.Column="1" Text="&#x1F5FA;"
+                                           FontSize="20" TextColor="#1a56db"
+                                           VerticalOptions="Center" Padding="6,0">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:InspeccionesListViewModel}}, Path=VerMapaCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+
                                     <!-- Badge estado -->
-                                    <Frame Grid.Row="0" Grid.Column="1"
+                                    <Frame Grid.Row="0" Grid.Column="2"
                                            CornerRadius="10" Padding="8,3"
                                            BackgroundColor="{Binding Estado, Converter={StaticResource EstadoColorConverter}}">
                                         <Label Text="{Binding Estado}"
                                                TextColor="White" FontSize="11" />
                                     </Frame>
 
+                                    <!-- Nombre del cliente -->
+                                    <Label Grid.Row="1" Grid.ColumnSpan="3"
+                                           Text="{Binding NombreCliente}"
+                                           FontSize="13" FontAttributes="Bold"
+                                           TextColor="#374151"
+                                           LineBreakMode="TailTruncation" />
+
                                     <!-- Dirección -->
-                                    <Label Grid.Row="1" Grid.ColumnSpan="2"
+                                    <Label Grid.Row="2" Grid.ColumnSpan="3"
                                            Text="{Binding Direccion}"
-                                           FontSize="13" TextColor="#6b7280"
+                                           FontSize="12" TextColor="#6b7280"
                                            LineBreakMode="TailTruncation" />
 
                                     <!-- Detalles -->
-                                    <HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="2"
+                                    <HorizontalStackLayout Grid.Row="3" Grid.ColumnSpan="3"
                                                            Spacing="12" Margin="0,4,0,0">
                                         <HorizontalStackLayout Spacing="3">
                                             <Label Text="&#x1F4CD;" FontSize="11" />
